@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <aside id="sidebar" class="expand" th:fragment="sidenav">
+        <div class="d-flex justify-content-around">
+            <div class="sidebar-logo">
+                <a th:href="@{${redirectUrl}}">
+                    <img th:src="@{/images/logo.png}" height="80" width="80" alt="Logo" />
+                </a>
+            </div>
+            <button class="toggle-btn" type="button">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-item" th:each="menulist : ${session.menuPageList}">
+                <a th:href="@{'/' + ${menulist.url}}" th:title="${menulist.itemname}" class="sidebar-link">
+                    <span class="material-symbols-outlined" th:classappend="${menulist.bootstrapclass_sub}"></span>
+                    <span th:text="${menulist.itemname}"></span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+</body>
+</html>

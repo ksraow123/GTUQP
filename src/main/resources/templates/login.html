@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+	  layout:decorator="layout">
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>QPMS</title>
+  	
+<!-- base:css -->
+
+<link rel="stylesheet" th:href="@{css/style.css}">
+	<link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css}" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<!-- endinject -->
+	<style>
+		html, body, .container-table {
+           height: 100%;
+
+           background: #2e2f8b;
+
+       }
+
+           .form-control{background: none !important; border-radius: 5px;}
+           .logo{}
+           .logo img{ height: 100px; width: 100px; display: inline !important;}
+	</style>
+</head>
+<body>
+	
+<div class="d-flex align-items-center justify-content-center vh-100" >
+    <div class="p-4 m-2 shadow rounded-2 border-light bg-white" style="width:700px;">
+
+		<div class="row">
+			<div class="col-6 d-flex align-items-center logo justify-content-center">
+				<div class="text-center">
+					<img src="images/logo.png" align="center" alt="" />
+					<h4 class="text-primary">GUJARAT TECHNOLOGICAL UNIVERSITY </h4>
+					<h6 class="text-danger">INTERNATIONAL INNOVATIVE UNIVERSITY<br /><span class="text-primary">Accredited with A+ grade by NAAC</span></h6>
+					<h5>Secure Online Question Paper Receiving System (SOQPRS)</h5>
+				</div>
+	 
+		
+	</div>
+    <div class="col-6 align-self-center border-start">
+		<h3 class=" mb-3 pb-2 pt-2">Login</h3>
+		<form action="home" th:action="@{/}" method="post">
+             
+              <!-- Email input -->
+              <div data-mdb-input-init class="form-outline mb-4">
+				 <label class="form-label" >User ID</label>
+                <input type="text"  name="userName" class="form-control" />
+               
+              </div>
+
+              <!-- Password input -->
+              <div data-mdb-input-init class="form-outline mb-4">
+				 <label class="form-label" >Password</label>
+                <input type="password"  name="password" class="form-control" />
+                
+              </div>
+
+              <!-- Submit button -->
+				<div class="d-flex justify-content-between me-3">
+					<div>
+						<button type="submit" class="btn btn-primary btn-block btn-block mb-4"
+								th:text="Login">LogIn</button>
+
+					</div>
+					<div class="text-end">
+						<a  th:href="@{/password/forgot}" class="link-danger text-decoration-none">Forgot Password ?</a>
+					</div>
+				</div>
+              
+
+              <!-- Register buttons -->
+              
+            </form>
+
+
+    </div>
+  </div>
+	</div>
+    
+</div>
+	
+	
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+	
+ 
+</body>
+
+</html>

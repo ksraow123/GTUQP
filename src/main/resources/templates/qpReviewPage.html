@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
+    <title>QP Entry Page</title>
+
+    <!-- Include CSS & Scripts -->
+    <div th:replace="fragments/styles :: styles"></div>
+    <script th:src="@{/js/jquery-3.7.1.js}"></script>
+    <script type="text/javascript" th:src="@{/pramukhtypepad/tiny_mce_5/js/tinymce/jquery.tinymce.min.js}"></script>
+    <script type="text/javascript" th:src="@{/pramukhtypepad/tiny_mce_5/js/tinymce/tinymce.min.js}"></script>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            tinymce.init({
+                selector: '.qdesc',
+                plugins: 'anchor autolink autoresize autosave charmap code codesample colorpicker contextmenu directionality emoticons fullscreen help hr image insertdatetime legacyoutput link lists media nonbreaking noneditable pagebreak paste preview print quickbars save searchreplace spellchecker tabfocus table template textcolor textpattern toc visualblocks visualchars wordcount',
+                toolbar: 'undo redo | alignleft aligncenter alignright alignjustify | outdent indent | link image | preview | code help',
+                image_title: true,
+                automatic_uploads: true,
+                file_picker_types: 'image',
+                file_picker_callback: function (cb, value, meta) {
+                    var input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.onchange = function () {
+                        var file = this.files[0];
+                        var reader = new FileReader();
+                        reader.onload = function () {
+                            var id = 'blobid' + (new Date()).getTime();
+                            var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                            var base64 = reader.result.split(',')[1];
+                            var blobInfo = blobCache.create(id, file, base64);
+                            blobCache.add(blobInfo);
+                            cb(blobInfo.blobUri(), { title: file.name });
+                        };
+                        reader.readAsDataURL(file);
+                    };
+                    input.click();
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+<div class="wrapper">
+
+    <div class="main">
+
+        <div class="container-fluid p-3">
+            <div class="row">
+                <div class="col-12">
+                    <div class="cards">
+                        <div class="card border-0">
+                            <h2>
+                                <span th:text="${subject.subject_code}"> </span>-
+                                <span th:text="${subject.subject_name}"></span>
+                            </h2>
+
+                            <!-- Modal or Form Container -->
+                            <div id="editModal" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Question</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form th:action="@{/updateQuestions}" method="post" enctype="multipart/form-data">
+                                                <input type="hidden" id="qid" name="qid">
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Instructions</label>
+                                                    <input class="form-control" type="text" id="instructions" name="instructions">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Question </label>
+                                                    <textarea class="form-control qdesc" id="q_desc" name="q_desc" rows="5"></textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Browse Image</label>
+                                                    <input class="form-control" type="file" id="image_file" name="image_file">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <th:block th:each="entry : ${groupedBySetNo}">
+                                    <h2>Set No: <b th:text="${entry.key}"></b></h2>
+
+                                    <table class="table table-bordered" id="example">
+                                        <thead>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>Q.No</th>
+                                            <th>Bit No.</th>
+                                            <th>Topic</th>
+                                            <th>Level</th>
+                                            <th>Marks</th>
+                                            <th>Instructions</th>
+                                            <th>Question</th>
+                                            <th>Image Path</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="qpoint, iterStat : ${qPtemplate}">
+                                            <td th:text="${iterStat.count}">S.No.</td>
+                                            <td th:text="${qpoint.q_no}">Q No</td>
+                                            <td th:text="${qpoint.bit_no}">Bit No.</td>
+                                            <td th:text="${qpoint.topic}">Topic</td>
+                                            <td th:text="${qpoint.level}">Level</td>
+                                            <td th:text="${qpoint.marks}">Marks</td>
+                                            <td th:text="${qpoint.instructions}">Instructions</td>
+                                            <td th:utext="${qpoint.q_desc}">Question</td>
+                                            <td>
+                                                <img th:if="${qpoint.image_path != null}"
+                                                     th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
+                                                     alt="Uploaded Image" width="100" height="100"></td>
+                                            <td>
+
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-info edit-btn"
+                                                   th:data-id="${qpoint.id}" title="Add">
+                                                    Save
+                                                </a>
+
+                                            </td>
+
+                                        </tr>
+                                        </tbody>
+
+                                        <th:block th:each="entrydata : ${setSubjects}">
+                                            <div class="col-md-3 bg-light border p-2" th:if="${entrydata.key eq entry.key }">
+                                                <a th:href="@{/forwardQuestions/{id}(id=${entrydata.key})}" class="btn btn-sm btn-warning" title="Forward Questions">
+                                                    Forward
+                                                </a>
+                                                <a th:href="@{/previewPdf/{id}(id=${entrydata.key})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                                    Preview
+                                                </a>
+
+                                            </div>
+
+                                        </th:block>
+                                    </table>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $(document).ready(function () {
+    $(".edit-btn").click(function () {
+        var qid = $(this).data("id");
+
+        $.ajax({
+            url: "../getQuestionDetails/" + qid,
+            type: "GET",
+            success: function (response) {
+                $("#qid").val(response.id);
+                $("#instructions").val(response.instructions);
+                tinymce.get("q_desc").setContent(response.q_desc); // ✅ Set TinyMCE content
+                $("#editModal").modal("show");
+            },
+            error: function () {
+                alert("Failed to fetch question details.");
+            }
+        });
+    });
+
+    $("#editForm").submit(function (e) {
+        e.preventDefault();
+  var csrfToken = $("meta[name='_csrf']").attr("content");
+    var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+        var formData = new FormData(this);
+        formData.set("q_desc", tinymce.get("q_desc").getContent()); // ✅ Fetch updated TinyMCE content
+
+        $.ajax({
+    url: "../updateQuestions",
+    type: "POST",  // ✅ Ensure this is POST
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function () {
+        alert("Question updated successfully.");
+        location.reload();
+    },
+    error: function (xhr) {
+        alert("Failed to update question: " + xhr.responseText);
+        console.error("Error details:", xhr);
+    }
+});
+
+    });
+});
+
+</script>
+</html>

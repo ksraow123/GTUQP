@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="navbar">
+    <div class="container-fluid p-3 white">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h2>Gujarat Technological University</h2>
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="btn-group me-3">
+                    <button type="button" class="dropdown-toggle bg-transparent" data-bs-toggle="dropdown" aria-expanded="false">
+                        Welcome <b th:text="${#request.userPrincipal.principal.username}"></b> - <b th:text="${#request.userPrincipal.principal.fullName}"></b>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/password/change}">Change Password</a></li>
+                        <li>
+                        <li><a class="dropdown-item" th:href="@{/viewProfile}">View Profile</a></li>
+                        <li>
+
+
+                            <form th:action="@{/logout}" method="post">
+                                <input type="submit" value="Logout" class="dropdown-item"  />
+                            </form>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

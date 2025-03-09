@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <div th:replace="fragments/styles :: styles"></div>
+</head>
+
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidenav :: sidenav"></div>
+    <div class="main">
+        <div th:replace="fragments/navbar :: navbar"></div>
+        <div class="container-fluid p-3">
+
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="cards">
+                        <div class="card border-0">
+                            <h2>Paper Setter / Moderator Appointment </h2>
+                            <form th:action="@{/appointments/save}" th:object="${appointment}" method="post" >
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <input type="hidden" th:field="*{id}">
+                                            <input type="hidden" th:field="*{orderNo}">
+                                            <label for="" class="form-label">Type</label>
+                                            <select class="form-select" th:field="*{role_id}" >
+                                                <option value="0">Select</option>
+                                                <option value="2">Paper Setter </option>
+                                                <option value="3">Paper Moderator </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Mobile No.</label>
+                                            <input class="form-control" type="text" th:field="*{mobile_number}" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Name</label>
+                                            <input class="form-control" type="text" th:field="*{name}" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Email ID</label>
+                                            <input class="form-control" type="text" th:field="*{email}" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Institute/College Code</label>
+                                            <select class="form-select"  th:field="*{college_id}" >
+                                                <option value="">Select</option>
+                                                <option th:each="colleges : ${collegeList}" th:value="${colleges.id}" th:text="${colleges.college_name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Regulation </label>
+                                            <select class="form-select" id="regulation" th:field="*{regulation}">
+                                                <option value="0">Select</option>
+                                                <option value="R24">R24 </option>
+                                                <option value="R25">R25 </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Course Code</label>
+                                            <select class="form-select" id="courseCode" required  th:field="*{course_id}" >
+                                                <option value="0">Select</option>
+                                                <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Subject Code-Name </label>
+                                            <select class="form-select" id="subjectCode" th:field="*{subject_id}"  required>
+                                                <option value="0">Select</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">No. of Sets   </label>
+
+                                            <input class="form-control" type="text" th:field="*{no_of_sets}" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Office Order Date  </label>
+                                            <input type="date" class="form-control" th:field="*{order_date}" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Last Date of Submission   </label>
+                                            <input type="date" class="form-control" th:field="*{submission_date}" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Curriculum / Syllabus </label>
+                                            <input class="form-control" type="text" placeholder="Computer" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <button class="btn btn-primary">Generate order and Send Email</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="row">
+                                <div class="col-12">
+                                    <table class="table table-bordered" id="example">
+                                        <thead>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>Order  Date</th>
+                                            <th>Order  No.</th>
+                                            <th>Type</th>
+                                            <th>Inst.  / College Code</th>
+                                            <th>Name</th>
+                                            <th>Mobile</th>
+                                            <th>Regulation</th>
+                                            <th>No of sets</th>
+                                            <th>Course  Code</th>
+                                            <th>Subject  Code</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="appoint,iterStat: ${appointmentList}">
+                                            <td th:text="${iterStat.count}">S.No.</th>
+                                            <td th:text="${appoint.order_date}">Order  Date</th>
+                                            <td th:text="${appoint.orderNo}">Order  No.</th>
+                                            <td th:text="${appoint.role}">Type</th>
+                                            <td th:text="${appoint.college_code}">Inst.  / College Code</th>
+                                            <td th:text="${appoint.name}">Name</th>
+                                            <td th:text="${appoint.mobile_number}">Mobile</th>
+                                            <td th:text="${appoint.regulation}">Regulation</th>
+                                            <td th:text="${appoint.no_of_sets}">No of sets</th>
+                                            <td th:text="${appoint.course_code}">Course  Code</th>
+                                            <td th:text="${appoint.subject_code}">Subject  Code</th>
+                                            <td th:text="${appoint.current_status}">Status</th>
+                                            <td>
+                                                <a th:href="@{/appointments/edit/{id}(id=${appoint.id})}" class="btn btn-sm btn-info" title="Edit">
+                                                    <span class="material-symbols-outlined">edit_square</span>
+                                                </a>
+                                                <a th:href="@{/appointments/resend/{id}(id=${appoint.id})}" class="btn btn-sm btn-warning" title="Resend Order by e-mail">
+                                                    <span class="material-symbols-outlined">send</span>
+                                                </a>
+                                                <a th:href="@{/appointments/delete/{id}(id=${appoint.id})}" class="btn btn-sm btn-danger" title="Cancel Order">
+                                                    <span class="material-symbols-outlined">cancel</span>
+                                                </a>
+                                            <div>
+                                                <b class="text-success" th:if="${appoint.current_status != null and status_date != null}"
+                                                   th:text="${appoint.current_status + ' on ' + status_date}"></b>
+                                            </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Include Common Scripts -->
+<div th:replace="fragments/scripts :: scripts"></div>
+</body>
+
+</html>

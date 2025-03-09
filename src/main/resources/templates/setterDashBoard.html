@@ -1,0 +1,125 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>Dashboard</h2>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered" id="example">
+                                <thead>
+                                <tr>
+                                    <th>Course Name</th>
+                                    <th>Year</th>
+                                    <th>Sem.</th>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Syllabus</th>
+                                    <th>No. of Sets</th>
+                                    <th>Last Date for Submission</th>
+                                    <th>Sets Prepared</th>
+                                    <th>Sets Forwarded</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="appointment : ${qpSetterDashBoardList}">
+                                    <td th:text="${appointment.course_name}"></td>
+                                    <td th:text="${appointment.year}"></td>
+                                    <td th:text="${appointment.semester}"></td>
+                                    <td th:text="${appointment.subject_code}"></td>
+                                    <td th:text="${appointment.subject_name}"></td>
+                                    <td>
+                                        <a th:if="${appointment.syllabus}" th:href="@{${appointment.syllabus}}" target="_blank" title="View Syllabus">View Syllabus</a>
+                                        <span th:unless="${appointment.syllabus}">No syllabus available</span>
+                                    </td>
+                                    <td th:text="${appointment.no_of_sets}"></td>
+                                    <td th:text="${appointment.submission_date}"></td>
+                                    <td th:text="${appointment.no_of_sets_uploaded}"></td>
+                                    <td th:text="${appointment.no_of_sets_forwarded}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card border-0">
+                    <h2> Set wise Dashboard</h2>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered" id="example">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">Course Name</th>
+                                    <th class="text-center">Year</th>
+                                    <th class="text-center">Sem.</th>
+                                    <th class="text-center">Subject Code</th>
+                                    <th class="text-center">Subject Name</th>
+                                    <th class="text-center">Syllabus</th>
+                                    <th class="text-center">Set No.</th>
+                                    <th class="text-center">Total Bits</th>
+                                    <th class="text-center">Bits Compl.</th>
+                                    <th class="text-center">Bits Pending</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Preview</th>
+                                    <th class="text-center">QP Authoring</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="appointment : ${setwiseDashBoard}">
+                                    <td th:text="${appointment.course_name}" class="text-center"></td>
+                                    <td th:text="${appointment.year}" class="text-center"></td>
+                                    <td th:text="${appointment.semester}" class="text-center"></td>
+                                    <td th:text="${appointment.subject_code}" class="text-center"></td>
+                                    <td th:text="${appointment.subject_name}" class="text-center"></td>
+                                    <td class="text-center">
+                                        <a th:if="${appointment.syllabus}" th:href="@{${appointment.syllabus}}" target="_blank" title="View Syllabus">View</a>
+                                        <span th:unless="${appointment.syllabus}">No syllabus available</span>
+                                    </td>
+                                    <td th:text="${appointment.setno}" class="text-center"></td>
+                                    <td th:text="${appointment.total_questions}" class="text-center"></td>
+                                    <td th:text="${appointment.no_of_questions}" class="text-center"></td>
+                                    <td th:text="${appointment.pending_questions}" class="text-center"></td>
+                                    <td th:text="${appointment.qp_status} ?: 'Pending'" class="text-center"></td>
+                                    <td th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}" class="text-center">
+                                        <a th:href="@{/previewPdf/{id}/{subjectId}(id=${appointment.setno}, subjectId=${appointment.subject_id})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                            Preview
+                                        </a>
+                                    </td>
+                                    <td th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}" class="text-center">
+                                        <a th:href="@{/bitwisequestionsList(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
+                                           class="btn btn-sm btn-info">
+                                            QP Authoring
+                                        </a>
+                                    </td>
+                                    <td th:if="${appointment.no_of_questions == appointment.total_questions and appointment.qp_status != 'FORWARDED'}" class="text-center">
+                                        <a th:href="@{/forwardQuestions/{id}/{subjectId}(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
+                                           class="btn btn-sm btn-warning"
+                                           title="Forward Questions">
+                                            Forward to Moderator
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- End Content  -->
+</div>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <div th:replace="fragments/styles :: styles"></div>
+</head>
+
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidenav :: sidenav"></div>
+    <div class="main">
+        <div th:replace="fragments/navbar :: navbar"></div>
+        <div th:replace="${page}"></div>
+    </div>
+</div>
+<!-- Include Common Scripts -->
+<div th:replace="fragments/scripts :: scripts"></div>
+</body>
+
+</html>

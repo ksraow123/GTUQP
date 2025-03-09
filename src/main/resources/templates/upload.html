@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CSV Upload</title>
+</head>
+<body>
+<h1>Upload CSV File</h1>
+
+<!-- CSV Upload Form -->
+<form method="post" th:action="@{/upload}" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit">Upload</button>   <a  th:href="@{/appointmentData.csv}" class="link-danger text-decoration-none">Click here to download sample file</a>
+</form>
+
+<!-- Display Upload Message -->
+<div th:if="${message}" style="margin-top: 10px;">
+    <p th:text="${message}"></p>
+</div>
+
+<!-- Appointment Table with Checkboxes -->
+<div class="row">
+    <div class="col-12">
+        <form th:action="@{/appointments/processSelected}" method="post">
+
+            <table class="table table-bordered" id="example">
+                <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>S.No.</th>
+                    <th>Role</th>
+                    <th>User Name</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>College</th>
+                    <th>Course</th>
+                    <th>Subject</th>
+                    <th>Subject Name</th>
+                    <th>No of sets</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="appoint, iterStat : ${appointmentList}">
+                    <td>
+                        <input type="checkbox" class="form-check-input" name="selectedIds" th:value="${appoint.id}" />
+                    </td>
+                    <td th:text="${iterStat.count}"></td>
+                    <td th:text="${appoint.role}"></td>
+                    <td th:text="${appoint.user_name}"></td>
+                    <td th:text="${(appoint.first_name ?: '') + ' - ' + (appoint.last_name ?: '')}"></td>
+                    <td th:text="${appoint.mobile_no}"></td>
+                    <td th:text="${appoint.email}"></td>
+                    <td th:text="${appoint.course_name}"></td>
+                    <td th:text="${(appoint.college_code ?: '') + ' - ' + (appoint.college_name ?: '')}"></td>
+                    <td th:text="${appoint.subject_code}"></td>
+                    <td th:text="${appoint.subject_name}"></td>
+                    <td th:text="${appoint.no_of_sets}"></td>
+                    <td>
+                        <b class="text-success"
+                           th:if="${appoint.current_status != null and appoint.status_date != null}"
+                           th:text="${appoint.current_status + ' on ' + appoint.status_date}">
+                        </b>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-sm btn-success">Send Appointment</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

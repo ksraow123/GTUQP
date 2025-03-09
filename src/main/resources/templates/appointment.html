@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <!--<link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />-->
+	<link th:href="@{https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0}" rel="stylesheet" />
+
+	<link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css}"
+		  integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+		  crossorigin="anonymous" rel="stylesheet">
+
+	<link th:href="@{/css/style.css}" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div class="wrapper">
+        <aside id="sidebar" class="expand">
+            <div class="d-flex justify-content-around">
+                <div class="sidebar-logo">
+					<a th:href="@{/appointments/list}">
+						<img th:src="@{/images/logo.png}" height="80" width="80" alt="Logo" />
+					</a>
+                </div>
+				<button class="toggle-btn" type="button">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                
+            </div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item" th:each="menulist,iterStat : ${session.menuPageList}">
+
+					<a th:href="${menulist.url}" th:title="${menulist.purpose}"  class="sidebar-link active" >
+                        <span class="material-symbols-outlined"><span class="material-symbols-outlined">Menu</span></span>
+                        <span th:text="${menulist.itemname}" class="text"></span>
+                    </a>
+                </li>
+
+            </ul>
+
+        </aside>
+        <div class="main">
+            <!-- Navbar -->
+			<div class="container-fluid p-3 white">
+			   <div class="d-flex justify-content-between">
+					<div>
+						<h2>Maharashtra State Board of Technical Education, Mumbai</h2>
+					</div>
+
+					<div class="d-flex justify-content-between">
+						<!--<div class="theme-btn me-2">
+							<span class="material-symbols-outlined active">light_mode</span>
+							<span class="material-symbols-outlined">dark_mode</span>
+						</div>-->
+						<div class="btn-group me-3">
+						  <button type="button" class="dropdown-toggle bg-transparent" data-bs-toggle="dropdown" aria-expanded="false">
+							<b>Dileep Kumar B</b>
+						  </button>
+						  <ul class="dropdown-menu dropdown-menu-end">
+							<li><button class="dropdown-item" type="button">Change Password</button></li>
+							<li><a class="dropdown-item" type="button" th:href="login.html">Logout</a></li>
+						  </ul>
+						</div>
+					</div>
+				</div>
+			  </div>
+				<!-- End Navbar -->
+			
+			<div class="container-fluid p-3">
+				
+				
+				<div class="row">
+					<div class="col-12">
+						<div class="cards">
+							<div class="card border-0">
+								<h2>Paper Setter / Moderator Appointment </h2>
+								<form th:action="@{/appointments/save}" th:object="${appointment}" method="post" >
+								<div class="row mt-3">
+										<div class="col-md-4">
+											<div class="mb-3">
+												<input type="hidden" th:field="*{id}">
+												<input type="hidden" th:field="*{orderNo}">
+											  <label for="" class="form-label">Type</label>
+											  <select class="form-select" th:field="*{role_id}" >
+												  <option value="0">Select</option>
+												  <option value="2">Paper Setter </option>
+												  <option value="3">Paper Moderator </option>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Mobile No.</label>
+											  <input class="form-control" type="text" th:field="*{mobile_number}" >
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Name</label>
+											  <input class="form-control" type="text" th:field="*{name}" >
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Email ID</label>
+											  <input class="form-control" type="text" th:field="*{email}" >
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Institute/College Code</label>
+											  <select class="form-select"  th:field="*{college_id}" >
+												  <option value="0">Select</option>
+												  <option value="1">526 </option>
+												  <option value="2">485 </option>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Course Code</label>
+											  <select class="form-select" id="courseCode" required  th:field="*{course_id}" >
+												  <option value="0">Select</option>
+												  <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Subject Code </label>
+											  <select class="form-select" id="subjectCode" th:field="*{subject_id}"  required>
+												  <option value="0">Select</option>
+
+												</select>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Office Order Date  </label>
+											 <input type="date" class="form-control" th:field="*{order_date}" >
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Last Date of Submission   </label>
+											 <input type="date" class="form-control" th:field="*{submission_date}" />
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="mb-3">
+											  <label for="" class="form-label">Curriculum / Syllabus </label>
+											  <input class="form-control" type="text" placeholder="Computer" disabled>
+											</div>
+										</div>
+										<div class="col-md-12">
+											<div class="mb-3">
+												<button class="btn btn-primary">Generate order and Send Email</button>
+											</div>
+										</div>
+									</div>
+								</form>
+									<div class="row">
+										<div class="col-12">
+											<table class="table table-bordered">
+												<thead>
+												<tr>
+													<th>S.No.</th>
+													<th>Order  Date</th>
+													<th>Order  No.</th>
+													<th>Type</th>
+													<th>Inst.  / College Code</th>
+													<th>Name</th>
+													<th>Mobile</th>
+													<th>Course  Code</th>
+													<th>Subject  Code</th>
+													<th>Status</th>
+													<th>Action</th>
+												</tr>
+												</thead>
+												  <tbody>
+												  <tr th:each="appoint,iterStat: ${appointmentList}">
+													  <td th:text="${iterStat.count}">S.No.</th>
+													  <td th:text="${appoint.order_date}">Order  Date</th>
+													  <td th:text="${appoint.orderNo}">Order  No.</th>
+													  <td th:text="${appoint.role}">Type</th>
+													  <td th:text="${appoint.college_code}">Inst.  / College Code</th>
+													  <td th:text="${appoint.name}">Name</th>
+													  <td th:text="${appoint.mobile_number}">Mobile</th>
+													  <td th:text="${appoint.course_code}">Course  Code</th>
+													  <td th:text="${appoint.subject_code}">Subject  Code</th>
+													  <td th:text="${appoint.current_status}">Status</th>
+													  <td>
+													  <a th:href="@{/appointments/edit/{id}(id=${appoint.id})}" class="btn btn-sm btn-info" title="Edit">
+													  <span class="material-symbols-outlined">edit_square</span>
+													  </a>
+													  <a th:href="@{/appointments/resend/{id}(id=${appoint.id})}" class="btn btn-sm btn-warning" title="Resend Order by e-mail">
+														  <span class="material-symbols-outlined">send</span>
+													  </a>
+													  <a th:href="@{/appointments/delete/{id}(id=${appoint.id})}" class="btn btn-sm btn-danger" title="Cancel Order">
+														  <span class="material-symbols-outlined">cancel</span>
+													  </a>
+
+												  </td>
+													</tr>
+												  </tbody>
+												</table>
+
+										</div>
+									</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+        </div>
+    </div>
+	<script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js}"
+			integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+			crossorigin="anonymous"></script>
+
+	<script th:src="@{/js/script.js}"></script>
+
+	<script th:src="@{https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js}"></script>
+
+	<script th:src="@{https://cdn.jsdelivr.net/npm/chart.js}"></script>
+
+	<script>
+        $(document).ready(function () {
+            // Data for the chart
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['AU','SVU','ANU','SKU','NU','YVU','BRAU','KU','RU','VSU','JNTUK','JNTUA','JNTUV','SPMV','DU','AHUU','RGUKT','CU','YSRAFAU','AKU','SBTET'],
+                    datasets: [
+                        {
+                            label: 'Total',
+                            data: [112088,146000,323333,25000,233333,50000,90000,109496,40333,120000,233333,300000,128850,6175,1667,13,50000,7500,378,40000,100000],
+                            backgroundColor: 'rgba(33, 146, 46, 0.2)',
+                            borderColor: 'rgba(33, 146, 46, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Boys',
+                            data: [40352,52560,116400,9000,84000,18000,32400,39419,14520,43200,84000,108000,46386,2223,600,5,18000,2700,136,14400,36000],
+                            backgroundColor: 'rgba(244, 170, 0, 0.2)',
+                            borderColor: 'rgba(244, 170, 0, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Girls',
+                            data: [43714,56940,126100,9750,91000,19500,35100,42704,15730,46800,91000,117000,50252,2408,650,5,19500,2925,147,15600,39000],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    animation: {
+                        duration: 2000, // Animation duration in milliseconds
+                        easing: 'easeInOutBounce', // Animation easing effect
+                        delay: 500 // Delay before animation starts
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+	<script>
+        $(document).ready(function () {
+            var ctx = document.getElementById('ScriptsCorrection').getContext('2d');
+            var ScriptsCorrection = new Chart(ctx, {
+                type: 'pie', // Change to 'pie' for a pie chart
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed'],
+                    datasets: [{
+                        data: [300, 50, 100],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(244, 170, 0, 0.2)',
+                            'rgba(33, 146, 46, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(244, 170, 0, 1)',
+                            'rgba(33, 146, 46, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutBounce',
+                        delay: 600
+                    }
+                }
+            });
+        });
+    </script>
+	<script>
+        $(document).ready(function () {
+            var ctx = document.getElementById('ScriptsVerification').getContext('2d');
+            var ScriptsVerification = new Chart(ctx, {
+                type: 'pie', // Change to 'pie' for a pie chart
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed'],
+                    datasets: [{
+                        data: [100, 20, 400],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(244, 170, 0, 0.2)',
+                            'rgba(33, 146, 46, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(244, 170, 0, 1)',
+                            'rgba(33, 146, 46, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    animation: {
+                        duration: 3000,
+                        easing: 'easeInCirc',
+                        delay: 700
+                    }
+                }
+            });
+        });
+    </script>
+	<script>
+        $(document).ready(function () {
+            var ctx = document.getElementById('LastEvaluator').getContext('2d');
+            var LastEvaluator = new Chart(ctx, {
+                type: 'pie', // Change to 'pie' for a pie chart
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed'],
+                    datasets: [{
+                        data: [100, 20, 400],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(244, 170, 0, 0.2)',
+                            'rgba(33, 146, 46, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(244, 170, 0, 1)',
+                            'rgba(33, 146, 46, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInCubic',
+                        delay: 800
+                    }
+                }
+            });
+        });
+    </script>
+	<script>
+        $(document).ready(function () {
+            var ctx = document.getElementById('ScriptsRejected').getContext('2d');
+            var ScriptsRejected = new Chart(ctx, {
+                type: 'pie', // Change to 'pie' for a pie chart
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed'],
+                    datasets: [{
+                        data: [100, 600, 100],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(244, 170, 0, 0.2)',
+                            'rgba(33, 146, 46, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(244, 170, 0, 1)',
+                            'rgba(33, 146, 46, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutSine',
+                        delay: 500
+                    }
+                }
+            });
+        });
+    </script>
+	<script>
+        $(document).ready(function () {
+            var ctx = document.getElementById('EvaluatorsCenters').getContext('2d');
+            var EvaluatorsCenters = new Chart(ctx, {
+                type: 'pie', // Change to 'pie' for a pie chart
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed'],
+                    datasets: [{
+                        data: [800, 220, 100],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(244, 170, 0, 0.2)',
+                            'rgba(33, 146, 46, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(244, 170, 0, 1)',
+                            'rgba(33, 146, 46, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutBounce',
+                        delay: 500
+                    }
+                }
+            });
+        });
+    </script>
+	<script>
+        // Sample data for different views
+        const dataDaily = {
+            labels: ['01', '02', '03', '04', '05', '06', '07'],
+            datasets: [{
+                label: 'Daily Data',
+                data: [12, 19, 3, 5, 2, 3, 7],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        };
+
+        const dataWeekly = {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Weekly Data',
+                data: [50, 70, 60, 90],
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        };
+
+        const dataMonthly = {
+            labels: ['April', 'May', 'June'],
+            datasets: [{
+                label: 'Monthly Data',
+                data: [200, 180, 220],
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        };
+
+        // Create the chart
+        let ctx = document.getElementById('Reportbydate').getContext('2d');
+        let Reportbydate = new Chart(ctx, {
+            type: 'line',
+            data: dataDaily, // Initial data set
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Function to update the chart based on the selected period
+        function updateChart(period) {
+            if (period === 'daily') {
+                Reportbydate.data = dataDaily;
+            } else if (period === 'weekly') {
+                Reportbydate.data = dataWeekly;
+            } else if (period === 'monthly') {
+                Reportbydate.data = dataMonthly;
+            }
+            Reportbydate.update();
+        }
+    </script>
+	<script>
+		document.getElementById("courseCode").addEventListener("change", function () {
+            let courseId = this.value;
+            let subjectDropdown = document.getElementById("subjectCode");
+            // Clear existing options
+            subjectDropdown.innerHTML = '<option value="0">Loading...</option>';
+
+            if (courseId !== "0") {
+                fetch('../subjects/' + courseId)
+                    .then(response => response.json())
+                    .then(data => {
+                        subjectDropdown.innerHTML = '<option value="0">Select</option>'; // Reset dropdown
+
+                        data.forEach(subject => {
+                            let option = document.createElement("option");
+                            option.value = subject.id;  // Use Subject Code as value
+                            option.textContent = subject.id + " - " + subject.subject_name;  // Display Code & Name
+                            subjectDropdown.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching subjects:", error);
+                        subjectDropdown.innerHTML = '<option value="0">Error Loading Subjects</option>';
+                    });
+            } else {
+                subjectDropdown.innerHTML = '<option value="0">Select a Course First</option>';
+            }
+        });
+	</script>
+
+</body>
+
+</html>

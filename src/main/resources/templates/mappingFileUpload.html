@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+  <!-- Content Start -->
+
+  <div class="row">
+    <div class="col-12">
+      <div class="cards">
+        <div class="card border-0">
+          <h2>QP Setters Vs Moderators Mapping</h2>
+          <div th:if="${message}" style="margin-top: 10px;">
+            <p th:text="${message}"></p>
+          </div>
+
+          <div class="row">
+
+            <div class="col-12">
+
+              <table class="table table-bordered" id="example">
+                <thead>
+                <tr>
+                  <th>S.No.</th>
+                  <th>Subject</th>
+                  <th>QP Setter ID - Name</th>
+                  <th>QP Moderator ID - Name</th>
+                  <th>Assigned Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="appoint, iterStat : ${setterModeratorMappingList}">
+                  <td th:text="${iterStat.count}"></td>
+                  <td th:text="${appoint.subject_details}"></td>
+                  <td th:text="|${appoint.qpsetter} - ${appoint.setter_name}|"></td>
+                  <td th:text="|${appoint.moderator} - ${appoint.moderator_name}|"></td>
+                  <td th:text="${appoint.assigned_date}"></td>
+                </tr>
+                </tbody>
+              </table>
+
+
+
+
+            </div>
+            <div class="col-12 mt-3">
+              <p><b>Upload QP Setters Vs Moderators Mapping (CSV File)</b> <a  th:href="@{/setter_moderator_mapping.csv}"  class="link-danger">Click here to download the sample file</a></p>
+              <form method="post" th:action="@{/mappingUpload}" enctype="multipart/form-data">
+                <div class="row">
+                  <div class="col-md-4">
+                    <input type="file" name="file" accept=".csv" required="" class="form-control">
+                  </div>
+                  <div class="col-md-1">
+                    <button type="submit" class="btn  btn-primary">Upload</button>
+                  </div>
+                  <div class="col-md-6">
+
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+        <!-- Success Records Table -->
+        <div th:if="${not #lists.isEmpty(successList)}">
+          <h3 class="success">Successfully Uploaded Records</h3>
+          <table class="table table-bordered" id="example">
+            <thead>
+            <tr>
+              <th>Setter Id</th>
+              <th>Moderator Id</th>
+              <th>Subject Code</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="faculty : ${successList}">
+              <td th:text="${faculty.setterId}"></td>
+              <td th:text="${faculty.moderatorId}"></td>
+              <td th:text="${faculty.subjectCode}"></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Failure Records Table -->
+        <div th:if="${not #lists.isEmpty(failureList)}">
+          <h3 class="failure">Failed Records</h3>
+          <table class="table table-bordered" id="example">
+            <thead>
+            <tr>
+              <th>Setter Id</th>
+              <th>Moderator Id</th>
+              <th>Subject Code</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="faculty : ${failureList}">
+              <td th:text="${faculty.setterId}"></td>
+              <td th:text="${faculty.moderatorId}"></td>
+              <td th:text="${faculty.subjectCode}"></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>Appointments - QP Setters/Moderators</h2>
+                    <form th:action="@{/appointments/processSelected}" method="post">
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-end">
+                                <input type="submit" class="btn btn-success"
+                                       value="Send Appointment to selected records"/></p>
+                           <div class="table-responsive">
+                            <table class="table table-bordered" id="example">
+                                <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>S.No.</th>
+                                    <th>Role</th>
+                                    <th>User Name</th>
+                                    <th>Name</th>
+                                    <th>Mobile</th>
+                                    <th>Email</th>
+                                    <th>College</th>
+                                    <th>Course</th>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>No.of sets</th>
+                                    <th>View Syllabus</th>
+                                    <th>Last Date of Submission</th>
+
+                                    <th>Current status</th>
+                                    <th>Current Status Date</th>
+                                    <th>Appointment sent date</th>
+                                    <th>Reset Password</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="appoint, iterStat : ${appointmentList}">
+                                    <td class="text-center">
+                                        <input type="hidden" id="hiddenSelectedIds" name="selectedIds" value="" />
+
+                                        <input type="checkbox" class="form-check-input" name="selectedIds" th:value="${appoint.id}" />
+                                    </td>
+                                    <td class="text-center" th:text="${iterStat.count}"></td>
+                                    <td class="text-center" th:text="${appoint.role}"></td>
+                                    <td class="text-center" th:text="${appoint.user_name}"></td>
+                                    <td class="text-center" th:text="${(appoint.first_name ?: '') + ' - ' + (appoint.last_name ?: '')}"></td>
+                                    <td class="text-center" th:text="${appoint.mobile_no}"></td>
+                                    <td class="text-center" th:text="${appoint.email}"></td>
+
+                                    <td class="text-center" th:text="${(appoint.college_code ?: '') + ' - ' + (appoint.college_name ?: '')}"></td>
+                                    <td class="text-center" th:text="${appoint.course_name}"></td>
+                                    <td class="text-center" th:text="${appoint.subject_code}"></td>
+                                    <td class="text-center" th:text="${appoint.subject_name}"></td>
+                                    <td class="text-center" th:text="${appoint.no_of_sets}"></td>
+                                    <td>
+                                        <a th:if="${appoint.syllabus}" th:href="@{${appoint.syllabus}}" target="_blank" title="View Syllabus">View Syllabus</a>
+                                        <span th:unless="${appoint.syllabus}">No syllabus available</span>
+                                    </td>
+                                    <td class="text-center" th:text="${appoint.last_date_to_submit}"> </td>
+                                    <td class="text-center" th:text="${appoint.current_status}"> </td>
+
+                                    <td class="text-center" th:text="${appoint.status_date}"> </td>
+                                    <td class="text-center" th:text="${appoint.appointment_sent_date}"> </td>
+                                    <td>
+                                    <a th:href="@{/password/resend/{email}(email=${appoint.email})}" class="btn btn-sm btn-danger" title="Reset Password">
+                                        Reset Password
+                                    </a>
+                                    </td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+
+                           </div>
+
+                        </div>
+                    </div>
+                    </form>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <p><b>Upload QP Setters/Moderators (CSV File)</b> <a  th:href="@{/appointmentData.csv}"  class="link-danger">Click here to download the sample file</a></p>
+                            <form method="post" th:action="@{/upload}" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="file" name="file" accept=".csv" required="" class="form-control">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="submit" class="btn  btn-primary">Upload</button>
+                                </div>
+                                <div class="col-md-6">
+
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+        <!-- Success Records Table: Show only if successList is not empty -->
+        <div th:if="${not #lists.isEmpty(successList)}">
+            <h3 class="success">Successfully Uploaded Records</h3>
+            <table class="table table-bordered" id="example">
+                <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Subject Code</th>
+                    <th>Mobile No</th>
+                    <th>Email</th>
+                    <th>Last Date to Submit</th>
+                    <th>No of Sets</th>
+                    <th>College Code</th>
+                    <th>Role ID</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="faculty : ${successList}">
+                    <td th:text="${faculty.firstName}"></td>
+                    <td th:text="${faculty.lastName}"></td>
+                    <td th:text="${faculty.subjectCode}"></td>
+                    <td th:text="${faculty.mobileNo}"></td>
+                    <td th:text="${faculty.email}"></td>
+                    <td th:text="${faculty.lastDateToSubmit}"></td>
+                    <td th:text="${faculty.noOfSets}"></td>
+                    <td th:text="${faculty.collegeCode}"></td>
+                    <td th:text="${faculty.roleId}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Failure Records Table: Show only if failureList is not empty -->
+        <div th:if="${not #lists.isEmpty(failureList)}">
+            <h3 class="failure">Failed Records</h3>
+            <table class="table table-bordered" id="example">
+                <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Subject Code</th>
+                    <th>Mobile No</th>
+                    <th>Email</th>
+                    <th>Last Date to Submit</th>
+                    <th>No of Sets</th>
+                    <th>College Code</th>
+                    <th>Role ID</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="faculty : ${failureList}">
+                    <td th:text="${faculty.firstName}"></td>
+                    <td th:text="${faculty.lastName}"></td>
+                    <td th:text="${faculty.subjectCode}"></td>
+                    <td th:text="${faculty.mobileNo}"></td>
+                    <td th:text="${faculty.email}"></td>
+                    <td th:text="${faculty.lastDateToSubmit}"></td>
+                    <td th:text="${faculty.noOfSets}"></td>
+                    <td th:text="${faculty.collegeCode}"></td>
+                    <td th:text="${faculty.roleId}"></td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (event) {
+            const checkboxes = document.querySelectorAll("input[name='selectedIds']:checked");
+            if (checkboxes.length === 0) {
+                alert("Please select at least one record before submitting.");
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+    });
+</script>
+</html>

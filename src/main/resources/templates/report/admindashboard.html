@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>QP Set-wise Details</h2>
+
+
+                    <div class="row">
+
+                        <div class="col-12">
+                            <div class="table-responsive">
+                            <table class="table table-bordered" id="example">
+                                <thead>
+                                <tr>
+                                    <th>S.No.</th>
+                                    <th>Course</th>
+                                    <th>Year</th>
+                                    <th>Sem</th>
+                                    <th>Subject</th>
+                                    <th>Subject - Name</th>
+                                    <th>Assigned Setters</th>
+                                    <th>Assigned Moderators</th>
+                                    <th>QP Setting Status</th>
+                                    <th>QP Review status</th>
+                                    <th>Section Team Status</th>
+                                    <th>Forward to Repository</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="report, iterStat : ${adminDashBoardVoList}">
+                                    <td th:text="${iterStat.count}"></td>
+                                    <td th:text="${report.course_name}"></td>
+                                    <td th:text="${report.year}"></td>
+                                    <td th:text="${report.semester}"></td>
+                                    <td th:text="${report.subject_code}"></td>
+                                    <td th:text="${report.subject_name}"></td>
+                                    <td th:text="${report.assigned_setters}"></td>
+                                    <td th:text="${report.assigned_moderators}"></td>
+                                    <td th:text="${report.setter_status}"></td>
+                                    <td th:text="${report.moderator_status}"></td>
+                                    <td th:text="${report.section_team_status}"></td>
+                                    <td th:text="${report.forward_to_repo_status}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

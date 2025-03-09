@@ -1,0 +1,150 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Email</title>
+</head>
+<style type="text/css">
+    body { font-family: "Times New Roman", "serif"; font-size: 18px; }
+    h4 { margin: 2px; padding: 0; }
+</style>
+<body>
+
+<table width="720" border="0" align="center">
+    <tr>
+        <td>
+            <table width="100%" border="0">
+                <tr>
+                    <td>
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="80"><img src="images/logo.png" width="80" alt="" /></td>
+                                <td align="center">
+                                    <h2>GUJARAT TECHNOLOGICAL UNIVERSITY</h2>
+                                    <div><b>INTERNATIONAL INNOVATIVE UNIVERSITY<br />
+                                        Secure Online Question Paper Receiving System (SOQPRS)</b>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="50%"><b>Tel:</b> 022-62542105/106/107/100 <br />  <b>Web:</b> www.msbte.org.in</td>
+                                <td width="50%" align="right">
+                                    <b>Email:</b> desk42@msbte.com <br /><b>Mob:</b> 8424045989, 9869454687
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td><hr /></td>
+                </tr>
+                <tr>
+                    <td>
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="50%"><b>No. MSBTE / D-42 / MNS /</b></td>
+                                <td width="50%" align="right">
+                                    <b>Date:</b> <span th:text="${date}"></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td><hr /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h4><u>Office Order</u><br />Confidential</h4>
+            <p><b>To,</b></p>
+            <p th:text="${name}"></p>
+            <p><b>Inst. Code.</b> <span th:text="${collegeCode}"></span></p>
+            <p>Sir / Madam,</p>
+            <p>It gives me pleasure to inform your appointment as <b>paper setter/moderator</b> for MSBTE. You are requested to set one question paper for the details below.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%" border="1" cellspacing="0">
+                <tr>
+                    <td>
+                        <table width="100%" border="0" cellpadding="4" cellspacing="10">
+                            <tr>
+                                <td width="15">1)</td>
+                                <td>Question Paper Code</td>
+                                <td width="10">:</td>
+                                <td th:text="${subjectCode}"></td>
+                            </tr>
+                            <tr>
+                                <td>2)</td>
+                                <td>Name of Subject</td>
+                                <td>:</td>
+                                <td th:text="${subjectName}"></td>
+                            </tr>
+                            <tr>
+                                <td>3)</td>
+                                <td>Year / Course</td>
+                                <td>:</td>
+                                <td th:text="${yearCourse}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p><b>The necessary documents required for your paper setting activity are sent by mail.</b></p>
+            <p>The last date for the online submission of the Question Paper is</p>
+        </td>
+    </tr>
+    <tr>
+        <td align="right">
+            <table align="right" border="1" cellpadding="3" cellspacing="0">
+                <tr>
+                    <td colspan="3" align="center" th:text="${submissionDate}"></td>
+                </tr>
+                <tr>
+                    <td width="60" align="center"><b>DD</b></td>
+                    <td width="60" align="center"><b>MM</b></td>
+                    <td width="60" align="center"><b>YEAR</b></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>Issued as per the orders and in the name of The Secretary, MSBTE.</p>
+        </td>
+    </tr>
+    <tr>
+        <td align="right">
+            <p><b>Yours faithfully,</b></p>
+        </td>
+    </tr>
+    <tr>
+        <td align="right" valign="bottom">
+            <table align="right">
+                <tr>
+                    <td align="center">
+                        <p><b>Deputy Secretary <br />
+                            M. S. Board of Tech. Education,<br />
+                            Mumbai - 51.</b></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

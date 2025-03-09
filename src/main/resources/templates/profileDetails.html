@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="row">
+    <div class="col-12">
+        <div class="cards">
+            <div class="card border-0">
+                <h2>My Profile </h2>
+                <form th:action="@{/saveProfile}" th:object="${profileDetails}" method="post">
+                    <input type="hidden" th:field="*{id}">
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">User ID</label>
+                                <input class="form-control" type="text" th:field="*{user_name}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">First Name</label>
+                                <input class="form-control" type="text" th:field="*{first_name}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Last Name</label>
+                                <input class="form-control" type="text" th:field="*{last_name}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Mobile No.</label>
+                                <input class="form-control" type="text" th:field="*{mobile_no}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Email ID</label>
+                                <input class="form-control" type="text" th:field="*{email}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Designation  </label>
+                                <input class="form-control"  required type="text" th:field="*{designation}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Teaching Exp. (In Years and Months)</label>
+                                <input class="form-control" required type="text" th:field="*{teaching_experience}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Industry Exp. (In Years and Months)</label>
+                                <input class="form-control" required type="text" th:field="*{industry_experience}">
+                            </div>
+                        </div>
+                        <div class="col-md-12"><h2>Bank Details</h2></div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Account Number</label>
+                                <input class="form-control"  required minlength="5" maxlength="30" type="text" th:field="*{account_no}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">IFSC Code </label>
+                                <input class="form-control" type="text" th:field="*{ifsc_code}" required onblur="fetchBankDetails()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Bank Name</label>
+                                <input class="form-control" readonly required type="text" th:field="*{bank_name}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Branch Details </label>
+                                <input class="form-control" required readonly type="text" th:field="*{branch_details}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Branch Address </label>
+                                <input class="form-control" required readonly type="text" th:field="*{branch_address}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <button class="btn btn-primary">Save &amp; Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function fetchBankDetails() {
+var ifscCode = document.getElementById("ifsc_code").value.trim(); // Trim spaces
+
+if (ifscCode.length !== 11) {
+alert("IFSC Code must be exactly 11 characters.");
+return;
+}
+
+fetch("https://online.ctestservices.com/gtuqp/api/bank/getDetails/" + ifscCode)
+.then(response => {
+if (!response.ok) {
+throw new Error("Invalid IFSC Code or API error");
+}
+return response.json();
+})
+.then(data => {
+if (data && data.BANK && data.BRANCH && data.ADDRESS) {
+document.getElementById("bank_name").value = data.BANK;
+document.getElementById("branch_details").value = data.BRANCH;
+document.getElementById("branch_address").value = data.ADDRESS;
+} else {
+alert("Invalid IFSC Code or no data found.");
+}
+})
+.catch(error => {
+console.error("Error:", error);
+alert("Error fetching bank details. Please check the IFSC code.");
+});
+}
+</script>

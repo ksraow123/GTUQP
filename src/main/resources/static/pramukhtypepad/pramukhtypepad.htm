@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+        <title>Type in 20 Indian languages - Pramukh Type Pad</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="Description" content="Pramukh Type Pad to easily type in Assamese, Bengali, Bodo, Dogri, Gujarati, Hindi, Kannada, Konkani, Maithili, Malayalam, Manipuri, Marathi, Nepali, Oriya, Punjabi, Sanskrit, Santali, Sindhi, Tamiland Telugu" />
+		<meta name="keywords" content="Assamese, Bengali, Bodo, Dogri, Gujarati, Hindi, Kannada, Konkani, Maithili, Malayalam, Manipuri, Marathi, Nepali, Oriya, Punjabi, Sanskrit, Santali, Sindhi, Tamil, Telugu, Type pad, Unicode, transliteration " />
+		<meta name="copyright" content="Copyright © Vishal Monpara" />
+        <link rel="shortcut icon" href="img/pramukhime.ico" type="image/x-icon"/>
+        <script type="text/javascript" src="js/pramukhime-common.js"></script>
+        <script type="text/javascript" src="tiny_mce/tiny_mce.js"></script>
+        <script type="text/javascript">
+            //piresourcebase = 'tiny_mce/plugins/pramukhime/';
+	        tinyMCE.init({
+		        // General options
+		        mode : "textareas",
+		        theme: "advanced",
+		        plugins : "table,advhr,advimage,advlink,inlinepopups,searchreplace,print,paste,directionality,fullscreen,pramukhime",
+		        auto_focus: 'typingarea',
+		        // Theme options
+		        theme_advanced_buttons1: "pramukhime,pramukhimeclick,pramukhimeconvert,pramukhimehelp,print,undo,redo,fontselect,fontsizeselect,bold,italic,underline,forecolor,backcolor,|,link,unlink,image,|,justifyleft,justifycenter,justifyright,bullist,numlist,outdent,indent,|,code,ltr,rtl",
+		        theme_advanced_buttons2: "cut,copy,paste,pastetext,pasteword,|,search,replace,|,tablecontrols,|,sub,sup,blockquote,advhr,anchor,cleanup,removeformat,|,fullscreen",
+		        theme_advanced_toolbar_location : "top",
+		        theme_advanced_toolbar_align : "left",
+		        theme_advanced_statusbar_location : "bottom",
+		        theme_advanced_resizing: true,
+                theme_advanced_resizing_use_cookie : false,
+		        content_css : "css/ptparea.css",
+		        pramukhime_language: [
+                    {
+jsfile:'pramukhindic.js',
+kbclassname:'PramukhIndic',
+kbtitle:'Pramukh Indic',
+languagelist:[
+{language: 'assamese', title:'Assamese'},
+{language: 'bengali', title:'Bengali'},
+{language: 'bodo', title:'Bodo'},
+{language: 'dogri', title:'Dogri'},
+{language: 'gujarati', title:'Gujarati'},
+{language: 'hindi', title:'Hindi'},
+{language: 'kannada', title:'Kannada'},
+{language: 'konkani', title:'Konkani'},
+{language: 'maithili', title:'Maithili'},
+{language: 'malayalam', title:'Malayalam'},
+{language: 'manipuri', title:'Manipuri'},
+{language: 'marathi', title:'Marathi'},
+{language: 'nepali', title:'Nepali'},
+{language: 'oriya', title:'Oriya'},
+{language: 'punjabi', title:'Punjabi'},
+{language: 'sanskrit', title:'Sanskrit'},
+{language: 'santali', title:'Santali'},
+{language: 'sindhi', title:'Sindhi'},
+{language: 'tamil', title:'Tamil'},
+{language: 'telugu', title:'Telugu'},
+]
+}
+,
+			        { 
+				        kbtitle:'', 
+				        title:'English' 
+			        }
+                ]
+            });
+            function bodyload() {
+                var lang = (getCookie('pramukhime_language', ':english')).split(':');
+                if(typeof pramukhIME != 'undefined') {
+                    pramukhIME.setLanguage(lang[1], lang[0]);
+                    pramukhIME.onLanguageChange(function(l,k,c){setCookie('pramukhime_language',k+':'+l,10);},'cookie');
+                }
+            }
+        </script>
+        
+<style type="text/css">
+            body, * {font-family:verdana, arial, helvetica, sans-serif; font-size:12px;}
+            img {border:0px;}
+            .page { width:100%; margin:0 auto;}
+            #fblogo a,#gplogo a, #twtlogo a {height:20px; width:20px; padding-left:15px; text-decoration:none;}
+            #fblogo {height:20px; width:20px; background:transparent url('tiny_mce/plugins/pramukhime/img/pramukhime-icon.png') 0px -402px no-repeat;}
+            #gplogo {height:20px; width:20px; background:transparent url('tiny_mce/plugins/pramukhime/img/pramukhime-icon.png') 0px -422px no-repeat;}
+            #twtlogo {height:20px; width:20px; background:transparent url('tiny_mce/plugins/pramukhime/img/pramukhime-icon.png') 0px -442px no-repeat;}
+            .header {height:50px; border-bottom:2px solid #FF6600; background:transparent url('tiny_mce/plugins/pramukhime/img/pramukhime-icon.png') 0px -1342px no-repeat; padding-left:55px; }
+            .divleft { float:left;}
+            .headerright { text-align:right;}
+            .title { font-size:20px; color:#FF6600; font-weight:bold; }
+            .clear {clear:both;}
+            .editor {width:100%; border:1px solid #bbb; border-collapse:collapse; }
+            .editortoolbar {background:#EEEEEE; height:26px; width:100%;border:1px solid #bbb; padding:0px;}
+            textarea { height:376px; padding:0px; border:0px; width:100%; overflow:auto;}
+            .bottom {border-top:2px solid #FF6600; padding-top:4px;}
+            .copyright {text-align:center;}
+            .big {font-size:14px;}
+            .bigger {font-size:16px;}
+            #pi_tips {list-style-type:none; margin:0px; padding:0px;}
+            ul li.tipsmall {background-position: 0 0px; padding-left:20px; margin:0px; font-size:xx-small;}
+            ul li.tip {height:20px; margin:0px; padding-left:20px;background:transparent url('tiny_mce/plugins/pramukhime/img/pramukhime-icon.png') 0px -260px no-repeat;}
+        </style>
+</head>
+<body role="application" onload="bodyload();">
+    <div class="page">
+        <div class="header">
+            <div class="divleft">
+                <span class="title">Pramukh Type Pad</span><br />
+                <span class="tagline">Typing in Indian languages is so easy!!!</span>
+            </div>
+            <div class="headerright"><span>&nbsp;</span><br /><span>
+                <a href="http://www.vishalon.net/PramukhIME/Windows.aspx" target="_blank" 
+                    title="Download PramukhIME to directly type in MS Office" class="bigger">Download PramukhIME</a></span></div>
+            
+        </div>
+        <div>
+            <br />
+            <div class="divleft">
+                <ul id="pi_tips">
+                    <li class='smalltip'>Press F9 to switch between selected language and English.</li>
+<li class='smalltip'>Copy and paste the typed text into Microsoft Word to save it.</li>
+<li class='smalltip'>Download PramukhIME for Windows to directly type in MS Office in Windows XP/Vista/7/8.</li>
+
+                </ul>
+            </div>
+            <div class="headerright">
+            &nbsp;
+            </div>
+        </div>
+        <div class="clear"><br /></div>
+		<div>
+			<textarea id="typingarea" name="typingarea" rows="15" cols="80">
+			</textarea>
+            <br />
+		</div>
+
+		<div class="bottom">Use <a href="basicpramukhtypepad.htm" title="Pramukh Type Pad for Indian languages with basic text editing features." target="_blank">Pramukh Type Pad for Indian languages for basic text editing</a>. 
+        This utility is available as a 
+            <a href="http://www.vishalon.net/PramukhIME/WordPressPlugin.aspx" 
+                target="_blank" 
+                title="Download PramukhIME WordPress Plugin for Indian languages">Wordpress Plugin</a>, 
+            <a href="http://www.vishalon.net/PramukhIME/FireFoxExtension.aspx" 
+                target="_blank" 
+                title="Download PramukhIME Firefox Extension for Indian languages">Firefox Extension</a>, <a href="http://www.vishalon.net/PramukhIME/JavaScriptLibrary.aspx" target="_blank" title="Download PramukhIME Javascript Library for Indian languages">Javascript Library</a>, 
+            <a href="http://www.vishalon.net/PramukhIME/TinyMCEPlugin.aspx" target="_blank" 
+                title="Download PramukhIME TinyMCE Plugin for Indian languages">TinyMCE Plugin</a> and 
+            <a href="http://www.vishalon.net/PramukhIME/CKEditorPlugin.aspx" 
+                target="_blank" 
+                title="Download PramukhIME CKEditor Plugin for Indian languages">CKEditor Plugin</a> for enabling Indian languages typing on your Website.
+        Vishal Monpara has dedicated more than 2200 hours till June, 2012 to create these free utilities.
+        </div>
+        <div class="copyright"><br />Copyright &copy; <a href="http://www.vishalon.net" target="_blank" title="Vishal Monpara's Website">Vishal Monpara</a> | <a href="http://www.vishalon.net/ContactMe.aspx" target="_blank" title="Send feedback to Vishal Monpara">Send a Bug/Comment</a> | Version 3.0 | 
+        <span id="fblogo"><a href="https://www.facebook.com/pages/PramukhIME-Pramukh-Type-Pad/164572296943090" title="Like us on Facebook" target="_blank">&nbsp;</a></span> | <span id="gplogo"><a href="https://plus.google.com/111356465186782859926/" title="Add us to your circle on Google +" target="_blank">&nbsp;</a></span> | 
+        <span id="twtlogo"><a href="https://twitter.com/PramukhIME" title="Follow us on Twitter" target="_blank">&nbsp;</a></span></div>
+
+        <script language="javascript" type="text/javascript">
+            var ul = document.getElementById('pi_tips');
+
+            var elem, len = ul.childNodes.length, i;
+            for (i = 0; i < len; i++) {
+                elem = ul.childNodes[i];
+                if (elem.tagName && elem.tagName.toLowerCase() == 'li' && elem.innerHTML != "") {
+                    tips.push(elem.innerHTML);
+                }
+            }
+            for (i = len - 1; i > 1; i--) {
+                ul.removeChild(ul.childNodes[i]);
+            }
+            ul.childNodes[i].className = 'tip'; // replace small tip text with large
+
+            showNextTip(); // call for first time
+            setTimeout('turnOffTip()', 90000); // show tips for 1.5 minutes
+		</script>
+	</div>
+</body>
+</html>

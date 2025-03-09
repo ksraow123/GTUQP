@@ -1,0 +1,114 @@
+<div th:fragment="content">
+    <div class="container-fluid p-3">
+        <div class="row">
+            <div class="col-12">
+                <div class="cards">
+                    <div class="card border-0">
+                        <h2>Paper Setter / Moderator Appointment</h2>
+                        <form>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Type</label>
+                                        <select class="form-select">
+                                            <option selected>Select</option>
+                                            <option value="1">Paper Setter</option>
+                                            <option value="2">Paper Moderator</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Mobile No.</label>
+                                        <input class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Name</label>
+                                        <input class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Email ID</label>
+                                        <input class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Institute/College Code</label>
+                                        <select class="form-select">
+                                            <option selected>Select</option>
+                                            <option value="1">526</option>
+                                            <option value="2">485</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Course Code</label>
+                                        <select class="form-select">
+                                            <option selected>Select</option>
+                                            <option value="1">526</option>
+                                            <option value="2">485</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <button class="btn btn-primary">Generate order and Send Email</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>Order Date</th>
+                                            <th>Order No.</th>
+                                            <th>Type</th>
+                                            <th>Inst. / College Code</th>
+                                            <th>Name</th>
+                                            <th>Mobile</th>
+                                            <th>Course Code</th>
+                                            <th>Subject Code</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>31-01-2025</td>
+                                            <td><a href="#" class="link-primary">12546</a></td>
+                                            <td>Paper Setter</td>
+                                            <td>564</td>
+                                            <td>Dileep Kumar</td>
+                                            <td>9491314320</td>
+                                            <td>2025</td>
+                                            <td>651</td>
+                                            <td><a href="#" class="link-warning">Pending Consent</a></td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-info" title="Edit">
+                                                    <span class="material-symbols-outlined">edit_square</span>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-warning" title="Resend Order by e-mail">
+                                                    <span class="material-symbols-outlined">send</span>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-danger" title="Cancel Order">
+                                                    <span class="material-symbols-outlined">cancel</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

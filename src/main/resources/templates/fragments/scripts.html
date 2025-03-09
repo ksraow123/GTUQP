@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:fragment="scripts">
+        <!-- jQuery -->
+        <script th:src="@{/js/jquery-3.7.1.js}"></script>
+
+        <!-- Bootstrap -->
+        <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+        <!-- DataTables -->
+        <script th:src="@{/js/dataTables.js}"></script>
+        <script th:src="@{/js/dataTables.bootstrap5.js}"></script>
+        <script th:src="@{/js/dataTables.buttons.js}"></script>
+        <script th:src="@{/js/buttons.bootstrap5.js}"></script>
+        <script th:src="@{/js/jszip.min.js}"></script>
+        <script th:src="@{/js/pdfmake.min.js}"></script>
+        <script th:src="@{/js/vfs_fonts.js}"></script>
+        <script th:src="@{/js/buttons.html5.min.js}"></script>
+        <script th:src="@{/js/buttons.print.min.js}"></script>
+        <script th:src="@{/js/buttons.colVis.min.js}"></script>
+
+
+        <script type="text/javascript">
+            new DataTable('#example', {
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'excel', 'pdf', 'colvis']
+                }
+            }
+        });
+        </script>
+        <script type="text/javascript">
+            new DataTable('#search', {
+            layout: {
+                topStart: {
+                   // buttons: ['copy', 'excel', 'pdf', 'colvis']
+                }
+            }
+        });
+        </script>
+
+        <!-- Custom JavaScript -->
+        <script th:src="@{/js/common.js}"></script>
+    </th:block>
+</head>
+</html>

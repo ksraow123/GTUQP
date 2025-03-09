@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>PDF</title>
+    <style type="text/css">
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 18px;
+            position: relative;
+        }
+
+        /* Watermark Styling */
+        .watermarked::before {
+            content: attr(data-watermark);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 40px;
+            font-weight: bold;
+            color: rgba(180, 180, 180, 0.3); /* Light grey for watermark */
+            z-index: -1;
+            white-space: nowrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table tr td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        table tr td p {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<h2>
+    <span th:text="${subjects.subjectCode}"> </span>-
+    <span th:text="${subjects.subject_name}"></span>:
+    Max Marks:<span th:text="${subjects.max_marks}"></span>
+</h2>
+<!-- Watermark Container -->
+<div class="watermarked" id="watermark" th:attr="data-watermark=${watermark}"></div>
+
+
+
+<table width="100%" border="0">
+    <tr>
+        <td>
+            <table width="100%" border="0">
+                <tr>
+                    <td align="right" width="150"><b>Instructions –</b></td>
+                    <td align="center" width="30">(1)</td>
+                    <td>All Questions are Compulsory.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="center">(2)</td>
+                    <td>Answer each next main Question on a new page.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="center">(3)</td>
+                    <td>Illustrate your answers with neat sketches wherever necessary.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="center">(4)</td>
+                    <td>Figures to the right indicate full marks.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="center">(5)</td>
+                    <td>Assume suitable data, if necessary.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="center">(6)</td>
+                    <td>Mobile Phone, Pager and any other Electronic Communication devices are not permissible in Examination Hall.</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td align="right"><b>Marks</b></td>
+    </tr>
+
+    <tr>
+        <td>
+            <th:block th:each="lst : ${qpTemplateList}">
+                <table width="100%" border="0">
+                    <tr>
+                        <td valign="top"><b th:text="${lst.question_no} + '.'"></b></td>
+                        <td valign="top"></td>
+                        <td valign="top">
+<!--                            <b th:text="${lst.instructions} + ':'"></b>-->
+                        </td>
+                        <td valign="top"><b th:text="${lst.marks}"></b></td>
+                    </tr>
+
+                    <!-- Iterate over groupedByQuestionNo but only if lst.q_no matches entry.key -->
+                    <th:block th:each="entry : ${groupedQuestions}">
+                        <th:block th:if="${entry.key == lst.question_no}">
+                            <tr th:each="question : ${entry.value}">
+                                <td valign="top"></td>
+                                <td valign="top"><b th:text="${question.bit_no}"></b>)</td>
+                                <td valign="top"><span th:utext="${question.q_desc}"></span></td>
+
+                                <!-- Display image if exists -->
+                                <td valign="top">
+                                    <img th:if="${question.image_path != null and !question.image_path.isEmpty()}"
+                                         th:src="${question.image_path}"
+                                         alt="Base64 Image"
+                                         width="75%" height="50%"/>
+                                </td>
+                            </tr>
+                        </th:block>
+                    </th:block>
+                </table>
+            </th:block>
+        </td>
+    </tr>
+</table>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Fetch the IP address from the API
+        fetch("https://api.ipify.org?format=json")
+            .then(response => response.json())
+            .then(data => {
+                // Get the IP address from the response
+                const ipAddress = data.ip;
+
+                // Get the watermark element
+                const watermarkElement = document.getElementById("watermark");
+
+                // Get the current watermark text (username + currentDateTime from Thymeleaf)
+                const watermarkText = watermarkElement.getAttribute("data-watermark");
+
+                // Append the IP address to the watermark text
+                const fullWatermarkText = watermarkText + ", " + ipAddress;
+
+                // Set the updated watermark text (including the IP address)
+                watermarkElement.setAttribute("data-watermark", fullWatermarkText);
+            })
+            .catch(error => {
+                console.error("Error fetching IP address:", error);
+            });
+    });
+</script>
+
+</body>
+</html>

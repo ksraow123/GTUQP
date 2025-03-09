@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QP Upload Page</title>
+
+  <!-- Include CSS & Scripts -->
+  <div th:replace="fragments/styles :: styles"></div>
+  <script th:src="@{/js/jquery-3.7.1.js}"></script>
+
+</head>
+
+<body>
+<div class="wrapper">
+  <div th:replace="fragments/sidenav :: sidenav"></div>
+  <div class="main">
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <div class="container-fluid p-3">
+      <div class="row">
+        <div class="col-12">
+          <div class="cards">
+            <div class="card border-0">
+              <h2>
+                <span th:text="${subject.subjectCode}"> </span>-
+                <span th:text="${subject.subject_name}"></span>
+              </h2>
+              <form th:action="@{/uploadQPPdf}" method="post" enctype="multipart/form-data">
+                <div class="col-md-8">
+                  <div th:each="i : ${#numbers.sequence(1, noOfSets)}" class="mb-3">
+                    <label class="form-label">Browse QP Set <span th:text="${i}"></span></label>
+                    <input class="form-control" type="file" name="upload_file" th:name="'upload_file_' + ${i}">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <button type="submit" class="btn btn-sm btn-success">Save</button>
+                </div>
+
+              </form>
+
+
+            </div>
+            <!-- End of Iteration -->
+
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <table class="table table-bordered" id="example">
+                <thead>
+                <tr>
+                  <th>S.No.</th>
+                  <th>Set No</th>
+                  <th>Status</th>
+                  <th>Uploaded File</th>
+                  <th>Action</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="file, iterStat : ${qpFiles}">
+                  <td th:text="${iterStat.count}">1</td> <!-- Auto-increment serial number -->
+                  <td th:text="${file.setNo}">Set No</td>
+                  <td th:text="${file.qp_reviewer_status}">Status</td>
+                  <td>
+                    <a target="_blank" th:href="@{'/viewPDF?fileinfo=' + ${file.qp_file} + '&filename=' + ${file.qp_file}}"
+                       th:text="${file.qp_file}">View</a>
+                  </td>
+                  <td>
+                  <td>
+                    <a href="#" class="btn btn-sm btn-warning" title="Approve/Reject" onclick="openApprovalModal(this)" th:data-id="${file.id}">
+                      Approve/Reject
+                    </a>
+                  </td>
+
+                </tr>
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Common Scripts -->
+<div th:replace="fragments/scripts :: scripts"></div>
+</body>
+<script>
+  function openApprovalModal(element) {
+      var fileId = $(element).data("id");
+      $("#fileId").val(fileId);  // Set file ID inside hidden field
+      $("#approvalModal").modal("show");  // Open modal
+  }
+
+  function submitApproval() {
+      var formData = {
+          fileId: $("#fileId").val(),
+          approved: $("input[name='approved']:checked").val(),
+          comments: $("#comments").val()
+      };
+
+      $.ajax({
+          type: "POST",
+          url: "/qpPdfApproval",
+          contentType: "application/json",
+          data: JSON.stringify(formData),
+          success: function(response) {
+              alert("Approval Submitted Successfully!");
+              $("#approvalModal").modal("hide");
+              location.reload();
+          },
+          error: function(xhr) {
+              alert("Error submitting approval! " + xhr.responseText);
+              console.error("Error:", xhr);
+          }
+      });
+  }
+</script>
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="approvalModalLabel">Approve/Reject</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form th:action="@{/qpPdfApproval}" method="post"  >
+          <input type="hidden" id="fileId" name="qpointId" />
+
+          <label class="font-weight-bold">Decision:</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="approve" name="approved" value="Approved" required>
+            <label class="form-check-label" for="approve"><b>Approve</b></label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="reject" name="approved" value="Rejected" required>
+            <label class="form-check-label" for="reject"><b>Reject</b></label>
+          </div>
+
+          <label class="mt-3 font-weight-bold">Comments:</label>
+          <textarea id="comments"  name="comments" class="form-control" rows="3" required></textarea>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>QP Dashboard</h2>
+
+
+                    <div class="row">
+
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="example">
+                                    <thead>
+                                    <tr>
+                                        <th>S.No.</th>
+                                        <th>Course</th>
+                                        <th>Year</th>
+                                        <th>Sem</th>
+                                        <th>Subject</th>
+                                        <th>Subject - Name</th>
+                                        <th>No. of QP Setters</th>
+                                        <th>No. of QP Moderators</th>
+                                        <th>Total No. of Sets</th>
+                                        <th>QP Setting Compl. Sets</th>
+                                        <th>QP Setting Pending</th>
+                                        <th>Moderator Approved Sets</th>
+                                        <th>Moderator Rejected Sets</th>
+                                        <th>Pending Moderation Sets</th>
+                                        <th>No. of QPs Forwarded to Repository</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="report, iterStat : ${adminDashBoardVoList}">
+                                        <td th:text="${iterStat.count}"></td>
+                                        <td th:text="${report.course_name ?: 'N/A'}"></td>
+                                        <td th:text="${report.year ?: 'N/A'}"></td>
+                                        <td th:text="${report.semester ?: 'N/A'}"></td>
+                                        <td th:text="${report.subject_code ?: 'N/A'}"></td>
+                                        <td th:text="${report.subject_name ?: 'N/A'}"></td>
+                                        <td th:text="${report.no_of_setters ?: 0}"></td>
+                                        <td th:text="${report.no_of_moderators ?: 0}"></td>
+                                        <td th:text="${report.qp_set ?: 0}"></td>
+                                        <td th:text="${report.setter_completed ?: 0}"></td>
+                                        <td th:text="${(report.qp_set ?: 0) - (report.setter_completed ?: 0)}"></td>
+                                        <td th:text="${report.moderator_completed ?: 0}"></td>
+                                        <td th:text="${report.moderator_rejected ?: 0}"></td>
+                                        <td th:text="${(report.setter_completed ?: 0) - (report.moderator_completed ?: 0) + (report.moderator_rejected ?: 0)}"></td>
+                                        <td th:text="${report.forward_to_repo_count ?: 0}"></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

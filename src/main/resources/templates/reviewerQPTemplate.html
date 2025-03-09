@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
+    <title>QP Entry Page</title>
+
+    <!-- Include CSS & Scripts -->
+    <div th:replace="fragments/styles :: styles"></div>
+    <script th:src="@{/js/jquery-3.7.1.js}"></script>
+    <script  th:src="@{/pramukhtypepad/tiny_mce_5/js/tinymce/jquery.tinymce.min.js}"></script>
+    <script  th:src="@{/pramukhtypepad/tiny_mce_5/js/tinymce/tinymce.min.js}"></script>
+
+
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            tinymce.init({
+                selector: '.qdesc',
+                plugins: 'anchor autolink autoresize autosave charmap code codesample colorpicker contextmenu directionality emoticons fullscreen help hr image insertdatetime legacyoutput link lists media nonbreaking noneditable pagebreak paste preview print quickbars save searchreplace spellchecker tabfocus table template textcolor textpattern toc visualblocks visualchars wordcount',
+                toolbar: 'undo redo | alignleft aligncenter alignright alignjustify | outdent indent | link image | preview | code help',
+                image_title: true,
+                automatic_uploads: true,
+                file_picker_types: 'image',
+                file_picker_callback: function (cb, value, meta) {
+                    var input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.onchange = function () {
+                        var file = this.files[0];
+                        var reader = new FileReader();
+                        reader.onload = function () {
+                            var id = 'blobid' + (new Date()).getTime();
+                            var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                            var base64 = reader.result.split(',')[1];
+                            var blobInfo = blobCache.create(id, file, base64);
+                            blobCache.add(blobInfo);
+                            cb(blobInfo.blobUri(), { title: file.name });
+                        };
+                        reader.readAsDataURL(file);
+                    };
+                    input.click();
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidenav :: sidenav"></div>
+    <div class="main">
+        <div th:replace="fragments/navbar :: navbar"></div>
+        <div class="container-fluid p-3">
+            <div class="row">
+                <div class="col-12">
+                    <div class="cards">
+                        <div class="card border-0">
+
+                            <h2>
+                                Subject Details: <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
+
+                            </h2>
+                            <p>Max. Marks: <span th:text="${subject.max_marks}"></span> |
+                                <a th:if="${subject.syllabus}" th:href="@{${subject.syllabus}}" target="_blank" title="View Syllabus" class="text-primary">View Syllabus</a>
+                                <span th:unless="${subject.syllabus}">No syllabus available</span></p>
+
+                            <!-- Modal or Form Container -->
+                            <div id="editModal" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Question</h5>
+                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form th:action="@{/updateQuestions}" method="post" enctype="multipart/form-data">
+                                                <input type="hidden" id="qid" name="qid">
+                                                <div class="col-12">
+                                                    <div class="card p-2 mb-3 bg-light">
+                                                        <div class="row">
+                                                            <div class="col-md-2">
+                                                                <h3 class="modal-title">Q.No: <b><span id="qno"></span></b></h3>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <h3 class="modal-title">Bit No.: <b><span id="bitno"></span></b></h3>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <h3 class="modal-title">Topic: <b><span id="topic"></span></b></h3>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <h3 class="modal-title">Level: <b><span id="level"></span></b></h3>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <h3 class="modal-title">Marks: <b><span id="marks"></span></b></h3>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Instructions</label>
+                                                    <input class="form-control" type="text" id="instructions" name="instructions">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Question Description</label>
+                                                    <textarea class="form-control qdesc" id="q_desc" name="q_desc" rows="5"></textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Browse Image</label>
+                                                    <input class="form-control" type="file" id="image_file" name="image_file">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Solution </label>
+                                                    <textarea class="form-control qdesc" id="q_solution" name="q_solution" rows="5"></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+
+                                    <h2>Set No: <b th:text="${setNo}"></b></h2>
+
+                                    <table class="table table-bordered" >
+                                        <thead>
+                                        <tr>
+                                            <th class="text-center">S.No.</th>
+                                            <th class="text-center">Q.No</th>
+                                            <th class="text-center">Bit No.</th>
+                                            <th class="text-center">Topic</th>
+                                            <th class="text-center">Level</th>
+                                            <th class="text-center">Marks</th>
+                                            <th class="text-center">Instructions</th>
+                                            <th class="text-center">Question</th>
+                                            <th class="text-center">Image </th>
+                                            <th class="text-center">Review Status</th>
+
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="qpoint, iterStat : ${qPtemplate}">
+                                            <td th:text="${iterStat.count}" class="text-center">S.No.</td>
+                                            <td th:text="${qpoint.q_no}" class="text-center">Q.No.</td>
+                                            <td th:text="${qpoint.bit_no}" class="text-center">Bit No.</td>
+                                            <td th:text="${qpoint.topic}" class="text-center">Topic</td>
+                                            <td th:text="${qpoint.level}" class="text-center">Level</td>
+                                            <td th:text="${qpoint.marks}" class="text-center">Marks</td>
+                                            <td th:text="${qpoint.instructions}">Instructions</td>
+                                            <td th:utext="${qpoint.q_desc}">Question</td>
+                                            <td>
+                                                <img th:if="${qpoint.image_path != null}"
+                                                     th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
+                                                     alt="Uploaded Image" width="100" height="100"></td>
+
+                                            <td th:utext="${qpoint.qp_reviewer_status}">Review Status</td>
+                                            <td>
+
+
+<!--                                                <a href="javascript:void(0);" class="btn btn-sm btn-info edit-btn mb-2"-->
+<!--                                                   th:data-id="${qpoint.id}" title="Edit">-->
+<!--                                                    Edit-->
+<!--                                                </a>-->
+
+                                                <a th:href="@{/questionApprove/{id}(id=${qpoint.id})}" class="btn btn-sm btn-success mb-2" title="Approve">
+                                                    Approve
+                                                </a>
+                                            </td>
+
+                                        </tr>
+                                        </tbody>
+
+                                                <a th:href="@{/previewPdf/{id}/{subjectId}(id=${setNo}, subjectId=${subject.id})}" class="btn btn-sm btn-primary me-2" title="preview" target="_blank">
+                                                    Preview
+                                                </a>
+                                                <a href="#" th:if="${isApproved}" class="btn btn-sm btn-success me-2" title="Approve"
+                                                   th:data-id="${setNo} + '/' + ${subject.id}"
+                                                   onclick="openSetWiseApprovalModal(this,'a')">
+                                                    Approved - Send to Admin
+                                                </a>
+                                        <a href="#" th:unless="${isApproved}" class="btn btn-sm btn-success me-2" title="Approve"
+                                           th:data-id="${setNo} + '/' + ${subject.id}"
+                                           onclick="openSetWiseApprovalModal(this,'u')">
+                                            Approved - Send to Admin
+                                        </a>
+                                                <a href="#" class="btn btn-sm btn-danger me-2" title="Reject"
+                                                   th:data-id="${setNo} + '/' + ${subject.id}"
+                                                   onclick="openSetWiseApprovalModal(this,'r')">
+                                                    Rejected - Send to Admin
+                                                </a>
+
+                                    </table>
+                                </th:block>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Include Common Scripts -->
+<div th:replace="fragments/scripts :: scripts"></div>
+</body>
+<script>
+    $(document).ready(function () {
+    $(".edit-btn").click(function () {
+        var qid = $(this).data("id");
+debugger;
+        $.ajax({
+            url: "https://online.ctestservices.com/gtuqp/getQuestionDetails/" + qid,
+            type: "GET",
+            success: function (response) {
+			debugger;
+                $("#qid").val(response.id);
+                $("#instructions").val(response.instructions);
+                $("#level").text(response.level);
+                    $("#marks").text(response.marks);
+                    $("#qno").text(response.q_no);
+                    $("#bitno").text(response.bit_no);
+                    $("#topic").text(response.topic);
+if (response.q_desc) {
+           tinymce.get("q_desc").setContent(response.q_desc);
+        }
+else{
+tinymce.get("q_desc").setContent("<p></p>");
+
+}
+
+ if (response.q_solution) {
+           tinymce.get("q_solution").setContent(response.q_solution);
+        }
+else{
+tinymce.get("q_solution").setContent("<p></p>");
+
+}
+
+                $("#editModal").modal("show");
+            },
+            error: function () {
+                alert("Failed to fetch question details.");
+            }
+        });
+    });
+
+    $("#editForm").submit(function (e) {
+        e.preventDefault();
+  var csrfToken = $("meta[name='_csrf']").attr("content");
+    var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+        var formData = new FormData(this);
+        formData.set("q_desc", tinymce.get("q_desc").getContent()); // Ã¢Å“â€¦ Fetch updated TinyMCE content
+
+        $.ajax({
+    url: "../updateQuestions",
+    type: "POST",  // Ã¢Å“â€¦ Ensure this is POST
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function () {
+        alert("Question updated successfully.");
+        location.reload();
+    },
+    error: function (xhr) {
+        alert("Failed to update question: " + xhr.responseText);
+        console.error("Error details:", xhr);
+    }
+});
+
+    });
+});
+
+
+function openSetWiseApprovalModal(element, i) {
+
+if(i=='u'){
+alert("please approve all questions");
+}
+else{
+    const dataId = element.getAttribute("data-id");
+    const [id, subjectId] = dataId.split('/');
+   // alert(i);  // debugging alert
+
+    // Toggle approve/reject based on 'i'
+    if(i == 'r') {
+        console.log("Reject option selected");
+        $("#approvediv").hide();
+        $("#rejectdiv").show();
+    }
+    if(i == 'a') {
+
+         $("#comments").val(".  ");
+        $("#rejectdiv").hide();
+        $("#approvediv").show();
+    }
+
+    // Set values for the hidden inputs
+    $("#setId").val(id);
+    $("#subjectId").val(subjectId);
+
+    // Show the modal
+    $("#reviewerApprovalModal").modal("show");
+}
+}
+
+
+function submitApproval() {
+    var formData = {
+        qpointId: $("#qpointId").val(),
+        approved: $("input[name='approved']:checked").val(),
+        comments: $("#comments").val()
+    };
+var csrfToken = $("meta[name='_csrf']").attr("content");
+    var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+    $.ajax({
+        type: "POST",
+        url: "../reviewerApproval",
+        contentType: "application/json",
+        data: JSON.stringify(formData),
+        success: function(response) {
+            alert("Approval Submitted Successfully!");
+            $("#approvalModal").modal("hide");
+            location.reload(); // Refresh page after submission
+        },
+        error: function(error) {
+            alert("Error submitting approval!");
+        }
+    });
+}
+</script>
+<!-- Bootstrap Modal -->
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="reviewerApprovalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form id="approvalForm" th:action="@{/setWiseReviewerApproval}" method="post">
+                    <input type="hidden" id="setId" name="setId" />
+                    <input type="hidden" id="subjectId" name="subjectId" />
+
+                    <label class="font-weight-bold">Decision:</label>
+                    <div class="form-check" id="approvediv">
+                        <input class="form-check-input" type="radio" id="approve" name="approved" value="APPROVED" required>
+                        <label class="form-check-label" for="approve"><b>Approve</b></label>
+                    </div>
+                    <div class="form-check" id="rejectdiv" style="display:none;">
+                        <input class="form-check-input" type="radio" id="reject" name="approved" value="REJECTED" required>
+                        <label class="form-check-label" for="reject"><b>Reject</b></label>
+                    </div>
+
+                    <label class="mt-3 font-weight-bold">Comments:</label>
+                    <textarea id="comments" name="comments" class="form-control" rows="3"></textarea>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approvalModalLabel">Approve/Reject</h5>
+                <button type="button" class="close"  data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/reviewerApproval}" method="post"  >
+
+                    <input type="hidden" id="qpointId" name="qpointId" />
+
+                    <label class="font-weight-bold">Decision:</label>
+                    <div class="form-check" id="approvediv">
+                        <input class="form-check-input" type="radio" id="approve" name="approved" value="Approved" required>
+                        <label class="form-check-label" for="approve"><b>Approve</b></label>
+                    </div>
+                    <div class="form-check" id="rejectdiv">
+                        <input class="form-check-input" type="radio" id="reject" name="approved" value="Rejected" required>
+                        <label class="form-check-label" for="reject"><b>Reject</b></label>
+                    </div>
+
+                    <label class="mt-3 font-weight-bold">Comments:</label>
+                    <textarea id="comments" name="comments" class="form-control" rows="3" required></textarea>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <!--                        <button type="button" class="btn btn-primary" onclick="submitApproval()">Submit</button>-->
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

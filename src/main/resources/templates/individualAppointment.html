@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+  <div class="row">
+    <div class="col-12">
+      <div class="cards">
+        <div class="card border-0">
+<<<<<<< HEAD
+          <h2>QP Setter / Moderator Appointment </h2>
+=======
+          <h2>Paper Setter / Moderator Appointment </h2>
+>>>>>>> origin/master
+          <div th:if="${message}" style="margin-top: 10px;">
+            <p th:text="${message}"></p>
+          </div>
+          <form th:action="@{/appointments/individual/save}"  th:object="${individualAppoint}" method="post" >
+            <div class="row mt-3">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <div class="mobileExists"></div>
+                  <label for="" class="form-label">Mobile No.</label>
+                  <input class="form-control" type="text"  required id="mobileNo" th:field="*{mobile_number}" onblur="fetchFacultyData()">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+
+                  <label for="" class="form-label">Type</label>
+                  <select class="form-select" th:field="*{role_id}" required >
+                    <option value="0">Select</option>
+                    <option value="2">QP Setter </option>
+                    <option value="3">QP Moderator </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">First Name</label>
+                  <input class="form-control" type="text" th:field="*{fname}" required>
+                </div>
+              </div><div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">Last Name</label>
+                  <input class="form-control" type="text" th:field="*{lname}" required >
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">Email ID</label>
+                  <input class="form-control" type="email" th:field="*{email}" required >
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">College</label>
+                  <select class="form-select" id="collegeCode" required  th:field="*{collegeCode}" >
+                    <option value="">Select</option>
+                    <option th:each="college : ${collegeList}" th:value="${college.collegeCode}" th:text="${college.college_name}"></option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">Course Code</label>
+                  <select class="form-select" id="courseCode" required  th:field="*{course_id}" >
+                    <option value="">Select</option>
+                    <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">Subject Code-Name </label>
+                  <select class="form-select" id="subjectCode" th:field="*{subject_id}"  required>
+                    <option value="0">Select</option>
+
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">No. of Sets   </label>
+
+                  <input class="form-control" type="text" th:field="*{no_of_sets}" required>
+
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Last Date of Submission</label>
+                  <input type="date" required class="form-control" id="submission_date" th:field="*{submission_date}"/>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="" class="form-label">Curriculum / Syllabus </label>
+                  <a id="syllabusLink" href="#" target="_blank" style="display: none;" title="View Syllabus">View Syllabus</a>
+                  <span id="noSyllabusText">No syllabus available</span>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="mb-3">
+                  <button class="btn btn-primary">Generate order and Send Email</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function fetchFacultyData() {
+      let mobileNo = document.getElementById("mobileNo").value.trim();
+
+      if (mobileNo.length === 10) {  // Ensure mobile number is valid
+          fetch("https://online.ctestservices.com/gtuqp/api/faculty/mobile/"+mobileNo)
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error("Faculty data not found");
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  document.getElementById("fname").value = data.firstName || "";
+                  document.getElementById("lname").value = data.lastName || "";
+                  document.getElementById("email").value = data.email || "";
+                  document.getElementById("collegeCode").value = data.collegeCode || "";
+              })
+              .catch(error => {
+                  console.error("Error fetching faculty data:", error);
+               
+                  document.querySelector(".mobileExists").innerHTML = "Faculty data not found for the given Mobile Number";
+
+              });
+      }
+  }
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      let today = new Date().toISOString().split('T')[0];
+
+
+
+      // Restrict Last Date of Submission to future dates
+      document.getElementById("submissionDate").setAttribute("min", today);
+ document.querySelector("form").addEventListener("submit", function (event) {
+            let mobileNo = document.getElementById("mobileNo").value.trim();
+            let email = document.querySelector("input[th\\:field='*{email}']").value.trim();
+            let course = document.getElementById("courseCode").value;
+            let subject = document.getElementById("subjectCode").value;
+            let role = document.querySelector("select[th\\:field='*{role_id}']").value;
+
+            let errorMessages = [];
+
+            if (!/^\d{10}$/.test(mobileNo)) {
+                errorMessages.push("Mobile number must be 10 digits.");
+            }
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                errorMessages.push("Enter a valid email address.");
+            }
+            if (course == "0") {
+                errorMessages.push("Please select a valid course.");
+            }
+            if (subject == "0") {
+                errorMessages.push("Please select a valid subject.");
+            }
+            if (role == "0") {
+                errorMessages.push("Please select a valid role.");
+            }
+
+            if (errorMessages.length > 0) {
+                alert(errorMessages.join("\n"));
+                event.preventDefault();
+            }
+        });
+    });
+</script>

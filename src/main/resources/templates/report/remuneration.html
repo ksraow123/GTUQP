@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>Remuneration Report</h2>
+
+
+                    <div class="row">
+
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="example">
+                                        <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th>User Name</th>
+                                            <th>Name</th>
+                                            <th>Role</th>
+                                            <th>Subject Code</th>
+                                            <th>Subject Name</th>
+                                            <th>No. of Sets</th>
+                                            <th>No. of Sets Completed</th>
+                                            <th>Rem. per set.</th>
+                                            <th>Total Amt</th>
+                                            <th>Account No</th>
+                                            <th>IFSC Code</th>
+                                            <th>Bank Name</th>
+                                            <th>Branch </th>
+                                            <th>Branch Address</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="report,iterStat : ${remunerationReports}">
+                                            <td th:text="${iterStat.count}"></td>
+                                            <td th:text="${report.user_name}"></td>
+                                            <td th:text="${report.name}"></td>
+                                            <td th:text="${report.role}"></td>
+                                            <td th:text="${report.subject_code}"></td>
+                                            <td th:text="${report.subject_name}"></td>
+                                            <td th:text="${report.no_of_sets}"></td>
+                                            <td th:text="${report.no_of_sets_completed}"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td th:text="${report.account_no}"></td>
+                                            <td th:text="${report.ifsc_code}"></td>
+                                            <td th:text="${report.bank_name}"></td>
+                                            <td th:text="${report.branch_details}"></td>
+                                            <td th:text="${report.branch_address}"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
