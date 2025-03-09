@@ -24,12 +24,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<RemunerationReportVo> getRemunerationReport() {
-<<<<<<< HEAD
+
         return reportDao.getRemunerationReport();
-=======
-        return List.of();
->>>>>>> origin/master
+
     }
-
-
 }

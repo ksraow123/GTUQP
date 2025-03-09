@@ -53,11 +53,7 @@ public class FacultyDataServiceImpl implements FacultyDataService {
                 Optional<FacultyData> existingFacultyOpt = facultyDataRepository.findByMobileNumber(faculty.getMobileNumber());
 
                 if (existingFacultyOpt.isPresent()) {
-<<<<<<< HEAD
                     failureList.add(existingFacultyOpt.get());
-=======
-
->>>>>>> origin/master
                 } else {
                     successList.add(faculty);
                     facultyDataRepository.save(faculty);

@@ -37,17 +37,11 @@ List<AdminDashBoardVo> adminDashBoardVoList=reportService.getAdminDashBoard();
     }
  @GetMapping("/subject/remunerationReport")
     public String getRemunerationReport(Model model) {
-
-<<<<<<< HEAD
         List<RemunerationReportVo> remunerationReports=reportService.getRemunerationReport();
         model.addAttribute("remunerationReports",remunerationReports);
-=======
-        List<RemunerationReportVo> adminDashBoardVoList=reportService.getRemunerationReport();
-        model.addAttribute("adminDashBoardVoList",adminDashBoardVoList);
->>>>>>> origin/master
+
         model.addAttribute("page","/report/remuneration");
         return "main";
     }
-
 
 }
