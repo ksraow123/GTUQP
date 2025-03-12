@@ -7,6 +7,7 @@ import in.coempt.entity.UserData;
 import in.coempt.repository.AppointmentRepository;
 import in.coempt.repository.BulkAppointmentRepository;
 import in.coempt.service.AppointmentService;
+import in.coempt.vo.AppointmentUpdateRequest;
 import in.coempt.vo.AppointmentVo;
 import in.coempt.vo.IndividualAppointmentVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -90,4 +92,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     public UserData getAppointmentDetailsByUserIdAndSubjectId(IndividualAppointmentVo appointmentVo, User user) {
         return   bulkAppointmentRepository.findByUserIdAndSubjectId(Math.toIntExact(user.getId()),appointmentVo.getSubject_id());
     }
+
+    @Override
+    public List<UserData> checkSubjectAvailableByUserList(List<User> ulist, int subjectId) {
+       return bulkAppointmentRepository.findByUserIdInAndSubjectId(ulist.stream().map(u->Math.toIntExact(u.getId())).collect(Collectors.toList()),subjectId);
+    }
+
+
 }

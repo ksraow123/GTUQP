@@ -12,9 +12,11 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -39,6 +41,10 @@ public class CSVServiceImpl implements CSVService {
     private final AppointmentService appointmentService;
     private final SetterModeratorRepository moderatorRepository;
 
+    @Autowired
+
+    private  FacultyDataService facultyDataService;
+    @Transactional
     public ArrayList<Object> saveCSV(MultipartFile file) {
         List<FacultyDataDTO> successList = new ArrayList<>();
         List<FacultyDataDTO> failureList = new ArrayList<>();
@@ -46,6 +52,15 @@ public class CSVServiceImpl implements CSVService {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
             for (CSVRecord record : csvParser) {
+                FacultyData facultyData =  facultyDataService.getFacultyByMobileNumber(record.get("mobile no")).get();
+                if(facultyData==null){
+                    facultyData.setEmail(record.get("email"));
+                    facultyData.setMobileNumber(record.get("mobile no"));
+                    facultyData.setFirstName(record.get("firstname"));
+                    facultyData.setLastName(record.get("lastname"));
+                    facultyData.setCollegeCode(record.get("college code"));
+                    facultyDataService.saveFaculty(facultyData);
+                }
                 FacultyDataDTO faculty = new FacultyDataDTO();
                 faculty.setFirstName(record.get("firstname"));
                 faculty.setLastName(record.get("lastname"));

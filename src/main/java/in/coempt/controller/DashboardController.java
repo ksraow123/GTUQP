@@ -41,8 +41,8 @@ private BitwiseQuestionsService bitwiseQuestionsService;
 
             for (QPSetterDashBoardVo qpSetterDashBoardVo : qpSetterDashBoardList) {
                 try {
-                    int noOfSets = Integer.parseInt(qpSetterDashBoardVo.getNo_of_sets());
-                    int subjectId = Integer.parseInt(qpSetterDashBoardVo.getSubject_id());
+                    int noOfSets = qpSetterDashBoardVo.getNo_of_sets();
+                    int subjectId = qpSetterDashBoardVo.getSubject_id();
 
                     for (int setNo = 1; setNo <= noOfSets; setNo++) {
                         List<BitwiseQuestions> existingQuestions = bitwiseQuestionsService.getQpTemplateQuestions(userEntity.getId(), String.valueOf(subjectId), setNo);

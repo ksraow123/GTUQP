@@ -20,7 +20,7 @@
                                     <th>Syllabus</th>
                                     <th>No. of Sets</th>
                                     <th>Last Date for Submission</th>
-                                    <th>No. of Sets Reviewed</th>
+                                    <th>No. of Sets Review Pending</th>
                                     <th>No. of Sets Approved</th>
 
 
@@ -39,7 +39,7 @@
                                     </td>
                                     <td th:text="${appointment.no_of_sets}"></td>
                                     <td th:text="${appointment.submission_date}"></td>
-                                    <td th:text="${appointment.no_of_sets_uploaded}"></td>
+                                    <td th:text="${(appointment.no_of_sets ?: 0) - (appointment.no_of_sets_forwarded ?: 0)}"></td>
                                     <td th:text="${appointment.no_of_sets_forwarded}"></td>
 
                                 </tr>

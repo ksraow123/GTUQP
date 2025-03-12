@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -46,8 +47,8 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    public void sendPasswordResetLink(String email) {
-        User user = repository.findByEmail(email)
+    public User sendPasswordResetLink(String email,String userName) {
+        User user = repository.findByEmailAndUserName(email,userName)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String token = UUID.randomUUID().toString();
@@ -59,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
         sendMail.sendMail(user.getEmail(), "Password Reset Request",
                 "Click the link to reset your password: " + resetLink);
+        return user;
     }
 
     @Override
@@ -74,6 +76,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByMobileNoAndEmailAndRoleId(String mobileNumber, String email, int roleId) {
         return repository.findByMobileNoAndEmailAndRoleId(mobileNumber,email,roleId);
+    }
+
+    @Override
+    public List<User> getUserByMobileNoAndEmail(String mobileNumber, String email) {
+        return  repository.findByMobileNoAndEmail(mobileNumber,email);
     }
 
     public boolean resetPassword(String token, String newPassword) {

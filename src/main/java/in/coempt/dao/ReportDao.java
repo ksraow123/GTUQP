@@ -11,19 +11,16 @@ import java.util.List;
 public class ReportDao {
     public List<AdminDashBoardVo> getAdminDashBoard() {
         QueryUtil<AdminDashBoardVo> queryUtil = new QueryUtil<>(AdminDashBoardVo.class);
-        return queryUtil.list("SELECT course_name,year,semester,subject_code," +
-                "subject_name,(SELECT group_concat(user_name) FROM tbl_appointments_bulk tb," +
-                "users u where u.id=tb.user_id and u.role_id=2 and subject_id=ts.id) as assigned_setters," +
-                "(SELECT group_concat(user_name) FROM tbl_appointments_bulk tb,users u " +
-                "where u.id=tb.user_id and u.role_id=3 and subject_id=ts.id)  as assigned_moderators, " +
-                "(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id and tb.role_id=2 and subject_id=ts.id) " +
-                "as setter_status,(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where " +
-                "u.id=tb.user_id and tb.role_id=3 and subject_id=ts.id) as moderator_status, " +
-                "(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id and " +
-                "tb.role_id=1 and subject_id=ts.id) as section_team_status, " +
-                "(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id " +
-                "and tb.role_id=1 and subject_id=ts.id and qp_status='APPROVED') as forward_to_repo_status" +
-                " FROM tbl_subjects ts, tbl_courses tc where ts.course_id=tc.id");
+        return queryUtil.list("SELECT DISTINCT c.`course_code`,c.`course_name`,s.year,s.semester, h.`subject_id`,s.`subject_code`,s.`subject_name`,h.`no_of_sets`,\n" +
+                "d.`set_no`,d.`qp_setter_id`,(SELECT CONCAT(first_name,' ',last_name) FROM users WHERE id=d.`qp_setter_id`)setter_name,\n" +
+                "m.`moderator_id`,(SELECT CONCAT(first_name,' ',last_name) FROM users WHERE id=m.`moderator_id`)reviewer_name,\n" +
+                "CASE WHEN IFNULL(qp_setter_status,'')='' THEN 'Pending' ELSE qp_setter_status END qp_setter_status,\n" +
+                "CASE WHEN IFNULL(qp_reviewer_status,'')='' THEN 'Pending' ELSE qp_reviewer_status END qp_reviewer_status\n" +
+                "FROM tbl_appointments_bulk h LEFT OUTER JOIN tbl_setter_moderator_mapping m\n" +
+                "ON h.`subject_id`=m.`subject_id` AND h.`user_id`=m.`setter_id`\n" +
+                ",qp_set_bit_wise_questions d,tbl_subjects s,tbl_courses c\n" +
+                "WHERE h.subject_id=d.subject_id AND h.user_id=d.`qp_setter_id` AND h.role_id=2\n" +
+                "AND h.subject_id=s.id AND s.course_id=c.id");
 
 
     }

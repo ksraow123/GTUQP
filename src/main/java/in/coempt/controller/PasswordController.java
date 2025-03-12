@@ -1,5 +1,6 @@
 package in.coempt.controller;
 
+import in.coempt.entity.User;
 import in.coempt.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,16 +51,26 @@ public class PasswordController {
     }
 
     @PostMapping("/forgot")
-    public String processForgotPassword(@RequestParam String email, RedirectAttributes redirectAttributes) {
-        userService.sendPasswordResetLink(email);
-        redirectAttributes.addFlashAttribute("success", "Password reset link sent to your email.");
+    public String processForgotPassword(@RequestParam String userName,@RequestParam String email, RedirectAttributes redirectAttributes) {
+        User user = userService.sendPasswordResetLink(email, userName);
+        if (user != null){
+            redirectAttributes.addFlashAttribute("success", "Password reset link sent to your email.");
+    }
+       else{
+            redirectAttributes.addFlashAttribute("success", "User name not found");
+        }
         return "redirect:/password/forgot";
     }
 
-    @GetMapping("/resend/{email}")
-    public String processResend(@PathVariable("email") String email, RedirectAttributes redirectAttributes) {
-        userService.sendPasswordResetLink(email);
-        redirectAttributes.addFlashAttribute("success", "Password reset link sent to your email.");
+    @GetMapping("/resend/{email}/{userName}")
+    public String processResend(@PathVariable("email") String email,@PathVariable("userName") String userName, RedirectAttributes redirectAttributes) {
+       User user= userService.sendPasswordResetLink(email,userName);
+        if (user != null){
+            redirectAttributes.addFlashAttribute("success", "Password reset link sent to "+email+" email.");
+        }
+        else{
+            redirectAttributes.addFlashAttribute("success", "User name not found");
+        }
         return "redirect:/upload";
     }
 

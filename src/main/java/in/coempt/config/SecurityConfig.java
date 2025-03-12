@@ -32,9 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 				// CSRF Handling: Disable only for CSV upload
 				.csrf().ignoringAntMatchers("/upload","/mappingUpload","/processSelected").and()
-
-				// Authorization settings
+							// Authorization settings
 				.authorizeRequests()
+				.antMatchers("/appointments/update").permitAll()
 				.antMatchers("/api/**").authenticated()
 				//.antMatchers("/*").permitAll()  // Allow access to home and upload
 				.anyRequest().permitAll()
@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.formLogin()
 				.loginPage("/")
 				.usernameParameter("userName")
-				.defaultSuccessUrl("/roles")
+				.defaultSuccessUrl("/send-otp")
 				.permitAll()
 
 				// Logout configuration

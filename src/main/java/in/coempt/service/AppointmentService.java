@@ -33,4 +33,6 @@ public interface AppointmentService {
     UserData saveuserData(UserData userData);
 
     UserData getAppointmentDetailsByUserIdAndSubjectId(IndividualAppointmentVo appointmentVo, User user);
+
+    List<UserData> checkSubjectAvailableByUserList(List<User> ulist, int subjectId);
 }

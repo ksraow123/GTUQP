@@ -23,6 +23,8 @@
                                     <th>Sem</th>
                                     <th>Subject</th>
                                     <th>Subject - Name</th>
+                                    <th>No. Of sets</th>
+                                    <th>Set No</th>
                                     <th>Assigned Setters</th>
                                     <th>Assigned Moderators</th>
                                     <th>QP Setting Status</th>
@@ -39,10 +41,12 @@
                                     <td th:text="${report.semester}"></td>
                                     <td th:text="${report.subject_code}"></td>
                                     <td th:text="${report.subject_name}"></td>
-                                    <td th:text="${report.assigned_setters}"></td>
-                                    <td th:text="${report.assigned_moderators}"></td>
-                                    <td th:text="${report.setter_status}"></td>
-                                    <td th:text="${report.moderator_status}"></td>
+                                    <td th:text="${report.no_of_sets}"></td>
+                                    <td th:text="${report.set_no}"></td>
+                                    <td th:text="${report.setter_name}"></td>
+                                    <td th:text="${report.reviewer_name}"></td>
+                                    <td th:text="${report.qp_setter_status}"></td>
+                                    <td th:text="${report.qp_reviewer_status}"></td>
                                     <td th:text="${report.section_team_status}"></td>
                                     <td th:text="${report.forward_to_repo_status}"></td>
                                 </tr>

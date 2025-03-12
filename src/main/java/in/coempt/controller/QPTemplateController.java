@@ -185,6 +185,7 @@ private SetterModeratorService setterModeratorService;
      Subjects subjects=subjectsService.getSubjectById(subjectId+"");
 
         model.addAttribute("subjects", subjects);
+        model.addAttribute("questionsList", questionsList);
         model.addAttribute("watermark", subjects.getSubjectCode()+","+userDetails.getUsername()+","+LocalDateTime.now());
         model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no)));
         return "pdfsample";

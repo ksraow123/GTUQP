@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
 <div class="container-fluid p-3">
     <!-- Content Start -->
 
@@ -15,67 +18,79 @@
                                 <input type="submit" class="btn btn-success"
                                        value="Send Appointment to selected records"/></p>
                            <div class="table-responsive">
-                            <table class="table table-bordered" id="example">
-                                <thead>
-                                <tr>
-                                    <th>Select</th>
-                                    <th>S.No.</th>
-                                    <th>Role</th>
-                                    <th>User Name</th>
-                                    <th>Name</th>
-                                    <th>Mobile</th>
-                                    <th>Email</th>
-                                    <th>College</th>
-                                    <th>Course</th>
-                                    <th>Subject Code</th>
-                                    <th>Subject Name</th>
-                                    <th>No.of sets</th>
-                                    <th>View Syllabus</th>
-                                    <th>Last Date of Submission</th>
+                               <table class="table table-bordered" id="example">
+                                   <thead>
+                                   <tr>
+                                       <th>Select</th>
+                                       <th>S.No.</th>
+                                       <th>Role</th>
+                                       <th>User Name</th>
+                                       <th>Name</th>
+                                       <th>Mobile</th>
+                                       <th>Email</th>
+                                       <th>College</th>
+                                       <th>Course</th>
+                                       <th>Subject Code</th>
+                                       <th>Subject Name</th>
 
-                                    <th>Current status</th>
-                                    <th>Current Status Date</th>
-                                    <th>Appointment sent date</th>
-                                    <th>Reset Password</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="appoint, iterStat : ${appointmentList}">
-                                    <td class="text-center">
-                                        <input type="hidden" id="hiddenSelectedIds" name="selectedIds" value="" />
+                                       <th>View Syllabus</th>
+                                       <th>No.of sets</th>
+                                       <th>Last Date of Submission</th>
+                                       <th>Current status</th>
+                                       <th>Current Status Date</th>
+                                       <th>Appointment sent date</th>
+                                       <th>Update</th>
+                                       <th>Reset Password</th>
+                                   </thead>
+                                   <tbody>
+                                   <tr th:each="appoint, iterStat : ${appointmentList}">
+                                       <td class="text-center">
+                                           <input type="hidden" id="hiddenSelectedIds" name="selectedIds" value="" />
 
-                                        <input type="checkbox" class="form-check-input" name="selectedIds" th:value="${appoint.id}" />
-                                    </td>
-                                    <td class="text-center" th:text="${iterStat.count}"></td>
-                                    <td class="text-center" th:text="${appoint.role}"></td>
-                                    <td class="text-center" th:text="${appoint.user_name}"></td>
-                                    <td class="text-center" th:text="${(appoint.first_name ?: '') + ' - ' + (appoint.last_name ?: '')}"></td>
-                                    <td class="text-center" th:text="${appoint.mobile_no}"></td>
-                                    <td class="text-center" th:text="${appoint.email}"></td>
+                                           <input type="checkbox" class="form-check-input" name="selectedIds" th:value="${appoint.id}" />
+                                       </td>
+                                       <td class="text-center" th:text="${iterStat.count}"></td>
+                                       <td class="text-center" th:text="${appoint.role}"></td>
+                                       <td class="text-center" th:text="${appoint.user_name}"></td>
+                                       <td class="text-center" th:text="${(appoint.first_name ?: '') + ' - ' + (appoint.last_name ?: '')}"></td>
+                                       <td class="text-center" th:text="${appoint.mobile_no}"></td>
+                                       <td class="text-center" th:text="${appoint.email}"></td>
 
-                                    <td class="text-center" th:text="${(appoint.college_code ?: '') + ' - ' + (appoint.college_name ?: '')}"></td>
-                                    <td class="text-center" th:text="${appoint.course_name}"></td>
-                                    <td class="text-center" th:text="${appoint.subject_code}"></td>
-                                    <td class="text-center" th:text="${appoint.subject_name}"></td>
-                                    <td class="text-center" th:text="${appoint.no_of_sets}"></td>
-                                    <td>
-                                        <a th:if="${appoint.syllabus}" th:href="@{${appoint.syllabus}}" target="_blank" title="View Syllabus">View Syllabus</a>
-                                        <span th:unless="${appoint.syllabus}">No syllabus available</span>
-                                    </td>
-                                    <td class="text-center" th:text="${appoint.last_date_to_submit}"> </td>
-                                    <td class="text-center" th:text="${appoint.current_status}"> </td>
+                                       <td class="text-center" th:text="${(appoint.college_code ?: '') + ' - ' + (appoint.college_name ?: '')}"></td>
+                                       <td class="text-center" th:text="${appoint.course_name}"></td>
+                                       <td class="text-center" th:text="${appoint.subject_code}"></td>
+                                       <td class="text-center" th:text="${appoint.subject_name}"></td>
+                                       <td>
+                                           <a th:if="${appoint.syllabus}" th:href="@{${appoint.syllabus}}" target="_blank" title="View Syllabus">View Syllabus</a>
+                                           <span th:unless="${appoint.syllabus}">No syllabus available</span>
+                                       </td>
+                                       <td class="text-center">
+                                           <input type="number" class="form-control no-of-sets" th:value="${appoint.no_of_sets}" min="1"/>
+                                       </td>
 
-                                    <td class="text-center" th:text="${appoint.status_date}"> </td>
-                                    <td class="text-center" th:text="${appoint.appointment_sent_date}"> </td>
-                                    <td>
-                                    <a th:href="@{/password/resend/{email}(email=${appoint.email})}" class="btn btn-sm btn-danger" title="Reset Password">
-                                        Reset Password
-                                    </a>
-                                    </td>
-                                </tr>
+                                       <td class="text-center">
+                                           <input type="date" class="form-control last-date-to-submit" th:value="${appoint.last_date_to_submit}"/>
+                                       </td>
+                                       <td class="text-center" th:text="${appoint.current_status}"> </td>
 
-                                </tbody>
-                            </table>
+                                       <td class="text-center" th:text="${appoint.status_date}"> </td>
+                                       <td class="text-center" th:text="${appoint.appointment_sent_date}"> </td>
+                                       <td class="text-center">
+                                           <button type="button" class="btn btn-primary update-btn"
+                                                   th:data-id="${appoint.id}">Update</button>
+                                       </td>
+                                       <td>
+                                           <a th:href="@{/password/resend/{email}/{userName}(email=${appoint.email}, userName=${appoint.user_name})}"
+                                              class="btn btn-sm btn-danger" title="Reset Password">
+                                               Reset Password
+                                           </a>
+                                       </td>
+
+                                   </tr>
+
+                                   </tbody>
+                               </table>
+
 
                            </div>
 
@@ -185,4 +200,44 @@
         });
     });
 </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+        $(".update-btn").click(function () {
+            var row = $(this).closest("tr");
+            var id = $(this).data("id");
+            var noOfSets = row.find(".no-of-sets").val();
+            var lastDateToSubmit = row.find(".last-date-to-submit").val();
+
+            $.ajax({
+                type: "POST",
+                url: "https://online.ctestservices.com/gtuqp/appointments/update",  // ✅ Use relative URL instead of absolute URL
+                contentType: "application/json",
+                data: JSON.stringify({
+                    id: id,
+                    noOfSets: noOfSets,
+                    lastDateToSubmit: lastDateToSubmit
+                }),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);  // ✅ Include CSRF token
+                },
+                success: function (response) {
+                    console.log("Server Response:", response);
+                    alert("Updated successfully!");
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error Details:", xhr.responseText);
+                    alert("Error updating record!");
+                }
+            });
+        });
+    });
+</script>
+
+
 </html>

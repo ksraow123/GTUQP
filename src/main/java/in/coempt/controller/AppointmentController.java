@@ -2,18 +2,17 @@ package in.coempt.controller;
 
 import in.coempt.entity.*;
 import in.coempt.service.*;
-import in.coempt.util.SecurityUtil;
 import in.coempt.util.SendMailUtil;
+import in.coempt.vo.AppointmentUpdateRequest;
 import in.coempt.vo.AppointmentVo;
 import in.coempt.vo.IndividualAppointmentVo;
-import in.coempt.vo.ProfileDetailsVo;
 import org.apache.commons.lang3.RandomUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -29,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/appointments")
@@ -51,6 +51,9 @@ public class AppointmentController {
     private final SmsEmailTemplateService smsEmailTemplateService;
     private final CollegeService collegeService;
     private final UserDetailsService userDetailsService;
+
+    @Autowired
+    private  FacultyDataService facultyDataService;
 
 
     @Value("${app.url}")
@@ -92,10 +95,36 @@ public class AppointmentController {
 
     public String saveAppointment(Model model, RedirectAttributes redirectAttributes, IndividualAppointmentVo appointmentVo) {
         try {
+            Optional<FacultyData> facultyDataOptional = facultyDataService.getFacultyByMobileNumber(appointmentVo.getMobile_number());
+
+            FacultyData facultyData;
+
+            if (facultyDataOptional.isPresent()) {
+                facultyData = facultyDataOptional.get();
+            } else {
+                facultyData = new FacultyData(); // Create a new object if not found
+                facultyData.setEmail(appointmentVo.getEmail());
+                facultyData.setMobileNumber(appointmentVo.getMobile_number());
+                facultyData.setFirstName(appointmentVo.getFname());
+                facultyData.setLastName(appointmentVo.getLname());
+                facultyData.setCollegeCode(appointmentVo.getCollegeCode());
+                facultyDataService.saveFaculty(facultyData); // Save only if new
+            }
+
             String customPassword = RandomUtils.nextLong(10000, 99999) + "";
 
             User user = userService.getUserByMobileNoAndEmailAndRoleId(
                     appointmentVo.getMobile_number(), appointmentVo.getEmail(), appointmentVo.getRole_id());
+
+            List<User> ulist=userService.getUserByMobileNoAndEmail(appointmentVo.getMobile_number(), appointmentVo.getEmail());
+
+if(ulist.size()>0) {
+    List<UserData> userData = appointmentService.checkSubjectAvailableByUserList(ulist, appointmentVo.getSubject_id());
+    if (userData.size() > 0) {
+        redirectAttributes.addFlashAttribute("message", "Same user cannot be as a QP Setter and QP Moderator for same subject.");
+        return "redirect:/appointments/individualAppointments";
+    }
+}
 
             boolean isNewUser = (user == null);
             if (isNewUser) {
@@ -174,17 +203,17 @@ public class AppointmentController {
             context.setVariable("subjectName", subject.getSubject_name());
             context.setVariable("yearCourse", subject.getYear() + "/" + course.getCourse_name());
             context.setVariable("submissionDate", appointmentVo.getSubmission_date());
+            context.setVariable("noOfSets", appointmentVo.getNo_of_sets());
 
             String emailContent = templateEngine.process("email-template", context);
             String actionType = isNewUser ? "accept" : "addlSubjectAccept";
             String declineActionType = isNewUser ? "notaccept" : "addlSubjectDecline";
-
             String emailBody = emailContent + "<p>Please click on the link below to accept your appointment :</p>" +
                     "<p><a href='" + appUrl + "appointments/" + userData.getId() + "/" + user.getUserName() + "/" + actionType + "'>Accept Appointment</a></p>" +
                     "<p>If you are not willing to accept this appointment, please click the link below:</p>" +
                     "<p><a href='" + appUrl + "appointments/" + userData.getId() + "/" + user.getUserName() + "/" + declineActionType + "'>Decline Appointment</a></p>";
 
-            sendMail.sendHtmlMail(user.getEmail(), "Your appointment details of GTU", emailBody, filePath + File.separator + "1.pdf");
+            sendMail.sendHtmlMail(user.getEmail(), "Your appointment is confirmed for the Subject "+subject.getSubjectCode()+"-"+subject.getSubjectCode()+"- GTU SQQPRS", emailBody, filePath + File.separator + "1.pdf");
 
             appointmentService.saveUserAppointment(userData);
         }
@@ -236,7 +265,7 @@ public class AppointmentController {
             User user = userService.getUserByUserName(userName);
             String emailBody = "<html><body>" +
                     "<p>You are appointed as a <strong>" + roles.getRole() + "</strong> for the " +
-                    subjects.getSubject_name() + ".</p>" +
+                    subjects.getSubjectCode()+"-" +subjects.getSubject_name() + ".</p>" +
                     "<p><a href='" + appUrl + "'>Click here to login</a></p>" +
                     "<p><strong>Username:</strong> " + userName + "</p>" +
                     "<p><strong>Password:</strong> " + customPassword + "</p>" +
@@ -330,6 +359,7 @@ public class AppointmentController {
             context.setVariable("subjectName", subjects.getSubject_name());
             context.setVariable("yearCourse", subjects.getYear() + "/" + course.getCourse_name());
             context.setVariable("submissionDate", appointment.getSubmission_date());
+            context.setVariable("noOfSets", appointment.getNo_of_sets());
 
             String s1 = templateEngine.process("email-template", context);
 
@@ -376,6 +406,7 @@ public class AppointmentController {
                 context.setVariable("subjectName", subjects.getSubject_name());
                 context.setVariable("yearCourse", subjects.getYear() + "/" + course.getCourse_name());
                 context.setVariable("submissionDate", ap.getLast_date_to_submit());
+                context.setVariable("noOfSets", ap.getNo_of_sets());
 
                 String s1 = templateEngine.process("email-template", context);
 
@@ -411,13 +442,18 @@ public class AppointmentController {
             Subjects subjects = subjectsService.getSubjectById(appointment.getSubjectId()+"");
 
             User user = userService.getUserByUserName(userName);
-            String emailBody = "<html><body>" +
-                    "<p>You are appointed as a <strong>" + roles.getRole() + "</strong> for the " +
-                    subjects.getSubject_name() + ".</p>" +
-                    "<p><a href='" + appUrl + "'>Click here to login</a></p>" +
-                    "<p>Thanks,</p>" +
-                    "<p><strong>GTU</strong></p>" +
-                    "</body></html>";
+
+           String emailBody= "<html>" +
+                    "<body>" +
+                    "<p>Dear Sir/Madam,</p>" +
+                    "<p>You have been appointed as a QP Setter for the Subject " +
+                    "<strong>&quot;<subject_code> - <subject_name>&quot;</strong>.</p>" +
+                    "<p>Your User ID is <strong>"+userName+"</strong>.</p>" +
+                    "<p><a href='" + appUrl +"'>Click here to login</a></p>" +
+                    "<p>User ID and Password remain the same. In case you have forgotten the password, " +
+                    "use the <strong>Forgot Password</strong> option provided on the login page.</p>" +
+                    "<p>Thanks,</p>" ;
+
             sendMail.sendHtmlmail(user.getEmail(), "Your appointment details of GTU", emailBody);
             return "appointment-status";
         }
@@ -436,4 +472,31 @@ public class AppointmentController {
             appointmentService.saveUserAppointment(appointment);
 
         }
+    @PostMapping("/update")
+    @ResponseBody
+    public ResponseEntity<String> updateAppointment(@RequestBody AppointmentUpdateRequest request) {
+        try {
+            UserData appointment = appointmentService.getAppointmentDetailsById(request.getId());
+            User user = userService.getUserById(appointment.getUserId()+"");
+            appointment.setNo_of_sets(request.getNoOfSets());
+            appointment.setLast_date_to_submit(request.getLastDateToSubmit()+"");
+            appointmentService.saveUserAppointment(appointment);
+            Subjects subject = subjectsService.getSubjectById(String.valueOf(appointment.getSubjectId()));
+            String emailBody = "<html>"
+                    + "<body>"
+                    + "<p>Dear "+user.getFirstName()+""+user.getLastName()+",</p>"
+                    + "<p>Admin updated your QP tasks for the subject: <strong>"+subject.getSubjectCode()+"-"+subject.getSubject_name()+"</strong>.</p>"
+                    + "<p><strong>No. of sets:</strong>"+request.getNoOfSets()+"</p>"
+                    + "<p><strong>Last date of submission:</strong> "+request.getLastDateToSubmit()+"</p>"
+                    + "<p>Login and check the details.</p>"
+                    + "<p>Thanks,<br>Admin<br>SOQPRS - GTU</p>"
+                    + "</body>"
+                    + "</html>";
+
+            sendMail.sendHtmlmail(user.getEmail(),"Updates from GTU SOQPRS Admin",emailBody);
+            return ResponseEntity.ok("success");  // ✅ Return HTTP 200
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");  // ✅ Return HTTP 500
+        }
+    }
     }

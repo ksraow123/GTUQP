@@ -9,7 +9,6 @@ import javax.persistence.*;
 @Table(
         name = "tbl_setter_moderator_mapping",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"subject_id", "moderator_id"}),
                 @UniqueConstraint(columnNames = {"subject_id", "setter_id"})
         }
 )
