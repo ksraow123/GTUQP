@@ -10,4 +10,6 @@ public interface BulkAppointmentRepository extends JpaRepository<UserData,Long>
 
     UserData findByUserIdAndSubjectId(int userId, int subjectId);
     List<UserData> findByUserIdInAndSubjectId(List<Integer> userIds, int subjectId);
+
+    List<UserData> getAppointmentDetailsByUserIdAndExamSeriesId(Integer userId, Integer examSeriesId);
 }

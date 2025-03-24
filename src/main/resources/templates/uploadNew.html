@@ -10,10 +10,53 @@
         <div class="col-12">
             <div class="cards">
                 <div class="card border-0">
-                    <h2>Appointments - QP Setters/Moderators</h2>
-                    <form th:action="@{/appointments/processSelected}" method="post">
+                    <h2>Appointments - QP Setters</h2>
+
                     <div class="row">
+                        <form th:action="@{/uploadFilters}"  method="post" >
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Course Name </label>
+                                            <select class="form-select" id="courseCode" required  name="course_id" >
+                                                <option value="">Select</option>
+                                                <option value="All">All</option>
+                                                <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Year / Sem </label>
+                                            <select class="form-select" id="yearsem" required  name="semester" >
+                                                <option value="All">All</option>
+                                                <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Subject </label>
+                                            <select class="form-select" id="subject" required  name="subject_id" >
+                                                <option value="All">All</option>
+                                                <option th:each="subject : ${subjectsList}"
+                                                        th:value="${subject.id}"
+                                                        th:text="|${subject.subjectCode} - ${subject.subject_name}|">
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3 mt-4">
+                                            <button class="btn btn-primary">Search</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         <div class="col-12">
+                            <form th:action="@{/appointments/processSelected}" method="post">
                             <p class="text-end">
                                 <input type="submit" class="btn btn-success"
                                        value="Send Appointment to selected records"/></p>
@@ -33,12 +76,11 @@
                                        <th>Subject Code</th>
                                        <th>Subject Name</th>
 
-                                       <th>View Syllabus</th>
-                                       <th>No.of sets</th>
-                                       <th>Last Date of Submission</th>
-                                       <th>Current status</th>
-                                       <th>Current Status Date</th>
+                                       <th>Syllabus</th>
                                        <th>Appointment sent date</th>
+                                       <th>Last Date of Submission</th>
+
+
                                        <th>Update</th>
                                        <th>Reset Password</th>
                                    </thead>
@@ -61,20 +103,13 @@
                                        <td class="text-center" th:text="${appoint.subject_code}"></td>
                                        <td class="text-center" th:text="${appoint.subject_name}"></td>
                                        <td>
-                                           <a th:if="${appoint.syllabus}" th:href="@{${appoint.syllabus}}" target="_blank" title="View Syllabus">View Syllabus</a>
-                                           <span th:unless="${appoint.syllabus}">No syllabus available</span>
+                                           <a href="https://syllabus.gtu.ac.in/" target="_blank" class="link-primary" title="View Syllabus">View</a>
                                        </td>
-                                       <td class="text-center">
-                                           <input type="number" class="form-control no-of-sets" th:value="${appoint.no_of_sets}" min="1"/>
-                                       </td>
-
+                                       <td class="text-center" th:text="${appoint.appointment_sent_date}"> </td>
                                        <td class="text-center">
                                            <input type="date" class="form-control last-date-to-submit" th:value="${appoint.last_date_to_submit}"/>
                                        </td>
-                                       <td class="text-center" th:text="${appoint.current_status}"> </td>
 
-                                       <td class="text-center" th:text="${appoint.status_date}"> </td>
-                                       <td class="text-center" th:text="${appoint.appointment_sent_date}"> </td>
                                        <td class="text-center">
                                            <button type="button" class="btn btn-primary update-btn"
                                                    th:data-id="${appoint.id}">Update</button>
@@ -93,13 +128,12 @@
 
 
                            </div>
-
+                            </form>
                         </div>
                     </div>
-                    </form>
                         </div>
                         <div class="col-12 mt-3">
-                            <p><b>Upload QP Setters/Moderators (CSV File)</b> <a  th:href="@{/appointmentData.csv}"  class="link-danger">Click here to download the sample file</a></p>
+                            <p><b>Upload QP Setters (CSV File)</b> <a  th:href="@{/appointmentData.csv}"  class="link-danger">Click here to download the sample file</a></p>
                             <form method="post" th:action="@{/upload}" enctype="multipart/form-data">
                             <div class="row">
                                 <div class="col-md-4">
@@ -129,7 +163,7 @@
                     <th>Mobile No</th>
                     <th>Email</th>
                     <th>Last Date to Submit</th>
-                    <th>No of Sets</th>
+
                     <th>College Code</th>
                     <th>Role ID</th>
                 </tr>
@@ -142,7 +176,7 @@
                     <td th:text="${faculty.mobileNo}"></td>
                     <td th:text="${faculty.email}"></td>
                     <td th:text="${faculty.lastDateToSubmit}"></td>
-                    <td th:text="${faculty.noOfSets}"></td>
+
                     <td th:text="${faculty.collegeCode}"></td>
                     <td th:text="${faculty.roleId}"></td>
                 </tr>
@@ -162,7 +196,7 @@
                     <th>Mobile No</th>
                     <th>Email</th>
                     <th>Last Date to Submit</th>
-                    <th>No of Sets</th>
+
                     <th>College Code</th>
                     <th>Role ID</th>
 
@@ -176,7 +210,7 @@
                     <td th:text="${faculty.mobileNo}"></td>
                     <td th:text="${faculty.email}"></td>
                     <td th:text="${faculty.lastDateToSubmit}"></td>
-                    <td th:text="${faculty.noOfSets}"></td>
+
                     <td th:text="${faculty.collegeCode}"></td>
                     <td th:text="${faculty.roleId}"></td>
 
@@ -188,18 +222,7 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector("form");
-        form.addEventListener("submit", function (event) {
-            const checkboxes = document.querySelectorAll("input[name='selectedIds']:checked");
-            if (checkboxes.length === 0) {
-                alert("Please select at least one record before submitting.");
-                event.preventDefault(); // Prevent form submission
-            }
-        });
-    });
-</script>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
@@ -211,7 +234,7 @@
         $(".update-btn").click(function () {
             var row = $(this).closest("tr");
             var id = $(this).data("id");
-            var noOfSets = row.find(".no-of-sets").val();
+            var noOfSets = 1;
             var lastDateToSubmit = row.find(".last-date-to-submit").val();
 
             $.ajax({

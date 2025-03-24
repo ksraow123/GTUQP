@@ -20,24 +20,60 @@
         <script th:src="@{/js/buttons.print.min.js}"></script>
         <script th:src="@{/js/buttons.colVis.min.js}"></script>
 
+        <script>
+            $(document).ready(function() {
+                 var table = $('#example').DataTable({
+                     dom: 'lBfrtip',
+                     buttons: [
+                         'copy', 'csv', 'pdf',  'colvis'
+                     ],
+                     lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                     language: {
+                         lengthMenu: "Show _MENU_ entries"
+                     }
+                 });
+
+                 $('#example tbody').on('click', 'tr', function() {
+                     $(this).toggleClass('selected');
+                 });
+             });
+        </script>
+        <script>
+            $(document).ready(function() {
+                 var table = $('#example1').DataTable({
+                     dom: 'lBfrtip',
+                     buttons: [
+                         'copy', 'csv', 'pdf',  'colvis'
+                     ],
+                     lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                     language: {
+                         lengthMenu: "Show _MENU_ entries"
+                     }
+                 });
+
+                 $('#example tbody').on('click', 'tr', function() {
+                     $(this).toggleClass('selected');
+                 });
+             });
+        </script>
 
         <script type="text/javascript">
-            new DataTable('#example', {
+          /*  new DataTable('#example', {
             layout: {
                 topStart: {
                     buttons: ['copy', 'excel', 'pdf', 'colvis']
                 }
             }
-        });
+        });*/
         </script>
         <script type="text/javascript">
-            new DataTable('#search', {
+         /*   new DataTable('#search', {
             layout: {
                 topStart: {
                    // buttons: ['copy', 'excel', 'pdf', 'colvis']
                 }
             }
-        });
+        }); */
         </script>
 
         <!-- Custom JavaScript -->

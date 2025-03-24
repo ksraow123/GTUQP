@@ -101,26 +101,18 @@ public class SendMailUtil {
 
     public void sendHtmlmail(String to, String subject, String body) {
         try {
+            MimeMessage mimeMessage = mail1.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8"); // Specify UTF-8 encoding
 
-            MimeMessage Mimemessage = mail1.createMimeMessage();
-
-            MimeMessageHelper message = new MimeMessageHelper(Mimemessage, true);
-
-            message.setFrom(fromMail);
-            message.setTo(to);
-            message.setSubject(subject);
-            //   message.setText("<html><body><a href=\"https://www.w3schools.com\">Visit W3Schools.com!</a></body></html>");
-            message.setText(subject, body);
-            //message.addBcc("BCC email");
-            //message.addCc("CC email");
-
-//            FileSystemResource file = new FileSystemResource(fileToAttach);
-//            message.addAttachment(file.getFilename(), file);
-
-            mail1.send(Mimemessage);
+            messageHelper.setFrom(fromMail);
+            messageHelper.setTo(to);
+            messageHelper.setSubject(subject);
+            messageHelper.setText(body, true); // Enable HTML content
+            mail1.send(mimeMessage);
 
         } catch (MessagingException e) {
             throw new MailParseException(e);
         }
+
     }
 }

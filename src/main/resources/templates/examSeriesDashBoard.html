@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Series</title>
+  <div th:replace="fragments/styles :: styles"></div>
+</head>
+
+<body>
+<div class="container-fluid bg-primary">
+  <div class="d-flex  align-items-center justify-content-between text-white p-2">
+    <div><strong>Helpline No. 9063992318, 9063992130</strong></div>
+    <div><strong>Email: papersetterorder@gtu.edu.in</strong></div>
+  </div>
+</div>
+<div class="wrapper">
+  <div class="main">
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <div class="cards">
+      <div class="card border m-auto mt-5 text-center" style="width:350px;">
+        <h3>Your Section ID </h3>
+        <h3 th:text="${sectionsMaster.section_name}"></h3>
+        <p>&nbsp;</p>
+
+        <p>Select Exam Series</p>
+        <p><th:block th:each="lst : ${examSeriesList}">
+          <a th:href="@{/examSeries/selectExamSeries(series_id=${lst.id})}" class="btn btn-primary btn-block" th:text="${lst.seriesName}"></a>
+          <br>
+        </th:block>
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- Include Common Scripts -->
+<div th:replace="fragments/scripts :: scripts"></div>
+</body>
+
+</html>

@@ -22,4 +22,8 @@ public class QPFilesEntity {
     @Column(name="subject_id")
     private Long subjectId;
     private String qp_status, qp_status_date,remarks;
+    @Column(name="exam_series_id")
+    private Integer examSeriesId;
+    @Column(name="qp_setter_id")
+    private Long qpSetterId;
 }

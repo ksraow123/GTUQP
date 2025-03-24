@@ -1,152 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Email</title>
+    <title>pdf</title>
 </head>
 <style type="text/css">
-    body { font-family: "Times New Roman", "serif"; font-size: 18px; }
-    h4 { margin: 2px; padding: 0; }
+    body{font-family:"Times New Roman", "serif"; line-height: 20px; }
+    h3{margin: 0; padding: 0;}
+    ol li{margin-bottom: 5px;}
 </style>
 <body>
 
 <table width="720" border="0" align="center">
     <tr>
-        <td>
-            <table width="100%" border="0">
+        <td align="center">
+            <table width="100%">
                 <tr>
-                    <td>
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td width="80"><img src="images/logo.png" width="80" alt="" /></td>
-                                <td align="center">
-                                    <h2>GUJARAT TECHNOLOGICAL UNIVERSITY</h2>
-                                    <div><b>INTERNATIONAL INNOVATIVE UNIVERSITY<br />
-                                        Secure Online Question Paper Receiving System (SOQPRS)</b>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td width="50%"><b>Tel:</b> 022-62542105/106/107/100 <br />  <b>Web:</b> www.gtu.ac.in/</td>
-                                <td width="50%" align="right">
-                                    <b>Email:</b> gtusoqprs@gtu.com <br /><b>Mob:</b> 999999999
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td><hr /></td>
-                </tr>
-                <tr>
-                    <td>
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td width="50%"><b>GTU/SOQPRS/S25/S0001 /</b></td>
-                                <td width="50%" align="right">
-                                    <b>Date:</b> <span th:text="${date}"></span>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td><hr /></td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <h4><u>Office Order</u><br />Confidential</h4>
-            <p><b>To,</b></p>
-            <p th:text="${name}"></p>
-            <p><b>Inst. Code.</b> <span th:text="${collegeCode}"></span></p>
-            <p>Sir / Madam,</p>
-            <p>It gives me pleasure to inform your appointment as paper setter/moderator (only 1 should be as per order) for GTU SOQPRS. You are requested to set the question paper for the details below.</p>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <table width="100%" border="1" cellspacing="0">
-                <tr>
-                    <td>
-                        <table width="100%" border="0" cellpadding="4" cellspacing="10">
-                            <tr>
-                                <td width="15">1)</td>
-                                <td>Question Paper Code</td>
-                                <td width="10">:</td>
-                                <td th:text="${subjectCode}"></td>
-                            </tr>
-                            <tr>
-                                <td>2)</td>
-                                <td>Name of Subject</td>
-                                <td>:</td>
-                                <td th:text="${subjectName}"></td>
-                            </tr>
-                            <tr>
-                                <td>3)</td>
-                                <td>Year / Course</td>
-                                <td>:</td>
-                                <td th:text="${yearCourse}"></td>
-                            </tr>
-                            <tr>
-                                <td>4)</td>
-                                <td>No of sets</td>
-                                <td>:</td>
-                                <td th:text="${noOfSets}"></td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <p><b>The necessary documents required for your paper setting activity are sent by mail.</b></p>
-            <p>The last date for the online submission of the Question Paper is</p>
-        </td>
-    </tr>
-    <tr>
-        <td align="right">
-            <table align="right" border="1" cellpadding="3" cellspacing="0">
-                <tr>
-                    <td colspan="3" align="center" th:text="${submissionDate}"></td>
-                </tr>
-                <tr>
-                    <td width="60" align="center"><b>DD</b></td>
-                    <td width="60" align="center"><b>MM</b></td>
-                    <td width="60" align="center"><b>YEAR</b></td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <p>Issued as per the orders and in the name of The Controller of Examinations, GTU</p>
-        </td>
-    </tr>
-    <tr>
-        <td align="right">
-            <p><b>Yours faithfully,</b></p>
-        </td>
-    </tr>
-    <tr>
-        <td align="right" valign="bottom">
-            <table align="right">
-                <tr>
+                    <td><img src="images/logo.png" alt="" width="100" /></td>
                     <td align="center">
-                        <p><b>COE<br />
-                            GTU Exam Section<br /></b></p>
+                        <h3>
+                            GUJARAT TECHNOLOGICAL UNIVERSITY</h3>
+                        <small>
+                            <strong>(Established under Gujarat Act No. 20 of 2007)<br />
+                                ગુજરાતટેકનોલોજીકલ યુનિવર્સિટી<br />
+                                (ગુજરાત અધિનિયમ ક્રમાંકઃ ર૦/ર૦૦૭ દ્વારા સ્થાપિત)</strong>
+                        </small>
                     </td>
                 </tr>
             </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%">
+                <tr>
+                    <td><small><u><b>VERY URGENT</b></u></small></td>
+                    <td><small><u><b>CONFIDENTIAL</b></u></small></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%">
+                <tr>
+                    <td><b>Ref. No. : GTU/S2025/Confidential/<span th:text="${userName}"></span>/<span th:text="${yearCourse}"></span></b></td>
+                    <td align="right"><b>Date: </b> <span th:text="${date}"></span>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>
+                <b>To,<br />
+                    <p th:text="${name}"></p>
+                    QP Setter ID: <p th:text="${userName}"></p>
+                    <span th:text="${collegeCode}"></span></b>
+            </p>
+            <p>Dear Sir/Madam,</p>
+            <p>I am directed to inform you that Hon. Vice Chancellor Sir has been pleased to appoint you as a Paper-setter for <b>University
+                Examination</b> in the following subject(s):
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%" cellpadding="0" cellspacing="0" border="1">
+                <tr>
+                    <td align="center"><b>Subject Code</b></td>
+                    <td align="center"><b>Subject Name</b></td>
+                    <td align="center"><b>Last Date for submission</b> </td>
+                </tr>
+                <tr>
+                    <td align="center" th:text="${subjectCode}"></td>
+
+                    <td align="center" th:text="${subjectName}"></td>
+
+                    <td align="center" th:text="${submissionDate}"></td>
+
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>[ It is compulsory to submit assessment chart and detailed solution for numerical part. Kindly refer new instruction no.11 which is mentioned below for Diploma Courses.]</b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <ol>
+                <li>You are instructed to draw Question Paper as per the syllabus which is available on GTU website. Please ensure that the Subject code of the Syllabus which you are referring is same as the subject code which is mentioned in your Paper-Setter order.</li>
+                <li>You are required to strictly follow University guidelines for setting question paper. Question Paper format and Paper solution/Answer Key/Assessment Chart format are given in link <b>(https://gtu.ac.in/QPFormat.aspx).</b> </li>
+                <li>You are instructed to design question paper according to the teaching scheme, <b>weightage of topics/suggested specifications as per blooms taxonomy</b> and syllabus of the subjects, which are given on GTU website. Please set question paper as per the format given in link <b>(https://gtu.ac.in/QPFormat.aspx)</b> only. The question paper has to be typed in Times New Roman font (font size 12) only in English version.</li>
+                <li> It is to be noted that once the question paper is submitted to GTU, it must be deleted from the hard disk of the computer/Laptop and not to be stored in any format or in any device with you or anywhere else.</li>
+                <li> Question paper once submitted to University becomes the property of GTU and it can be used in any examination. Hence it cannot be reproduced/published fully or partially anywhere, else if at all it is violated strict action shall be taken against paper setter by University.</li>
+                <li> It is informed not to repeat questions published in mid-semester exam conducted at your institute.</li>
+                <li>You are instructed to submit paper solution, Answer Key, Assessment Chart which are required for examining answer book. i.e. clearly mention stage wise marks to be given by an examiner for each correct portion of the answer.</li>
+                <li> It is compulsory to submit detailed solution of the numerical part of the question paper. </li>
+                <li>Further you are instructed to ensure the strict secrecy of this examination work assigned to you.</li>
+                <li>In case of change of address, residence phone number, mobile number and Bank details please update in SOQPRS portal immediately.</li>
+                <li>For subjects of <b>Diploma</b> Course, it is <b>compulsory to provide questions in both English and Gujarati Version.</b> Gujarati version    question has to be typed in Shruti font having letter size 12 points. <b>Questions in Gujarati are required to be typed just below the questions in English to avoid any mistake between two versions of question paper.</b> </li>
+                <li> Do not bold any letter, word or sentence in any part of the question paper.</li>
+                <li> Last date for submission of question paper to University: <b th:text="${submissionDate}" /> If you are unable to set question paper, you have to inform Controller of Examination, GTU immediately after receiving this paper setter order.</li>
+                <li> Diagram, charts and figures should be added against the respective questions. If required, please add instruction whether any IS codes, steam tables, or other reference materials should be provided to the students during the examination.</li>
+                <li> Please carefully add/verify bank details in SOQPRS portal.</li>
+                <li> To download syllabus Please refer https://www.gtu.ac.in/Syllubus_list.aspx</li>
+
+            </ol>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Your cooperation in maintaining the secrecy of this assigned examination work and its completion as per the schedule of G.T.U. is highly needed.
+        </td>
+    </tr>
+    <tr>
+        <td>
+
         </td>
     </tr>
 </table>

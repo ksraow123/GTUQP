@@ -9,53 +9,65 @@ import java.util.List;
 
 @Repository
 public class ReportDao {
-    public List<AdminDashBoardVo> getAdminDashBoard() {
+    public List<AdminDashBoardVo> getAdminDashBoard(Integer userId) {
         QueryUtil<AdminDashBoardVo> queryUtil = new QueryUtil<>(AdminDashBoardVo.class);
-        return queryUtil.list("SELECT DISTINCT c.`course_code`,c.`course_name`,s.year,s.semester, h.`subject_id`,s.`subject_code`,s.`subject_name`,h.`no_of_sets`,\n" +
-                "d.`set_no`,d.`qp_setter_id`,(SELECT CONCAT(first_name,' ',last_name) FROM users WHERE id=d.`qp_setter_id`)setter_name,\n" +
-                "m.`moderator_id`,(SELECT CONCAT(first_name,' ',last_name) FROM users WHERE id=m.`moderator_id`)reviewer_name,\n" +
+
+        return queryUtil.list("SELECT DISTINCT c.id as course_id,c.course_code,c.course_name,s.year,s.semester, h.subject_id,s.subject_code,s.subject_name,h.no_of_sets,\n" +
+                "d.set_no,d.qp_setter_id,\n" +
+                "(SELECT CONCAT(user_name,' - ', first_name,' ',last_name) FROM users WHERE id=d.qp_setter_id)setter_name,\n" +
                 "CASE WHEN IFNULL(qp_setter_status,'')='' THEN 'Pending' ELSE qp_setter_status END qp_setter_status,\n" +
                 "CASE WHEN IFNULL(qp_reviewer_status,'')='' THEN 'Pending' ELSE qp_reviewer_status END qp_reviewer_status\n" +
-                "FROM tbl_appointments_bulk h LEFT OUTER JOIN tbl_setter_moderator_mapping m\n" +
-                "ON h.`subject_id`=m.`subject_id` AND h.`user_id`=m.`setter_id`\n" +
-                ",qp_set_bit_wise_questions d,tbl_subjects s,tbl_courses c\n" +
-                "WHERE h.subject_id=d.subject_id AND h.user_id=d.`qp_setter_id` AND h.role_id=2\n" +
+                "FROM tbl_appointments_bulk h,qp_set_bit_wise_questions d,tbl_subjects s,tbl_courses c\n" +
+                "WHERE h.subject_id=d.subject_id AND h.user_id=d.qp_setter_id AND h.role_id=2\n" +
                 "AND h.subject_id=s.id AND s.course_id=c.id");
 
+//
+//
+//        return queryUtil.list("SELECT ts.course_id,ts.id as subject_id,course_name,year,semester,subject_code,tc.section_id,\n" +
+//                "subject_name,(SELECT group_concat(user_name) FROM tbl_appointments_bulk tb,\n" +
+//                "users u where u.id=tb.user_id and u.role_id=2 and subject_id=ts.id) as assigned_setters,\n" +
+//                "(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id and tb.role_id=2 and subject_id=ts.id)\n" +
+//                "as setter_status,(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id and\n" +
+//                "tb.role_id=1 and subject_id=ts.id) as section_team_status,\n" +
+//                "(SELECT group_concat(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id\n" +
+//                "and tb.role_id=1 and subject_id=ts.id and qp_status='APPROVED') as forward_to_repo_status\n" +
+//                " FROM tbl_subjects ts, tbl_courses tc where ts.course_id=tc.id");
+
 
     }
 
-    public List<AdminDashBoardVo> getSubjectWiseAdminDashBoard() {
+    public List<AdminDashBoardVo> getSubjectWiseAdminDashBoard(Integer userId,String sessionIds) {
         QueryUtil<AdminDashBoardVo> queryUtil = new QueryUtil<>(AdminDashBoardVo.class);
-        return queryUtil.list("SELECT course_name,year,semester,subject_code,(select sum(no_of_sets) from tbl_appointments_bulk" +
-                " where subject_id=ts.id and role_id=2) as qp_set,\n" +
-                "subject_name,(SELECT count(user_name) FROM tbl_appointments_bulk tb,\n" +
-                "users u where u.id=tb.user_id and u.role_id=2 and subject_id=ts.id) as no_of_setters,\n" +
-                "(SELECT count(user_name) FROM tbl_appointments_bulk tb,users u\n" +
-                "where u.id=tb.user_id and u.role_id=3 and subject_id=ts.id)  as no_of_moderators,\n" +
+        return queryUtil.list("SELECT ts.course_id,ts.id as subject_id,course_name,year,semester,subject_code,subject_name,\n" +
                 "(SELECT count(tb.id) FROM tbl_qp_files tb,users u where u.id=tb.user_id and tb.role_id=2\n" +
                 "and subject_id=ts.id and qp_status='FORWARDED')\n" +
-                "as setter_completed,(SELECT count(tb.id) FROM tbl_qp_files tb,users u where\n" +
-                "u.id=tb.user_id and tb.role_id=3 and subject_id=ts.id and qp_status='APPROVED') as moderator_completed,\n" +
+                "as setter_completed,\n" +
+                "(SELECT count(tb.id) FROM tbl_qp_files tb,users u where u.id=tb.user_id and tb.role_id=2\n" +
+                "and subject_id=ts.id and qp_status in('PENDING','Re-Submit'))\n" +
+                "as setter_pending,\n" +
                 "(SELECT count(tb.id) FROM tbl_qp_files tb,users u where\n" +
-                "u.id=tb.user_id and tb.role_id=3 and subject_id=ts.id and qp_status='REJECTED') as moderator_rejected,\n" +
+                "u.id=tb.user_id and tb.role_id=1 and subject_id=ts.id and qp_status='APPROVED') as moderator_completed,\n" +
                 "(SELECT count(tb.id) FROM tbl_qp_files tb,users u where\n" +
-                "u.id=tb.user_id and tb.role_id=3 and subject_id=ts.id and qp_status='PENDING') as moderator_pending,\n" +
+                "u.id=tb.user_id and tb.role_id=1 and subject_id=ts.id and qp_status='REJECTED') as moderator_rejected,\n" +
+                "(SELECT count(tb.id) FROM tbl_qp_files tb,users u where\n" +
+                "u.id=tb.user_id and tb.role_id=1 and subject_id=ts.id and qp_status in('PENDING','Re-Submit')) as moderator_pending,\n" +
                 "\n" +
                 "(SELECT count(qp_status) FROM tbl_qp_files tb,users u where u.id=tb.user_id\n" +
-                "and tb.role_id=1 and subject_id=ts.id and qp_status='APPROVED') as forward_to_repo_status\n" +
+                "and tb.role_id=1 and subject_id=ts.id and qp_status='REPOSITORY') as forward_to_repo_status\n" +
                 "\n" +
-                " FROM tbl_subjects ts, tbl_courses tc where ts.course_id=tc.id");
+                " FROM tbl_subjects ts, tbl_courses tc where ts.course_id=tc.id and\n" +
+                "ts.section_id in "+sessionIds+"");
 
 
     }
 
-    public List<RemunerationReportVo> getRemunerationReport() {
+    public List<RemunerationReportVo> getRemunerationReport(Integer userId,String sectionIds) {
         QueryUtil<RemunerationReportVo> queryUtil = new QueryUtil<>(RemunerationReportVo.class);
-        return queryUtil.list("SELECT tu.user_name,concat(first_name,'',last_name) as name,role,subject_code,subject_name,(SELECT sum(no_of_sets) as no_of_sets FROM tbl_appointments_bulk ttb where ttb.subject_id=tb.id and ttb.user_id=tu.id and ttb.role_id=tu.role_id) as no_of_sets,\n" +
-                "count(tq.id) as no_of_sets_completed,account_no,ifsc_code,bank_name,branch_details,branch_address FROM users tu,tbl_subjects tb,tbl_roles tr,tbl_profile_details tpr,tbl_qp_files tq\n" +
-                " where tq.subject_id=tb.id and tr.id=tu.role_id and tpr.user_id=tu.id\n" +
-                " and tq.user_id=tu.id and tq.qp_status in('FORWARDED','APPROVED') group by tb.id,tu.id;");
+        return queryUtil.list("SELECT ur.user_name,ur.first_name,ur.last_name,ur.mobile_no,tg.college_code,tg.college_name,tb.subject_id,ts.subject_code,ts.subject_name,ts.course_id,ts.semester,\n" +
+                "pr.account_no, pr.bank_name, pr.branch_details,(select count(id) from tbl_qp_files tq where tq.user_id=ur.id and tq.subject_id=tb.subject_id and tq.qp_status='FORWARDED') as setscompleted,\n" +
+                "pr.designation, pr.ifsc_code, pr.teaching_experience, pr.industry_experience, pr.branch_address, pr.residential_address\n" +
+                " FROM tbl_appointments_bulk tb left join tbl_profile_details pr on tb.user_id=pr.user_id,tbl_subjects ts,tbl_courses tc ,tbl_college tg,users ur\n" +
+                " where ur.id=tb.user_id and tb.subject_id=ts.id and tc.id=ts.course_id and tg.id=tb.college_id and ts.section_id in "+sectionIds+ " order by tg.college_code;");
 
     }
 }

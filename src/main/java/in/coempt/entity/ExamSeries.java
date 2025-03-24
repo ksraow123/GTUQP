@@ -22,7 +22,7 @@ public class ExamSeries {
     private String totalMarks;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private Integer isActive;
 
     @Column(name = "exam_start_date")
     private String examStartDate;

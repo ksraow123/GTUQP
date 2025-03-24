@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface ReportService {
 
-    List<AdminDashBoardVo> getAdminDashBoard();
-    List<AdminDashBoardVo> getSubjectWiseAdminDashBoard();
+    List<AdminDashBoardVo> getAdminDashBoard(Integer userId);
+    List<AdminDashBoardVo> getSubjectWiseAdminDashBoard(Integer userId,String sessionIds);
 
-    List<RemunerationReportVo> getRemunerationReport();
+    List<RemunerationReportVo> getRemunerationReport(Integer userId,String sectionIds);
 }

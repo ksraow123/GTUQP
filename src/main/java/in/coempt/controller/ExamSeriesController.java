@@ -1,35 +1,52 @@
 package in.coempt.controller;
 
 import in.coempt.entity.ExamSeries;
+import in.coempt.entity.SectionUserMappingEntity;
+import in.coempt.entity.SectionsMasterEntity;
+import in.coempt.entity.User;
+import in.coempt.repository.UserRepository;
 import in.coempt.service.ExamSeriesService;
-import org.springframework.beans.factory.annotation.Autowired;
+import in.coempt.service.SectionMasterService;
+import in.coempt.service.SectionUserMappingService;
+import in.coempt.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
-@RestController
+@Controller
+@RequiredArgsConstructor
 @RequestMapping("/examSeries")
 public class ExamSeriesController {
-    @Autowired
-    private ExamSeriesService examSeriesService;
 
-    @GetMapping
-    public List<ExamSeries> getAllExamSeries() {
-        return examSeriesService.getAllExamSeries();
+    private final ExamSeriesService examSeriesService;
+    private final UserRepository userRepository;
+private final SectionMasterService sectionMasterService;
+private final SectionUserMappingService sectionUserMappingService;
+    @GetMapping("/dashboard")
+    public String getActiveExamSeries(Model model) {
+
+        UserDetails user=(UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
+        User userEntity = userRepository.findByUserName(user.getUsername());
+        SectionUserMappingEntity mappingEntity=
+                sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
+        SectionsMasterEntity sectionsMaster=
+                sectionMasterService.getMappingDetailsById(mappingEntity.getSectionId());
+       List<ExamSeries> examSeriesList= examSeriesService.getAllActiveExamSeries();
+       model.addAttribute("examSeriesList",examSeriesList);
+       model.addAttribute("mappingEntity",mappingEntity);
+       model.addAttribute("sectionsMaster",sectionsMaster);
+        return "examSeriesDashBoard";
     }
 
-    @GetMapping("/{id}")
-    public ExamSeries getExamSeriesById(@PathVariable Integer id) {
-        return examSeriesService.getExamSeriesById(id);
-    }
+        @GetMapping("/selectExamSeries")
+        public String setExamSeriesInSession(@RequestParam("series_id") Integer seriesId, HttpSession session) {
+            session.setAttribute("selectedExamSeriesId", seriesId);
+            return "redirect:/moderatordashboard"; // Redirect to the dashboard or another page
+        }
 
-    @PostMapping
-    public ExamSeries createExamSeries(@RequestBody ExamSeries examSeries) {
-        return examSeriesService.saveExamSeries(examSeries);
     }
-
-    @DeleteMapping("/{id}")
-    public void deleteExamSeries(@PathVariable Integer id) {
-        examSeriesService.deleteExamSeries(id);
-    }
-}

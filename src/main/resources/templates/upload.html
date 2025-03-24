@@ -19,6 +19,39 @@
 
 <!-- Appointment Table with Checkboxes -->
 <div class="row">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="" class="form-label">Course Name </label>
+                    <select class="form-select" >
+                        <option selected>Select</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="" class="form-label">Year / Sem </label>
+                    <select class="form-select" >
+                        <option selected>Select</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="" class="form-label">Subject </label>
+                    <select class="form-select" >
+                        <option selected>Select</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3 mt-4">
+                    <button class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="col-12">
         <form th:action="@{/appointments/processSelected}" method="post">
 

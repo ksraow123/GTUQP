@@ -10,35 +10,37 @@ import in.coempt.repository.RolesRepository;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.service.impl.HtmlToPdfService;
-import in.coempt.util.FileUploadUtil;
 import in.coempt.util.SecurityUtil;
+import in.coempt.util.SendMailUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.websocket.server.PathParam;
 import java.io.*;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -63,9 +65,12 @@ private SetterModeratorService setterModeratorService;
     private UserRepository userRepository;
     @Autowired
     private RolesRepository rolesRepository;
-
+@Autowired
+   private SectionUserMappingService userMappingService;
     @Autowired
     private QPFilesService qpFilesService;
+    @Autowired
+    private SendMailUtil sendMail;
 
     @Value("${filePath}")
     private String filePath;
@@ -82,8 +87,15 @@ private SetterModeratorService setterModeratorService;
         List<BitwiseQuestions> qPtemplate = qpTemplateService.getQuestionsList(subjectId,setNo,userEntity.getId());
         model.addAttribute("qPtemplate", qPtemplate);
         model.addAttribute("setNo", setNo);
-        //model.addAttribute("page", "QPTemplate");
-        return "QPTemplate";
+        model.addAttribute("setterId", userEntity.getId());
+
+        QPFilesEntity qpFilesEntity=qpFilesService.getQPFilesByRollIdAndSubjectIdAndSetNoAndSetterId(1,subjectId+"",1,userEntity.getId());
+        String sectionTeamRemarks=null;
+        if(qpFilesEntity!=null) {
+         sectionTeamRemarks = qpFilesEntity.getRemarks();
+         }
+        model.addAttribute("sectionTeamRemarks", sectionTeamRemarks);
+            return "QPTemplate";
 
     }
 
@@ -91,6 +103,7 @@ private SetterModeratorService setterModeratorService;
     public String reviewerQuestionsList(
                                         @RequestParam("id") int setNo,
                                         @RequestParam("subjectId") String subjectId,
+                                        @RequestParam("setterId") Long setterId,
                                         Model model) {
         UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
 
@@ -98,11 +111,12 @@ private SetterModeratorService setterModeratorService;
       //  Appointment appointment = appointmentService.getAppointmentDetails(user.getUsername());
         Subjects subjects = subjectsService.getSubjectById(subjectId);
 //        List<BitwiseQuestions> qPtemplate = qpTemplateService.getQuestionsList(subjectId,setNo,userEntity.getId());
-        List<BitwiseQuestions> qPtemplate = qpTemplateService.getReviewerQuestionsList(subjectId,setNo,userEntity.getId());
+        List<BitwiseQuestions> qPtemplate = qpTemplateService.getReviewerQuestionsList(subjectId,setNo,userEntity.getId(),setterId);
 
         model.addAttribute("qPtemplate", qPtemplate);
         model.addAttribute("subject", subjects);
         model.addAttribute("setNo", setNo);
+        model.addAttribute("setterId", setterId);
       Boolean isApproved=  qPtemplate.stream()
                 .allMatch(q -> "Approved".equals(q.getQp_reviewer_status()));
         model.addAttribute("isApproved", isApproved);
@@ -114,26 +128,56 @@ private SetterModeratorService setterModeratorService;
     public String saveQuestion(@RequestParam("q_desc") String questionDescription,
                                @RequestParam("qid") Long qid,
                                @RequestParam(value = "instructions", required = false) String instructions,
-                               @RequestParam(value = "image_file", required = false) MultipartFile imageFile) {
+                               @RequestParam(value = "image_file", required = false) MultipartFile imageFile,
+                               RedirectAttributes redirectAttributes) {
+
+        Logger logger = LoggerFactory.getLogger(this.getClass());
 
         try {
             UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
             BitwiseQuestions question = qpTemplateService.getQuestionDetailsById(qid);
+
+            if (question == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Question not found!");
+                return "redirect:/bitwisequestionsList";
+            }
 
             question.setQ_desc(questionDescription);
             question.setInstructions(instructions);
 
             // **Convert Image to Base64 String**
             if (imageFile != null && !imageFile.isEmpty()) {
-                byte[] imageBytes = imageFile.getBytes();
-                String base64Image = Base64.getEncoder().encodeToString(imageBytes);  // ✅ Convert Image to Base64
-                question.setImage_path(base64Image);
+                try {
+                    byte[] imageBytes = imageFile.getBytes();
+                    String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                    question.setImage_path(base64Image);
+                } catch (IOException e) {
+                    logger.error("Error processing image file: " + e.getMessage(), e);
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to process image.");
+                    return "redirect:/bitwisequestionsList";
+                }
             }
-            // Save question in DB
+
+            // **Save Question to DB**
             qpTemplateService.saveQuestion(question);
+            redirectAttributes.addFlashAttribute("successMessage", "Question saved successfully!");
+        } catch (DataIntegrityViolationException e) {
+            logger.error("Unique constraint violation: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Duplicate entry! This question already exists.");
+            return "redirect:/bitwisequestionsList";
+
+        } catch (MaxUploadSizeExceededException e) {
+            logger.error("File size too large: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "File size exceeds limit.");
+            return "redirect:/bitwisequestionsList";
+        } catch (DataAccessException e) {
+            logger.error("Database error: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Database error occurred.");
             return "redirect:/bitwisequestionsList";
         } catch (Exception e) {
-
+            logger.error("Unexpected error: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred.");
+            return "redirect:/bitwisequestionsList";
         }
 
         return "redirect:/bitwisequestionsList";
@@ -147,9 +191,9 @@ private SetterModeratorService setterModeratorService;
 
     }
 
-    @GetMapping("/previewPdf/{id}/{subjectId}")
+    @GetMapping("/previewPdf/{id}/{subjectId}/{setterId}")
     public String previewPdf(HttpServletRequest request, Model model,
-                             @PathVariable("id") int id,@PathVariable("subjectId") int subjectId) throws IOException, DocumentException {
+                             @PathVariable("id") int id,@PathVariable("subjectId") int subjectId,@PathVariable("setterId") Long setterId) throws IOException, DocumentException {
         // Fetch User & Appointment Details
         UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User userEntity = userService.getUserByUserName(userDetails.getUsername());
@@ -161,27 +205,9 @@ private SetterModeratorService setterModeratorService;
         if(userEntity.getRoleId()==2) {
             questionsList = qpTemplateService.getQuestionsList(subjectId + "", id, userEntity.getId());
         }
-        if(userEntity.getRoleId()==3) {
-            questionsList = qpTemplateService.getReviewerQuestionsList(subjectId + "", id, userEntity.getId());
+        if(userEntity.getRoleId()==1) {
+            questionsList = qpTemplateService.getReviewerQuestionsList(subjectId + "", id, userEntity.getId(),setterId);
         }
-
-        // Process question descriptions and images
-        for (BitwiseQuestions qpoint : questionsList) {
-            if (qpoint.getQ_desc() != null) {
-                qpoint.setQ_desc(cleanHtmlForPdf(qpoint.getQ_desc()));
-            }
-            if (qpoint.getImage_path() != null) {
-                String imagePath = "data:image/png;base64," + qpoint.getImage_path();
-                qpoint.setImage_path(imagePath);
-            }
-        }
-
-        List<QPTemplate> qpTemplateList = qpTemplateService.getQuestionTemplate(subjectId);
-        for (QPTemplate qpTemplate : qpTemplateList) {
-            qpTemplate.setInstructions(String.format(qpTemplate.getInstructions(), qpTemplate.getNo_of_bits_answer()));
-        }
-        model.addAttribute("qpTemplateList", qpTemplateList);
-
      Subjects subjects=subjectsService.getSubjectById(subjectId+"");
 
         model.addAttribute("subjects", subjects);
@@ -297,24 +323,30 @@ private SetterModeratorService setterModeratorService;
     }
 
 
-    @GetMapping("/forwardQuestions/{id}/{subjectId}")
+    @PostMapping("/forwardQuestions")
     @Transactional
-    public String forwardQuestions( @PathVariable("id") int id,@PathVariable("subjectId") String subjectId) {
+    public String forwardQuestions(@RequestParam Integer id,
+                                   @RequestParam String subjectId,
+                                   @RequestParam Long setterId,
+                                   RedirectAttributes redirectAttributes) {
         UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User user = userService.getUserByUserName(userDetails.getUsername());
         //Appointment appointment = appointmentService.getAppointmentDetails(userDetails.getUsername());
         List<BitwiseQuestions> questionsList = qpTemplateService.getQuestionsList(subjectId,id,user.getId());
-        SetterModeratorMapping setterModeratorMapping=setterModeratorService.getReviewerDetails(user.getId(), Long.valueOf(subjectId));
+
+        Subjects subjects = subjectsService.getSubjectById(subjectId);
+     SectionUserMappingEntity sectionUserMappingEntity=userMappingService.getMappingDetailsBySectionIdAndRoleId(subjects.getSectionId(),1);
+
         questionsList.forEach(question -> {
             question.setQp_setter_status("FORWARDED");
             question.setQpSetterId(user.getId());
 
-            question.setQpReviewerId(Integer.parseInt(setterModeratorMapping.getModeratorId()+""));
+            question.setQpReviewerId(Integer.parseInt(sectionUserMappingEntity.getUserId()+""));
 
         });
 // Save all updated questions in one batch
         qpTemplateService.saveAllQuestions(questionsList);
-        QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByUser(user.getId(),subjectId,id);
+        QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByUser(user.getId(),subjectId,id,user.getId());
         if(qpFilesEntity==null){
             qpFilesEntity=new QPFilesEntity();
         }
@@ -328,8 +360,10 @@ private SetterModeratorService setterModeratorService;
         qpFilesEntity.setRollId(user.getRoleId());
             qpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
             qpFilesEntity.setRemarks("");
+        qpFilesEntity.setExamSeriesId(1);
+        qpFilesEntity.setQpSetterId(user.getId());
             qpFilesService.saveQPs(qpFilesEntity);
-        QPFilesEntity rqpFilesEntity = qpFilesService.getQPFilesByUser(setterModeratorMapping.getModeratorId(),subjectId,id);
+        QPFilesEntity rqpFilesEntity = qpFilesService.getQPFilesByUser(Long.valueOf(sectionUserMappingEntity.getUserId()),subjectId,id,user.getId());
         if(rqpFilesEntity==null){
             rqpFilesEntity=new QPFilesEntity();
         }
@@ -338,26 +372,29 @@ private SetterModeratorService setterModeratorService;
         }
         rqpFilesEntity.setSetNo(id);
         rqpFilesEntity.setQp_status("PENDING");
-        rqpFilesEntity.setUserId(setterModeratorMapping.getModeratorId());
-        rqpFilesEntity.setRollId(user.getRoleId()+1);
+        rqpFilesEntity.setUserId(Long.valueOf(sectionUserMappingEntity.getUserId()));
+        rqpFilesEntity.setRollId(sectionUserMappingEntity.getRoleId());
         rqpFilesEntity.setSubjectId(Long.valueOf(subjectId));
         rqpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
         rqpFilesEntity.setRemarks("");
+        rqpFilesEntity.setQpSetterId(user.getId());
+        rqpFilesEntity.setExamSeriesId(1);
         qpFilesService.saveQPs(rqpFilesEntity);
 
         return "redirect:/setterdashboard";
 
     }
 
-    @GetMapping("/reviewForward/{id}/{subjectId}")
+    @GetMapping("/reviewForward/{id}/{subjectId}/{setterId}")
     @Transactional
-    public String reviewForward( @PathVariable("id") int id,@PathVariable("subjectId") String subjectId) {
+    public String reviewForward( @PathVariable("id") int id,@PathVariable("subjectId")
+    String subjectId,Long setterId) {
         UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User user = userService.getUserByUserName(userDetails.getUsername());
 
         Subjects subjects = subjectsService.getSubjectById(subjectId);
 
-        QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByUser(user.getId(),subjectId,id);
+        QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByUser(user.getId(),subjectId,id,setterId);
         if(qpFilesEntity==null){
             qpFilesEntity=new QPFilesEntity();
         }
@@ -371,8 +408,9 @@ private SetterModeratorService setterModeratorService;
         qpFilesEntity.setRollId(user.getRoleId());
         qpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
         qpFilesEntity.setRemarks("");
+        qpFilesEntity.setQpSetterId(setterId);
         qpFilesService.saveQPs(qpFilesEntity);
-        QPFilesEntity rqpFilesEntity = qpFilesService.getQPFilesByUser(subjects.getSection_user_id(),subjectId,id);
+        QPFilesEntity rqpFilesEntity = qpFilesService.getQPFilesByUser((long) subjects.getSectionId(),subjectId,id,setterId);
         if(rqpFilesEntity==null){
             rqpFilesEntity=new QPFilesEntity();
         }
@@ -381,20 +419,17 @@ private SetterModeratorService setterModeratorService;
         }
         rqpFilesEntity.setSetNo(id);
         rqpFilesEntity.setQp_status("PENDING");
-        rqpFilesEntity.setUserId(subjects.getSection_user_id());
+        rqpFilesEntity.setUserId((long) subjects.getSectionId());
         rqpFilesEntity.setRollId(1);
         rqpFilesEntity.setSubjectId(Long.valueOf(subjectId));
         rqpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
         rqpFilesEntity.setRemarks("");
+        rqpFilesEntity.setQpSetterId(setterId);
         qpFilesService.saveQPs(rqpFilesEntity);
 
         return "redirect:/moderatordashboard";
 
     }
-
-
-
-
 
 
     @PostMapping("/updateQuestions")
@@ -403,15 +438,14 @@ private SetterModeratorService setterModeratorService;
             @RequestParam("qid") Long qid,
             @RequestParam(value = "instructions", required = false) String instructions,
             @RequestParam(value = "q_solution", required = false) String q_solution,
-            @RequestParam(value = "image_file", required = false) MultipartFile imageFile) {
-
+            @RequestParam(value = "image_file", required = false) MultipartFile imageFile,RedirectAttributes redirectAttributes) {
+        Logger logger = LoggerFactory.getLogger(this.getClass());
+        BitwiseQuestions question = qpTemplateService.getQuestionDetailsById(qid);
+        UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
+        User userEntity = userRepository.findByUserName(userDetails.getUsername());
+        Roles roles = rolesRepository.findById(Long.valueOf(userEntity.getRoleId())).get();
         try {
-            UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
-            User userEntity = userRepository.findByUserName(userDetails.getUsername());
-            Roles roles = rolesRepository.findById(Long.valueOf(userEntity.getRoleId())).get();
 
-
-            BitwiseQuestions question = qpTemplateService.getQuestionDetailsById(qid);
 
             question.setQ_desc(questionDescription);
             question.setInstructions(instructions);
@@ -423,24 +457,41 @@ private SetterModeratorService setterModeratorService;
                 byte[] imageBytes = imageFile.getBytes();
                 String base64Image = Base64.getEncoder().encodeToString(imageBytes);
                 question.setImage_path(base64Image);
-            }
-            else{
+            } else {
                 question.setImage_path(question.getImage_path());
             }
             qpTemplateService.saveQuestion(question);
+            redirectAttributes.addFlashAttribute("successMessage", "Question updated successfully!");
+
+            // ✅ Redirect based on Role
             if (roles.getId() == 2) {
-                return "redirect:/bitwisequestionsList?id="+question.getSetNo()+"&subjectId="+question.getSubjectId();
+                return "redirect:/bitwisequestionsList?id=" + question.getSetNo() + "&subjectId=" + question.getSubjectId();
             }
             if (roles.getId() == 3) {
-                return "redirect:/forwardQuestions/"+question.getSetNo()+"/"+question.getSubjectId();
+                return "redirect:/forwardQuestions/" + question.getSetNo() + "/" + question.getSubjectId();
             }
+
+        } catch (DataIntegrityViolationException e) {
+            logger.error("Unique constraint violation: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Duplicate entry! This question already exists.");
+        } catch (MaxUploadSizeExceededException e) {
+            logger.error("File size too large: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "File size exceeds limit.");
+        } catch (DataAccessException e) {
+            logger.error("Database error: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Database error occurred.");
         } catch (Exception e) {
-            e.printStackTrace();
-            return "";
+            logger.error("Unexpected error: " + e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred.");
+        }
+        if (roles.getId() == 2) {
+            return "redirect:/bitwisequestionsList?id=" + question.getSetNo() + "&subjectId=" + question.getSubjectId();
+        }
+        if (roles.getId() == 3) {
+            return "redirect:/forwardQuestions/" + question.getSetNo() + "/" + question.getSubjectId();
         }
         return "";
-
-}
+    }
     @GetMapping("/questionApprove/{id}")
     public String questionApprove(@PathVariable("id") Long qid) {
         try {
@@ -466,7 +517,7 @@ private SetterModeratorService setterModeratorService;
     @PostMapping("/reviewerApproval")
     public String processApproval( @RequestParam("qpointId") Long qpointId,
                                    @RequestParam("approved") String approved,
-                                   @RequestParam(value = "comments", required = false) String comments) {
+                                   @RequestParam(value = "comments", required = false) String comments,RedirectAttributes redirectAttributes) {
         UserDetails userDetails=(UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User user = userService.getUserByUserName(userDetails.getUsername());
         BitwiseQuestions question = qpTemplateService.getQuestionDetailsById(qpointId);
@@ -474,51 +525,66 @@ private SetterModeratorService setterModeratorService;
         question.setQp_reviewer_status(approved);
         question.setReviewer_comments(comments);
         qpTemplateService.saveQuestion(question);
-        return "redirect:/reviewerQuestionsList?id="+question.getSetNo()+"&subjectId="+question.getSubjectId();
+        redirectAttributes.addFlashAttribute("successMessage", approved+" successfully!");
+        return "redirect:/moderatordashboard";
     }
 
     @PostMapping("/setWiseReviewerApproval")
     public String setWiseReviewerApproval( @RequestParam("setId") int setId,
+                                           @RequestParam("setterId") Long setterId,
                                    @RequestParam("subjectId") String subjectId,
                                    @RequestParam(value = "comments") String comments,
-                                           @RequestParam(value = "approved") String approved                           ) {
+                                           @RequestParam(value = "approved") String approved,RedirectAttributes redirectAttributes) {
         UserDetails userDetails=(UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User user = userService.getUserByUserName(userDetails.getUsername());
 
-        QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByUser(user.getId(),subjectId,setId);
+        QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByUser(user.getId(),subjectId,setId,setterId);
 
         qpFilesEntity.setQp_status(approved);
         qpFilesEntity.setSubjectId(Long.valueOf(subjectId));
         qpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
         qpFilesEntity.setRemarks(comments);
+        qpFilesEntity.setQpSetterId(setterId);
         qpFilesService.saveQPs(qpFilesEntity);
        Subjects subject= subjectsService.getSubjectById(subjectId);
-       User userById = userService.getUserById(String.valueOf(subject.getSection_user_id()));
-        QPFilesEntity rqpFilesEntity = qpFilesService.getQPFilesByUser
-                (subject.getSection_user_id(),subjectId,setId);
-        if(rqpFilesEntity==null){
-            rqpFilesEntity=new QPFilesEntity();
-        }
-        else {
-            rqpFilesEntity.setId(rqpFilesEntity.getId());
-        }
-        rqpFilesEntity.setSetNo(setId);
-        rqpFilesEntity.setQp_status("PENDING");
-        rqpFilesEntity.setUserId(subject.getSection_user_id());
-        rqpFilesEntity.setRollId(userById.getRoleId());
-        rqpFilesEntity.setSubjectId(Long.valueOf(subjectId));
-        rqpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
-        rqpFilesEntity.setRemarks("");
-        qpFilesService.saveQPs(rqpFilesEntity);
-        return "redirect:/reviewerQuestionsList?id="+setId+"&subjectId="+subjectId;
+       if(approved.equalsIgnoreCase("REJECTED")) {
+
+           // User userById = userService.getUserById(String.valueOf(subject.getSection_user_id()));
+           QPFilesEntity rqpFilesEntity = qpFilesService.getQPFilesByRollIdAndSubjectIdAndSetNoAndSetterId(2, subjectId, setId,setterId);
+           User setterUser = userService.getUserById(rqpFilesEntity.getUserId()+"");
+           if (rqpFilesEntity == null) {
+               rqpFilesEntity = new QPFilesEntity();
+           } else {
+               rqpFilesEntity.setId(rqpFilesEntity.getId());
+           }
+           rqpFilesEntity.setSetNo(setId);
+           rqpFilesEntity.setQp_status("Re-Submit");
+           // rqpFilesEntity.setUserId(subject.getSection_user_id());
+           //rqpFilesEntity.setRollId(userById.getRoleId());
+           rqpFilesEntity.setSubjectId(Long.valueOf(subjectId));
+           rqpFilesEntity.setQp_status_date(LocalDateTime.now() + "");
+           rqpFilesEntity.setRemarks("");
+           rqpFilesEntity.setQpSetterId(setterId);
+           qpFilesService.saveQPs(rqpFilesEntity);
+           String emailBody = "Dear User,\n\n" +
+                   "Your QP for the "+subject.getSubjectCode()+"-"+subject.getSubject_name()+" got rejected.\n\n" +
+                   "Login to the QP Setter Application and check the remarks given for the Rejected QP.\n\n" +
+                   "Implement the changes/suggestions provided and re-submit/forward the QP to admin for review and approval.\n\n" +
+                   "Thanks\n" +
+                   "Admin\n" +
+                   "SOQPRS";
+
+           //send mail if reject the file
+           sendMail.sendHtmlmail(setterUser.getEmail(),
+                   "GTU SOQPRS - Your QP for the "+subject.getSubjectCode()+" got rejected, check and re-submit", emailBody);
+
+
+
+       }
+        redirectAttributes.addFlashAttribute("successMessage","QP "+approved+" successfully");
+
+        return "redirect:/moderatordashboard";
     }
-
-
-
-
-
-
-
     private String saveBase64Image(String base64Image, String outputPath) throws IOException {
         byte[] imageBytes = Base64.getDecoder().decode(base64Image);
         File outputFile = new File(outputPath);
@@ -527,77 +593,6 @@ private SetterModeratorService setterModeratorService;
         }
         return outputFile.getAbsolutePath();  // Return the saved file path
     }
-    @GetMapping("/generatePdf/{id}")
-    public String generatePdf(HttpServletRequest request,Model model, @PathVariable("id") int setNo) throws IOException, ServletException, DocumentException {
-        // Fetch User & Appointment Details
-        UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
-        User userEntity = userRepository.findByUserName(userDetails.getUsername());
-        Appointment appointment = appointmentService.getAppointmentDetails(userDetails.getUsername());
-        List<BitwiseQuestions> questionsList = qpTemplateService.getQuestionsList(appointment.getSubject_id(), setNo,userEntity.getId());
 
-        // Process question descriptions and images
-        for (BitwiseQuestions qpoint : questionsList) {
-            if (qpoint.getQ_desc() != null) {
-                qpoint.setQ_desc(cleanHtmlForPdf(qpoint.getQ_desc()));
-            }
-            if (qpoint.getImage_path() != null) {
-                String imagePath = "data:image/png;base64," + qpoint.getImage_path();
-                qpoint.setImage_path(imagePath);
-            }
-        }
-
-        List<QPTemplate> qpTemplateList = qpTemplateService.getQuestionTemplate(Integer.parseInt(appointment.getSubject_id()));
-        for (QPTemplate qpTemplate : qpTemplateList) {
-            qpTemplate.setInstructions(String.format(qpTemplate.getInstructions(), qpTemplate.getNo_of_bits_answer()));
-        }
-        model.addAttribute("qpTemplateList", qpTemplateList);
-
-        model.addAttribute("watermark", userDetails.getUsername()+","+request.getRemoteAddr()+","+LocalDateTime.now());
-
-        model.addAttribute("subjects", subjectsService.getSubjectById(appointment.getSubject_id()));
-        model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no)));
-             // Define PDF File Paths
-        String fileName = "QuestionPaperPDF_" + userDetails.getUsername() + ".pdf";
-        String tempFileName = "Temp_" + fileName; // Temporary PDF before watermark
-
-        String commonPath = filePath + File.separator;
-        String ourPath = "QuestionBank" + File.separator + userDetails.getUsername() + File.separator;
-        String serverPath = commonPath + ourPath;
-
-        FileUploadUtil fileUpload = new FileUploadUtil();
-        fileUpload.createRequiredDirectoryIfNotExists(commonPath, ourPath);
-
-        File tempPdf = new File(serverPath, tempFileName);
-        File finalPdf = new File(serverPath, fileName);
-
-        // Convert HTML to PDF using wkhtmltopdf
-        htmlToPdfService.generatePdfFromHtml(model, tempPdf.getAbsolutePath());
-
-        // Apply Watermark (if required)
-        htmlToPdfService.applyWatermark(tempPdf, finalPdf);
-
-        // Delete temporary file
-        tempPdf.delete();
-
-        String  returnFilePath = ourPath + fileName;
-        returnFilePath = returnFilePath.replace("\\", "/"); // ✅ Replace backslashes with forward slashes
-
-
-        QpUploadDetailsEntity qpUploadDetails = qpUploadService.getQPBySetNoAndSubjectId(1, Integer.parseInt(appointment.getSubject_id()));
-        if (qpUploadDetails == null) {
-            qpUploadDetails = new QpUploadDetailsEntity();
-        }
-        qpUploadDetails.setSetNo(setNo);
-        qpUploadDetails.setQp_reviewer_status("APPROVED");
-        qpUploadDetails.setQp_reviewed_date(LocalDateTime.now() + "");
-        qpUploadDetails.setQp_reviewer_id(Math.toIntExact(userEntity.getId()));
-        qpUploadDetails.setSubjectId(Integer.parseInt(appointment.getSubject_id()));
-        qpUploadDetails.setQp_file(returnFilePath);
-
-        qpUploadService.saveQPs(qpUploadDetails);
-
-        return "redirect:/viewPDF?fileinfo=" + returnFilePath + "&filename=" + fileName;
-
-    }
 }
 

@@ -23,7 +23,7 @@ public class FacultyData {
     @Column(name = "mobile_number", unique = true)
     private String mobileNumber;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "college_code")

@@ -15,4 +15,10 @@ public interface SubjectsRepository  extends JpaRepository<Subjects, Long> {
     Subjects findBySubjectCode(String subjectCode);
 
     List<Subjects> findByCourseId(String courseId);
+
+    List<Subjects> findByCourseIdAndSectionId(String courseId, Integer sectionId);
+
+    Subjects findBySubjectCodeAndSectionId(String subjectCode, Integer sectionId);
+
+    List<Subjects> findByCourseIdInOrderBySubjectCodeAsc(List<String> courseIds);
 }

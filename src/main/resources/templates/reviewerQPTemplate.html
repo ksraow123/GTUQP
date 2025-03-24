@@ -60,15 +60,14 @@
                 <div class="col-12">
                     <div class="cards">
                         <div class="card border-0">
-
+                            <p th:if="${successMessage}" class="text-danger" th:text="${successMessage}"></p>
+                            <p th:if="${errorMessage}" class="text-danger" th:text="${errorMessage}"></p>
                             <h2>
                                 Subject Details: <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
 
                             </h2>
                             <p>Max. Marks: <span th:text="${subject.max_marks}"></span> |
-                                <a th:if="${subject.syllabus}" th:href="@{${subject.syllabus}}" target="_blank" title="View Syllabus" class="text-primary">View Syllabus</a>
-                                <span th:unless="${subject.syllabus}">No syllabus available</span></p>
-
+                                <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
                             <!-- Modal or Form Container -->
                             <div id="editModal" class="modal fade" tabindex="-1" role="dialog">
                                 <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
@@ -149,10 +148,8 @@
                                             <th class="text-center">Marks</th>
                                             <th class="text-center">Instructions</th>
                                             <th class="text-center">Question</th>
+                                            <th class="text-center">Solution</th>
                                             <th class="text-center">Image </th>
-                                            <th class="text-center">Review Status</th>
-
-                                            <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -166,44 +163,31 @@
                                             <td th:text="${qpoint.instructions}">Instructions</td>
                                             <td th:utext="${qpoint.q_desc}">Question</td>
                                             <td>
+                                                <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
+                                                   onclick="showSolution(this)"
+                                                   th:data-solution="${qpoint.q_solution}">View Solution</a>
+                                            </td>
+                                            <td>
                                                 <img th:if="${qpoint.image_path != null}"
                                                      th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
                                                      alt="Uploaded Image" width="100" height="100"></td>
 
-                                            <td th:utext="${qpoint.qp_reviewer_status}">Review Status</td>
-                                            <td>
-
-
-<!--                                                <a href="javascript:void(0);" class="btn btn-sm btn-info edit-btn mb-2"-->
-<!--                                                   th:data-id="${qpoint.id}" title="Edit">-->
-<!--                                                    Edit-->
-<!--                                                </a>-->
-
-                                                <a th:href="@{/questionApprove/{id}(id=${qpoint.id})}" class="btn btn-sm btn-success mb-2" title="Approve">
-                                                    Approve
-                                                </a>
-                                            </td>
-
                                         </tr>
                                         </tbody>
 
-                                                <a th:href="@{/previewPdf/{id}/{subjectId}(id=${setNo}, subjectId=${subject.id})}" class="btn btn-sm btn-primary me-2" title="preview" target="_blank">
+                                        <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-primary me-2" title="preview" target="_blank">
                                                     Preview
                                                 </a>
-                                                <a href="#" th:if="${isApproved}" class="btn btn-sm btn-success me-2" title="Approve"
-                                                   th:data-id="${setNo} + '/' + ${subject.id}"
+                                                <a href="#"  class="btn btn-sm btn-success me-2" title="Approve"
+                                                   th:data-id="${setNo} + '/' + ${subject.id}+ '/'+ ${setterId}"
                                                    onclick="openSetWiseApprovalModal(this,'a')">
-                                                    Approved - Send to Admin
+                                                    Approve
                                                 </a>
-                                        <a href="#" th:unless="${isApproved}" class="btn btn-sm btn-success me-2" title="Approve"
-                                           th:data-id="${setNo} + '/' + ${subject.id}"
-                                           onclick="openSetWiseApprovalModal(this,'u')">
-                                            Approved - Send to Admin
-                                        </a>
+
                                                 <a href="#" class="btn btn-sm btn-danger me-2" title="Reject"
-                                                   th:data-id="${setNo} + '/' + ${subject.id}"
+                                                   th:data-id="${setNo} + '/' + ${subject.id}+ '/'+ ${setterId}"
                                                    onclick="openSetWiseApprovalModal(this,'r')">
-                                                    Rejected - Send to Admin
+                                                   Reject and Opened for Resubmit by QP setter
                                                 </a>
 
                                     </table>
@@ -218,6 +202,23 @@
     </div>
 </div>
 
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="solutionModal" tabindex="-1" aria-labelledby="solutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="solutionModalLabel">Solution</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="solutionContent"></p> <!-- Solution text will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Include Common Scripts -->
 <div th:replace="fragments/scripts :: scripts"></div>
@@ -297,7 +298,7 @@ alert("please approve all questions");
 }
 else{
     const dataId = element.getAttribute("data-id");
-    const [id, subjectId] = dataId.split('/');
+    const [id, subjectId,setterId] = dataId.split('/');
    // alert(i);  // debugging alert
 
     // Toggle approve/reject based on 'i'
@@ -316,6 +317,7 @@ else{
     // Set values for the hidden inputs
     $("#setId").val(id);
     $("#subjectId").val(subjectId);
+    $("#setterId").val(setterId);
 
     // Show the modal
     $("#reviewerApprovalModal").modal("show");
@@ -356,6 +358,7 @@ var csrfToken = $("meta[name='_csrf']").attr("content");
                 <form id="approvalForm" th:action="@{/setWiseReviewerApproval}" method="post">
                     <input type="hidden" id="setId" name="setId" />
                     <input type="hidden" id="subjectId" name="subjectId" />
+                    <input type="hidden" id="setterId" name="setterId" />
 
                     <label class="font-weight-bold">Decision:</label>
                     <div class="form-check" id="approvediv">
@@ -423,5 +426,13 @@ var csrfToken = $("meta[name='_csrf']").attr("content");
         </div>
     </div>
 </div>
+<script>
+    function showSolution(link) {
+        var solutionText = link.getAttribute("data-solution"); // Get solution text
+        document.getElementById("solutionContent").innerHTML = solutionText; // Insert solution into modal
+        var solutionModal = new bootstrap.Modal(document.getElementById('solutionModal'));
+        solutionModal.show(); // Show the modal
+    }
+</script>
 
 </html>

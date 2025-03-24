@@ -3,6 +3,7 @@ package in.coempt.service.impl;
 import in.coempt.entity.*;
 import in.coempt.repository.SetterModeratorRepository;
 import in.coempt.repository.UserDataRepository;
+import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.util.SecurityUtil;
 import in.coempt.vo.FacultyDataDTO;
@@ -40,15 +41,18 @@ public class CSVServiceImpl implements CSVService {
     private final UserService userService;
     private final AppointmentService appointmentService;
     private final SetterModeratorRepository moderatorRepository;
-
-    @Autowired
-
-    private  FacultyDataService facultyDataService;
+    private final UserRepository userRepository;
+    private final SectionUserMappingService sectionUserMappingService;
+    private final FacultyDataService facultyDataService;
     @Transactional
     public ArrayList<Object> saveCSV(MultipartFile file) {
         List<FacultyDataDTO> successList = new ArrayList<>();
         List<FacultyDataDTO> failureList = new ArrayList<>();
         List<UserData> userList = new ArrayList<>();
+        UserDetails userDetails=(UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
+        User userEntity = userRepository.findByUserName(userDetails.getUsername());
+        SectionUserMappingEntity mappingEntity=
+                sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
             for (CSVRecord record : csvParser) {
@@ -69,16 +73,16 @@ public class CSVServiceImpl implements CSVService {
                 faculty.setEmail(record.get("email"));
                 faculty.setOrderDate(LocalDateTime.now()+"");
                 faculty.setLastDateToSubmit(record.get("last date to submit"));
-                faculty.setNoOfSets(Integer.parseInt(record.get("no of sets")));
+                faculty.setNoOfSets(1);
                 faculty.setCollegeCode(record.get("college code"));
-                faculty.setRoleId(record.get("role id"));
-                int roleId = faculty.getRoleId().equalsIgnoreCase("S") ? 2 : 3;
-                User userExists = userService.getUserByMobileNoAndEmailAndRoleId(faculty.getMobileNo(), faculty.getEmail(), roleId);
+                faculty.setRoleId(2);
+                //int roleId = faculty.getRoleId().equalsIgnoreCase("S") ? 2 : 3;
+                User userExists = userService.getUserByMobileNoAndEmailAndRoleId(faculty.getMobileNo(), faculty.getEmail(), 2);
 
                 if (userExists != null) {
                     failureList.add(faculty);
                 } else {
-                    UserData user = getUserData(faculty);
+                    UserData user = getUserData(faculty,mappingEntity.getSectionId());
                     userList.add(user);
                     successList.add(faculty);
                 }
@@ -151,15 +155,23 @@ public class CSVServiceImpl implements CSVService {
 
     }
 
-    private UserData getUserData (FacultyDataDTO data){
+    private UserData getUserData (FacultyDataDTO data,Integer sectionId){
         String customPassword = RandomUtils.nextLong(10000, 99999) + "";
-        Subjects subjects = subjectsService.getSubject_code(data.getSubjectCode());
-        int roleId = data.getRoleId().equalsIgnoreCase("S") ? 2 : 3;
+
+        Subjects subjects=null;
+        if(data.getRoleId()==1) {
+
+            subjects = subjectsService.getSubjectCodeAndSectionId(data.getSubjectCode(), sectionId);
+        }if(data.getRoleId()==3) {
+
+            subjects = subjectsService.getSubject_code(data.getSubjectCode());
+        }
+        int roleId = 2;
         UserData userData = new UserData();
         User user = new User();
         user.setFirstName(data.getFirstName());
         user.setLastName(data.getLastName());
-        user.setIsActive(0);
+        user.setIsActive(1);
         user.setMobileNo(data.getMobileNo());
         user.setEmail(data.getEmail());
 
@@ -177,7 +189,7 @@ public class CSVServiceImpl implements CSVService {
         userData.setLast_date_to_submit(data.getLastDateToSubmit());
         userData.setNo_of_sets(data.getNoOfSets());
         userData.setSubjectId(Math.toIntExact(subjects.getId()));
-
+        userData.setExamSeriesId(1);
         userData.setRole_id(roleId);
         return userData;
 

@@ -59,7 +59,7 @@ public class QPTemplateServiceImpl implements QPTemplateService {
     }
 
     @Override
-    public List<BitwiseQuestions> getReviewerQuestionsList(String subjectId, int setNo, Long reviewerId) {
-        return bitWiseQuestionsRepository.findBySubjectIdAndQpReviewerIdAndSetNo(Integer.parseInt(subjectId), Math.toIntExact(reviewerId),setNo);
+    public List<BitwiseQuestions> getReviewerQuestionsList(String subjectId, int setNo, Long reviewerId,Long setterId) {
+        return bitWiseQuestionsRepository.findBySubjectIdAndQpReviewerIdAndSetNoAndQpSetterId(Integer.parseInt(subjectId), Math.toIntExact(reviewerId),setNo,setterId);
     }
 }

@@ -14,18 +14,18 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private ReportDao reportDao;
     @Override
-    public List<AdminDashBoardVo> getAdminDashBoard() {
-        return reportDao.getAdminDashBoard();
+    public List<AdminDashBoardVo> getAdminDashBoard(Integer userId) {
+        return reportDao.getAdminDashBoard(userId);
     }
     @Override
-    public List<AdminDashBoardVo> getSubjectWiseAdminDashBoard() {
-        return reportDao.getSubjectWiseAdminDashBoard();
+    public List<AdminDashBoardVo> getSubjectWiseAdminDashBoard(Integer userId,String sessionIds) {
+        return reportDao.getSubjectWiseAdminDashBoard(userId,sessionIds);
     }
 
     @Override
-    public List<RemunerationReportVo> getRemunerationReport() {
+    public List<RemunerationReportVo> getRemunerationReport(Integer userId,String sectionIds) {
 
-        return reportDao.getRemunerationReport();
+        return reportDao.getRemunerationReport(userId,sectionIds);
 
     }
 }

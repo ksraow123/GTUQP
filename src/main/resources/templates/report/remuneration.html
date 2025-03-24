@@ -8,23 +8,63 @@
             <div class="cards">
                 <div class="card border-0">
                     <h2>Remuneration Report</h2>
-
-
                     <div class="row">
-
+                        <form th:action="@{/subject/remunerationReport}"  method="post" >
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Course Name </label>
+                                            <select class="form-select" id="courseCode" required  name="course_id" >
+                                                <option value="">Select</option>
+                                                <option value="All">All</option>
+                                                <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Year / Sem </label>
+                                            <select class="form-select" id="yearsem" required  name="semester" >
+                                                <option value="All">All</option>
+                                                <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Subject </label>
+                                            <select class="form-select" id="subject" required  name="subject_id" >
+                                                <option value="All">All</option>
+                                                <option th:each="subject : ${subjectsList}"
+                                                        th:value="${subject.id}"
+                                                        th:text="|${subject.subjectCode} - ${subject.subject_name}|">
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3 mt-4">
+                                            <button class="btn btn-primary">Search</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         <div class="col-12">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="example">
                                         <thead>
                                         <tr>
                                             <th>S.No</th>
-                                            <th>User Name</th>
+                                            <th>QP Setter ID</th>
                                             <th>Name</th>
-                                            <th>Role</th>
+                                            <th>College Code</th>
+                                           <!-- <th>Role</th>-->
                                             <th>Subject Code</th>
                                             <th>Subject Name</th>
-                                            <th>No. of Sets</th>
-                                            <th>No. of Sets Completed</th>
+                                           <!-- <th>No. of Sets</th>-->
+                                            <th>Sets Completed</th>
                                             <th>Rem. per set.</th>
                                             <th>Total Amt</th>
                                             <th>Account No</th>
@@ -32,18 +72,21 @@
                                             <th>Bank Name</th>
                                             <th>Branch </th>
                                             <th>Branch Address</th>
+                                            <th>Teach./Ind.Exp.</th>
+                                            <th>Residential Address</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr th:each="report,iterStat : ${remunerationReports}">
                                             <td th:text="${iterStat.count}"></td>
                                             <td th:text="${report.user_name}"></td>
-                                            <td th:text="${report.name}"></td>
-                                            <td th:text="${report.role}"></td>
+                                            <td  th:text="${(report.first_name ?: '') + '  ' + (report.last_name ?: '')}"></td>
+                                            <td  th:text="${(report.college_code ?: '') + '  ' + (report.college_name ?: '')}"></td>
+                                           <!-- <td th:text="${report.role}"></td>-->
                                             <td th:text="${report.subject_code}"></td>
                                             <td th:text="${report.subject_name}"></td>
-                                            <td th:text="${report.no_of_sets}"></td>
-                                            <td th:text="${report.no_of_sets_completed}"></td>
+                                          <!--  <td th:text="${report.no_of_sets}"></td>-->
+                                            <td th:text="${report.setsCompleted}"></td>
                                             <td></td>
                                             <td></td>
                                             <td th:text="${report.account_no}"></td>
@@ -51,6 +94,8 @@
                                             <td th:text="${report.bank_name}"></td>
                                             <td th:text="${report.branch_details}"></td>
                                             <td th:text="${report.branch_address}"></td>
+                                            <td th:text="${#strings.defaultString(report.teaching_experience, 'N/A') + '/' + #strings.defaultString(report.industry_experience, 'N/A')}"></td>
+                                            <td th:text="${report.residential_address}"></td>
                                         </tr>
                                         </tbody>
                                     </table>

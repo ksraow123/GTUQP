@@ -11,7 +11,48 @@
 
 
                     <div class="row">
-
+                        <form th:action="@{/adminDashboard}"  method="post" >
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Course Name </label>
+                                        <select class="form-select" id="courseCode" required  name="course_id" >
+                                            <option value="">Select</option>
+                                            <option value="All">All</option>
+                                            <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Year / Sem </label>
+                                        <select class="form-select" id="yearsem" required  name="semester" >
+                                            <option value="All">All</option>
+                                            <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Subject </label>
+                                        <select class="form-select" id="subject" required  name="subject_id" >
+                                            <option value="All">All</option>
+                                            <option th:each="subject : ${subjectsList}"
+                                                    th:value="${subject.id}"
+                                                    th:text="|${subject.subjectCode} - ${subject.subject_name}|">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3 mt-4">
+                                        <button class="btn btn-primary">Search</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </form>
                         <div class="col-12">
                             <div class="table-responsive">
                             <table class="table table-bordered" id="example">
@@ -19,17 +60,13 @@
                                 <tr>
                                     <th>S.No.</th>
                                     <th>Course</th>
-                                    <th>Year</th>
-                                    <th>Sem</th>
+                                    <!--<th>Year</th>-->
+                                    <th>Year/Sem</th>
                                     <th>Subject</th>
                                     <th>Subject - Name</th>
-                                    <th>No. Of sets</th>
-                                    <th>Set No</th>
                                     <th>Assigned Setters</th>
-                                    <th>Assigned Moderators</th>
                                     <th>QP Setting Status</th>
                                     <th>QP Review status</th>
-                                    <th>Section Team Status</th>
                                     <th>Forward to Repository</th>
                                 </tr>
                                 </thead>
@@ -37,16 +74,12 @@
                                 <tr th:each="report, iterStat : ${adminDashBoardVoList}">
                                     <td th:text="${iterStat.count}"></td>
                                     <td th:text="${report.course_name}"></td>
-                                    <td th:text="${report.year}"></td>
+                                   <!-- <td th:text="${report.year}"></td>-->
                                     <td th:text="${report.semester}"></td>
                                     <td th:text="${report.subject_code}"></td>
                                     <td th:text="${report.subject_name}"></td>
-                                    <td th:text="${report.no_of_sets}"></td>
-                                    <td th:text="${report.set_no}"></td>
                                     <td th:text="${report.setter_name}"></td>
-                                    <td th:text="${report.reviewer_name}"></td>
                                     <td th:text="${report.qp_setter_status}"></td>
-                                    <td th:text="${report.qp_reviewer_status}"></td>
                                     <td th:text="${report.section_team_status}"></td>
                                     <td th:text="${report.forward_to_repo_status}"></td>
                                 </tr>

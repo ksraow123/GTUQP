@@ -61,14 +61,17 @@
         <div th:replace="fragments/navbar :: navbar"></div>
 
         <div class="container-fluid p-3">
+            <p th:if="${successMessage}" class="text-danger" th:text="${successMessage}"></p>
+            <p th:if="${errorMessage}" class="text-danger" th:text="${errorMessage}"></p>
             <div class="row">
                 <div class="col-12">
                     <div class="cards">
                         <div class="card border-0">
                             <h2>
                                 <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
-                              <small> <a th:if="${subject.syllabus}" th:href="@{${subject.syllabus}}" target="_blank" title="View Syllabus" class="text-link">View Syllabus</a>
-                                    <span th:unless="${subject.syllabus}">(No syllabus available)</span> |  Max. Marks:<span th:text="${subject.max_marks}"></span></small>
+                              <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
+                                    |  Max. Marks:<span th:text="${subject.max_marks}"></span>
+                              </small>
                             </h2>
 
                             <!-- Modal or Form Container -->
@@ -141,9 +144,11 @@
                         <div class="row">
                             <div class="col-12">
 
-                                    <h2>Set No: <b th:text="${setNo}"></b></h2>
+                                    <h2>Set No: <b th:text="${setNo}"></b> ( <a href="#" class="link-primary" th:if="${sectionTeamRemarks != null and sectionTeamRemarks != ''}"
+                                                                             onclick="showRemarks(this)"
+                                                                             th:data-remarks="${sectionTeamRemarks}">Rejected- View Remarks</a> )</h2>
 
-                                <a th:href="@{/previewPdf/{id}/{subjectId}(id=${setNo}, subjectId=${subject.id})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
                                     Preview
                                 </a>
                                     <table class="table table-bordered" >
@@ -157,6 +162,7 @@
                                             <th>Marks</th>
                                             <th>Instructions</th>
                                             <th>Question</th>
+                                            <th>Solution</th>
                                             <th>Image</th>
                                             <th>Action</th>
                                         </tr>
@@ -171,6 +177,11 @@
                                             <td th:text="${qpoint.marks}">Marks</td>
                                             <td th:text="${qpoint.instructions}">Instructions</td>
                                             <td th:utext="${qpoint.q_desc}">Question</td>
+                                            <td>
+                                                <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
+                                                   onclick="showSolution(this)"
+                                                   th:data-solution="${qpoint.q_solution}">View Solution</a>
+                                            </td>
                                             <td>
                                                 <img th:if="${qpoint.image_path != null}"
                                                      th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
@@ -273,4 +284,57 @@ tinymce.get("q_solution").setContent("<p></p>");
 });
 
 </script>
+<script>
+    function showSolution(link) {
+        var solutionText = link.getAttribute("data-solution"); // Get solution text
+        document.getElementById("solutionContent").innerHTML = solutionText; // Insert solution into modal
+        var solutionModal = new bootstrap.Modal(document.getElementById('solutionModal'));
+        solutionModal.show(); // Show the modal
+    }
+</script>
+<script>
+    function showRemarks(link) {
+        var remarksText = link.getAttribute("data-remarks"); // Get solution text
+        document.getElementById("remarksContent").innerHTML = remarksText; // Insert solution into modal
+        var remarksModal = new bootstrap.Modal(document.getElementById('remarksModal'));
+        remarksModal.show(); // Show the modal
+    }
+</script>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="solutionModal" tabindex="-1" aria-labelledby="solutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="solutionModalLabel">Solution</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="solutionContent"></p> <!-- Solution text will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="remarksModal" tabindex="-1" aria-labelledby="remarksModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="remarksModalLabel">Remarks</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="remarksContent"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </html>

@@ -488,5 +488,7 @@ a.sidebar-link:hover, a.active {
 	}
 }
 
-
+.dt-length, .dt-buttons {float: left; margin-right:5px;}
+		.dt-search{float:right;}
+		.dt-buttons  .btn{border:1px solid #C7C7C7; margin-bottom: 5px;}
 

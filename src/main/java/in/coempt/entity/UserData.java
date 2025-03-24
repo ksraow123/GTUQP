@@ -26,7 +26,8 @@ public class UserData {
     private int subjectId;
     private int no_of_sets;
     private int role_id;
-
+    @Column(name="exam_series_id")
+    private int examSeriesId;
     private String office_order_date;
     private String last_date_to_submit;
     private String college_id;

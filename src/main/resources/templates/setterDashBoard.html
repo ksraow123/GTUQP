@@ -5,55 +5,14 @@
     <div class="row">
         <div class="col-12">
             <div class="cards">
+
+
                 <div class="card border-0">
-                    <h2>Dashboard</h2>
+                    <h2> Dashboard</h2>
 
 
                     <div class="row">
-                        <div class="col-12">
-                            <table class="table table-bordered" id="example">
-                                <thead>
-                                <tr>
-                                    <th>Course Name</th>
-                                    <th>Year</th>
-                                    <th>Sem.</th>
-                                    <th>Subject Code</th>
-                                    <th>Subject Name</th>
-                                    <th>Syllabus</th>
-                                    <th>No. of Sets</th>
-                                    <th>Last Date for Submission</th>
-                                    <th>Sets Pending</th>
-                                    <th>Sets Forwarded</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="appointment : ${qpSetterDashBoardList}">
-                                    <td th:text="${appointment.course_name}"></td>
-                                    <td th:text="${appointment.year}"></td>
-                                    <td th:text="${appointment.semester}"></td>
-                                    <td th:text="${appointment.subject_code}"></td>
-                                    <td th:text="${appointment.subject_name}"></td>
-                                    <td>
-                                        <a th:if="${appointment.syllabus}" th:href="@{${appointment.syllabus}}" target="_blank" title="View Syllabus">View Syllabus</a>
-                                        <span th:unless="${appointment.syllabus}">No syllabus available</span>
-                                    </td>
-                                    <td th:text="${appointment.no_of_sets}"></td>
-                                    <td th:text="${appointment.submission_date}"></td>
-                                    <td th:text="${(appointment.no_of_sets ?: 0) - (appointment.no_of_sets_forwarded ?: 0)}"></td>
-                                    <td th:text="${appointment.no_of_sets_forwarded}"></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
-                </div>
-
-                <div class="card border-0">
-                    <h2> Set wise Dashboard</h2>
-
-
-                    <div class="row">
                         <div class="col-12">
                             <table class="table table-bordered" id="example">
                                 <thead>
@@ -64,7 +23,6 @@
                                     <th class="text-center">Subject Code</th>
                                     <th class="text-center">Subject Name</th>
                                     <th class="text-center">Syllabus</th>
-                                    <th class="text-center">Set No.</th>
                                     <th class="text-center">Total Bits</th>
                                     <th class="text-center">Bits Compl.</th>
                                     <th class="text-center">Bits Pending</th>
@@ -75,6 +33,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <!-- Iterate over the setwiseDashBoard list -->
                                 <tr th:each="appointment : ${setwiseDashBoard}">
                                     <td th:text="${appointment.course_name}" class="text-center"></td>
                                     <td th:text="${appointment.year}" class="text-center"></td>
@@ -82,44 +41,225 @@
                                     <td th:text="${appointment.subject_code}" class="text-center"></td>
                                     <td th:text="${appointment.subject_name}" class="text-center"></td>
                                     <td class="text-center">
-                                        <a th:if="${appointment.syllabus}" th:href="@{${appointment.syllabus}}" target="_blank" title="View Syllabus">View</a>
-                                        <span th:unless="${appointment.syllabus}">No syllabus available</span>
+                                        <!-- <a th:if="${appointment.syllabus}" th:href="@{${appointment.syllabus}}" target="_blank" title="View Syllabus">View</a>-->
+                                        <a  href="https://syllabus.gtu.ac.in/" class="link-primary" target="_blank" title="View Syllabus">View</a>
+                                        <!--<span th:unless="${appointment.syllabus}">No syllabus available</span>-->
                                     </td>
-                                    <td th:text="${appointment.setno}" class="text-center"></td>
+
                                     <td th:text="${appointment.total_questions}" class="text-center"></td>
                                     <td th:text="${appointment.no_of_questions}" class="text-center"></td>
                                     <td th:text="${appointment.pending_questions}" class="text-center"></td>
-                                    <td th:text="${appointment.qp_status} ?: 'Pending'" class="text-center"></td>
-                                    <td th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}" class="text-center">
-                                        <a th:href="@{/previewPdf/{id}/{subjectId}(id=${appointment.setno}, subjectId=${appointment.subject_id})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                    <td class="text-center">
+                                        <div th:text="${appointment.qp_status != null ? appointment.qp_status : 'Pending'}"></div>
+                                        <a href="#" class="link-primary"
+                                           th:if="${not #strings.isEmpty(appointment.remarks)}"
+                                           onclick="showRemarks(this)"
+                                           th:data-remarks="${appointment.remarks}"><div>REJECTED</div> <div>View Remarks</div> </a>
+                                    </td>
+
+                                    <!-- Preview Button -->
+                                    <td class="text-center">
+                                        <a th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}"
+                                           th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${appointment.setno}, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}"
+                                           class="btn btn-sm btn-warning" title="preview" target="_blank">
                                             Preview
                                         </a>
                                     </td>
-                                    <td th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}" class="text-center">
-                                        <a th:href="@{/bitwisequestionsList(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
+
+                                    <!-- QP Authoring Button -->
+                                    <td class="text-center">
+                                        <a th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}"
+                                           th:href="@{/bitwisequestionsList(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
                                            class="btn btn-sm btn-info">
                                             QP Authoring
                                         </a>
                                     </td>
-                                    <td th:if="${appointment.no_of_questions == appointment.total_questions and appointment.qp_status != 'FORWARDED'}" class="text-center">
-                                        <a th:href="@{/forwardQuestions/{id}/{subjectId}(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
+
+                                    <!-- Forward to Admin Button -->
+                                    <td class="text-center">
+                                        <a th:if="${appointment.no_of_questions == appointment.total_questions and appointment.qp_status != 'FORWARDED'}"
+                                           href="#"
                                            class="btn btn-sm btn-warning"
-                                           title="Forward Questions">
-                                            Forward to Moderator
+                                           title="Forward Questions"
+                                           th:data-id="${appointment.setno}"
+                                           th:data-subject-id="${appointment.subject_id}"
+                                           th:data-setter-id="${appointment.user_id}"
+                                           th:data-subject-code="${appointment.subject_code}"
+                                           th:data-subject-name="${appointment.subject_name}"
+                                           onclick="openForwardModal(this)">
+                                            Forward to Admin
                                         </a>
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
 
                 </div>
 
+                <div class="card border-0">
+                    <h2>View History</h2>
 
+
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered" id="example1">
+                                <thead>
+                                <tr>
+                                    <th>S No.</th>
+                                    <th>Course Name</th>
+                                    <th>Year</th>
+                                    <th>Sem.</th>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>User Name</th>
+                                    <th>Role</th>
+                                    <th>QP Old Status</th>
+                                    <th>QP New Status</th>
+                                    <th>Remarks</th>
+                                    <th>QP Status Date</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="appointment, iterStat: ${setwiseStatusReport}">
+                                    <td class="text-center" th:text="${iterStat.count}"></td>
+                                    <td th:text="${appointment.course_name}"></td>
+                                    <td th:text="${appointment.year}"></td>
+                                    <td th:text="${appointment.semester}"></td>
+                                    <td th:text="${appointment.subject_code}"></td>
+                                    <td th:text="${appointment.subject_name}"></td>
+                                    <td th:text="${appointment.user_name}"></td>
+                                    <td th:text="${appointment.role}"></td>
+                                    <td th:text="${appointment.old_qp_status}"></td>
+                                    <td th:text="${appointment.new_qp_status}"></td>
+                                    <td th:text="${appointment.remarks}"></td>
+                                    <td th:text="${appointment.qp_status_date}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Forward to Admin Modal -->
+    <div class="modal fade" id="forwardModal" tabindex="-1" aria-labelledby="forwardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="exampleModalLabel"><strong>UNDERTAKING</strong></h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="forwardForm" th:action="@{/forwardQuestions}" method="post">
+                    <div class="modal-body">
+
+                        <ul class="list-group list-group-numbered">
+                            <li class="mb-2 list-group-item border-0">
+                                I undersign undertake to maintain the secrecy in matter of paper setting of subject
+                                (with code no) <b><span id="modalSubjectCode"></span>-<span id="modalSubjectName"></span></b>
+                                and all other assigned work including correspondence pertaining to Gujarat Technological University Examination.
+                            </li>
+                            <li class="mb-2 list-group-item border-0">
+                                Further, I assure you that I shall maintain utmost secrecy in the work entrusted to me for semester/year examination
+                                and discharge all my duties impartially without involving in any type of malpractice which violates the code of conduct of examination.
+                            </li>
+                            <li class="mb-2 list-group-item border-0">
+                                No relative* of mine is appearing in the University examination for which the work is assigned to me.
+                            </li>
+                            <li class="mb-2 list-group-item border-0">
+                                I have neither given tuition to any student nor attached with any tuition classes.
+                                I have not imparted any private or personal tuition or training or coaching for the Gujarat Technological University examination.
+                            </li>
+                            <li class="mb-2 list-group-item border-0">
+                                I have also not published any guides, digests of text-book concerning the examination for which I am appointed.
+                            </li>
+                            <li class="mb-2 list-group-item border-0">
+                                I have deleted all the files/folders pertaining to assigned exam work from the hard disk of the PC/Laptop which I have used for G.T.U. exam work.
+                            </li>
+                        </ul>
+                        <p class="text-dark">
+                            * The meaning of relatives is defined as under:<br>
+                            Wife, husband, son, daughter, grandson, granddaughter, brother, sister, son-in-law, sister-in-law, daughter-in-law, nephew,
+                            niece, sisterâ€™s daughter and son, their sons and daughters, uncle, aunt. Step relations are not included in the above definition.
+                        </p>
+                        <p class="text-dark text-center">
+                            <input type="checkbox" class="form-check-input border-black" id="undertakeCheckbox" required />
+                            <strong>I hereby undertake the above.</strong>
+                        </p>
+                        <input type="hidden" id="modalSetId" name="id">
+                        <input type="hidden" id="modalSubjectId" name="subjectId">
+                        <input type="hidden" id="modalSetterId" name="setterId">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <input type="submit" class="btn btn-primary" ></input>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function openForwardModal(element) {
+        // Get the ID and Subject ID from the button
+        var setId = element.getAttribute("data-id");
+        var subjectId = element.getAttribute("data-subject-id");
+         var setterId = element.getAttribute("data-setter-id");
+
+          var subjectCode = element.getAttribute("data-subject-code");
+         var subjectName = element.getAttribute("data-subject-name");
+
+
+        // Set values in the hidden input fields
+        document.getElementById("modalSetId").value = setId;
+        document.getElementById("modalSubjectId").value = subjectId;
+        document.getElementById("modalSetterId").value = setterId;
+         document.getElementById("modalSubjectCode").textContent = subjectCode;
+    document.getElementById("modalSubjectName").textContent = subjectName;
+
+
+        // Open the modal
+        $('#forwardModal').modal('show');
+    }
+
+    function submitForwardForm() {
+        // Submit the form when user confirms
+        document.getElementById("forwardForm").submit();
+    }
+    </script>
+
+    <script>
+        function showRemarks(link) {
+            var remarksText = link.getAttribute("data-remarks"); // Get solution text
+            document.getElementById("remarksContent").innerHTML = remarksText; // Insert solution into modal
+            var remarksModal = new bootstrap.Modal(document.getElementById('remarksModal'));
+            remarksModal.show(); // Show the modal
+        }
+    </script>
+
+
+    <div class="modal fade" id="remarksModal" tabindex="-1" aria-labelledby="remarksModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="remarksModalLabel">Remarks</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="remarksContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- End Content  -->
 </div>

@@ -23,5 +23,5 @@ public interface QPTemplateService {
 
     List<BitwiseQuestions> getBitWiseQuestionReviewerTemplate(int subjectId, int id);
 
-    List<BitwiseQuestions> getReviewerQuestionsList(String subjectId, int setNo, Long reviewerId);
+    List<BitwiseQuestions> getReviewerQuestionsList(String subjectId, int setNo, Long reviewerId,Long setterId);
 }

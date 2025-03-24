@@ -11,4 +11,6 @@ public interface ExamSeriesService {
     ExamSeries getExamSeriesById(Integer id);
     ExamSeries saveExamSeries(ExamSeries examSeries);
     void deleteExamSeries(Integer id);
+
+    List<ExamSeries> getAllActiveExamSeries();
 }

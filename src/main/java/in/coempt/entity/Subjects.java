@@ -17,5 +17,8 @@ public class Subjects {
     @Column(name = "subject_code")
     private String subjectCode;
     private String syllabus;
-    private Long section_user_id;
+    @Column(name = "section_id")
+    private int sectionId;
+    @Column(name = "pattern_code")
+    private String patternCode;
 }

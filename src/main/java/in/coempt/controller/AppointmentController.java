@@ -1,18 +1,21 @@
 package in.coempt.controller;
 
 import in.coempt.entity.*;
+import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
+import in.coempt.util.SecurityUtil;
 import in.coempt.util.SendMailUtil;
 import in.coempt.vo.AppointmentUpdateRequest;
 import in.coempt.vo.AppointmentVo;
 import in.coempt.vo.IndividualAppointmentVo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -27,20 +30,22 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/appointments")
 @CrossOrigin(origins = "*")
+
+@RequiredArgsConstructor
 public class AppointmentController {
 
     @Value("${filePath}")
     private String filePath;
 
-
-    @Autowired
-    private TemplateEngine templateEngine;
+    private final TemplateEngine templateEngine;
     private final AppointmentService appointmentService;
     private final CourseService courseService;
     private final UserService userService;
@@ -48,43 +53,40 @@ public class AppointmentController {
     private final SubjectsService subjectsService;
     private final RolesService rolesService;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final SmsEmailTemplateService smsEmailTemplateService;
     private final CollegeService collegeService;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private  FacultyDataService facultyDataService;
+    private final SectionUserMappingService sectionUserMappingService;
+
+    private  final FacultyDataService facultyDataService;
 
 
     @Value("${app.url}")
     private String appUrl;
 
-    public AppointmentController(AppointmentService appointmentService, CourseService courseService,
-                                 UserService userService, SendMailUtil sendMail, SubjectsService subjectsService,
-                                 RolesService rolesService, BCryptPasswordEncoder passwordEncoder, SmsEmailTemplateService smsEmailTemplateService, CollegeService collegeService,UserDetailsService userDetailsService ) {
-        this.appointmentService = appointmentService;
-        this.courseService = courseService;
-        this.userService = userService;
-        this.sendMail = sendMail;
-        this.subjectsService = subjectsService;
-        this.rolesService = rolesService;
-        this.passwordEncoder = passwordEncoder;
-        this.smsEmailTemplateService = smsEmailTemplateService;
-        this.collegeService = collegeService;
-        this.userDetailsService=userDetailsService;
-    }
 
-    @GetMapping("/list")
-    public String getAppointmentList(Model model) {
-        model.addAttribute("appointment", new Appointment());
-        model.addAttribute("appointmentList", appointmentService.getAllAppointments());
-        model.addAttribute("coursesList", courseService.getAllCourses());
-        model.addAttribute("collegeList", collegeService.getAllColleges());
-        return "newappointment";
-    }
+
     @GetMapping("/individualAppointments")
     public String individualAppointments(Model model) {
-        model.addAttribute("coursesList", courseService.getAllCourses());
+        UserDetails user=(UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
+        User userEntity = userRepository.findByUserName(user.getUsername());
+        SectionUserMappingEntity mappingEntity=
+                sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
+
+        List<Course> courseList = courseService.getAllCourses().stream()
+                .sorted(Comparator.comparing(Course::getCourse_name)) // Sort by name
+                .distinct() // Remove duplicates (won't work well for objects)
+                .collect(Collectors.toList());
+
+        if(userEntity.getRoleId()==1) {
+            courseList= courseList.stream().filter(a ->
+                    Math.toIntExact(a.getSection_id()) == mappingEntity.getSectionId()).collect(Collectors.toList()).stream()
+                    .sorted(Comparator.comparing(Course::getCourse_name)) // Sort by name
+                    .distinct() // Remove duplicates (won't work well for objects)
+                    .collect(Collectors.toList());
+        }
+        model.addAttribute("coursesList", courseList);
         model.addAttribute("collegeList", collegeService.getAllColleges());
         model.addAttribute("individualAppoint", new IndividualAppointmentVo());
         model.addAttribute("page","individualAppointment");
@@ -142,7 +144,7 @@ if(ulist.size()>0) {
 
             UserData savedUserData = appointmentService.saveuserData(userData);
 
-            sendAppointmentEmail(appointmentVo, user, savedUserData, isNewUser);
+            sendAppointmentEmail(appointmentVo, user, savedUserData, isNewUser,customPassword);
 
             redirectAttributes.addFlashAttribute("message",
                     (isNewUser ? "User" : "Additional subject") + " appointment details sent successfully to : " + appointmentVo.getEmail());
@@ -163,7 +165,7 @@ if(ulist.size()>0) {
 
             user.setFirstName(appointmentVo.getFname());
             user.setLastName(appointmentVo.getLname());
-            user.setIsActive(0);
+            user.setIsActive(1);
             user.setMobileNo(appointmentVo.getMobile_number());
             user.setEmail(appointmentVo.getEmail());
             user.setUserName(generateUserNameByRole(appointmentVo.getRole_id()));
@@ -186,71 +188,52 @@ if(ulist.size()>0) {
             userData.setCurrent_status("Appointment Sent");
             userData.setStatus_date(LocalDateTime.now().toString());
             userData.setAppointment_sent_date(LocalDateTime.now().toString());
+            userData.setExamSeriesId(1);
 
             return userData;
         }
 
-        private void sendAppointmentEmail(IndividualAppointmentVo appointmentVo, User user, UserData userData, boolean isNewUser) {
+        private void sendAppointmentEmail(IndividualAppointmentVo appointmentVo, User user, UserData userData, boolean isNewUser,String customPassword) {
             Subjects subject = subjectsService.getSubjectById(String.valueOf(appointmentVo.getSubject_id()));
             Course course = courseService.getCourseDetailsById(subject.getCourseId());
             CollegeEntity collegeEntity = collegeService.getCollegeByCode(appointmentVo.getCollegeCode());
 
             Context context = new Context();
             context.setVariable("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-            context.setVariable("name", appointmentVo.getFname() + " " + appointmentVo.getLname());
-            context.setVariable("collegeCode", collegeEntity.getCollegeCode());
+            context.setVariable("name", appointmentVo.getFname().toUpperCase() + " " + appointmentVo.getLname().toUpperCase());
+            context.setVariable("collegeCode", collegeEntity.getCollegeCode()+"-"+collegeEntity.getCollege_name());
             context.setVariable("subjectCode", subject.getSubjectCode());
             context.setVariable("subjectName", subject.getSubject_name());
-            context.setVariable("yearCourse", subject.getYear() + "/" + course.getCourse_name());
-            context.setVariable("submissionDate", appointmentVo.getSubmission_date());
+            context.setVariable("userName", user.getUserName());
+            context.setVariable("yearCourse", course.getCourse_name());
+
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+            // Parse and format the date
+            LocalDate date = LocalDate.parse(appointmentVo.getSubmission_date(), inputFormatter);
+            String formattedDate = date.format(outputFormatter);
+            context.setVariable("submissionDate", formattedDate);
             context.setVariable("noOfSets", appointmentVo.getNo_of_sets());
 
             String emailContent = templateEngine.process("email-template", context);
-            String actionType = isNewUser ? "accept" : "addlSubjectAccept";
+            String password = isNewUser ? customPassword : "";
             String declineActionType = isNewUser ? "notaccept" : "addlSubjectDecline";
-            String emailBody = emailContent + "<p>Please click on the link below to accept your appointment :</p>" +
-                    "<p><a href='" + appUrl + "appointments/" + userData.getId() + "/" + user.getUserName() + "/" + actionType + "'>Accept Appointment</a></p>" +
-                    "<p>If you are not willing to accept this appointment, please click the link below:</p>" +
-                    "<p><a href='" + appUrl + "appointments/" + userData.getId() + "/" + user.getUserName() + "/" + declineActionType + "'>Decline Appointment</a></p>";
 
-            sendMail.sendHtmlMail(user.getEmail(), "Your appointment is confirmed for the Subject "+subject.getSubjectCode()+"-"+subject.getSubjectCode()+"- GTU SQQPRS", emailBody, filePath + File.separator + "1.pdf");
-
-            appointmentService.saveUserAppointment(userData);
+            String emailBody = emailContent + "<p>You are appointed as a <strong> QP Setter </strong> for the " +
+                    subject.getSubjectCode() + "-" + subject.getSubject_name() + ".</p>" +
+                    "<p><a href='" + appUrl + "'>Click here to login</a></p>" +
+                    "<p><strong>Username:</strong> " + user.getUserName() + "</p>";
+            if (isNewUser){
+                emailBody=emailBody+ "<p><strong>Password:</strong> " + customPassword + "</p>" ;
         }
-
-        @PostMapping("/save")
-        @Transactional
-        public String saveAppointment(Appointment appointment) {
-            String userName = generateUserName(appointment);
-            appointment.setOrderNo(userName);
-
-            User user = userService.getUserByUserName(userName);
-            if (user == null) {
-                user = new User();
+          else{
+                emailBody=emailBody+  "<p>User ID and Password remain the same. In case you have forgotten the password, " +
+                        "use the <strong>Forgot Password</strong> option provided on the login page.</p>";
             }
-            setupUserDetails(user, appointment, userName);
-            userService.saveUser(user);
 
-            appointmentService.saveAppointment(appointment);
-
-            String emailBody = generateEmailBody(appointment, userName);
-            sendMail.sendHtmlmail(appointment.getEmail(), "Your appointment details of GTU", emailBody);
-
-            return "redirect:/appointments/list";
-        }
-
-        @GetMapping("/edit/{id}")
-        public String editAppointment(@PathVariable Long id, Model model) {
-            model.addAttribute("appointment", appointmentService.getAppointmentById(id));
-            model.addAttribute("coursesList", courseService.getAllCourses());
-            model.addAttribute("collegeList", collegeService.getAllColleges());
-            return "newappointment";
-        }
-
-        @GetMapping("/delete/{id}")
-        public String deleteAppointment(@PathVariable Long id) {
-            appointmentService.cancelAppointmentById(id);
-            return "redirect:/appointments/list";
+            sendMail.sendHtmlmail(user.getEmail(), "Your appointment is confirmed for the Subject "+subject.getSubjectCode()+"-"+subject.getSubject_name()+"- GTU SQQPRS", emailBody);
+            appointmentService.saveUserAppointment(userData);
         }
 
         @GetMapping("/{orderId}/{userName}/accept")
@@ -283,43 +266,17 @@ if(ulist.size()>0) {
             return "appointment-status";
         }
 
-        @GetMapping("/resend/{id}")
-        public String resendAppointmentMail(@PathVariable Long id) {
-            Appointment appointment = appointmentService.getAppointmentById(id);
-            User user = userService.getUserByUserName(appointment.getOrderNo());
 
-            // Reset password
-            String customPassword = RandomUtils.nextLong(10000, 99999) + "";
-            user.setPassword(passwordEncoder.encode(customPassword));
-            userService.saveUser(user);
-
-            String emailBody = generateEmailBody(appointment, appointment.getOrderNo());
-            sendMail.sendHtmlmail(appointment.getEmail(), "Your appointment details of GTU", emailBody);
-
-            return "redirect:/appointments/list";
-        }
 
         // ------------------ 🔹 HELPER METHODS ------------------
 
-        private String generateUserName(Appointment appointment) {
-            if (appointment.getId() != null) {
-                return appointment.getOrderNo();
-            }
-            return (appointment.getRole_id() == 2 ? "S" : "M") + RandomUtils.nextLong(10000, 99999);
-        }
+
 
         private String generateUserNameByRole(int roleId) {
 
             return (roleId == 2 ? "S" : "M") + RandomUtils.nextLong(10000, 99999);
         }
-        private void setupUserDetails(User user, Appointment appointment, String userName) {
-            user.setIsActive(0);
-            user.setRoleId(appointment.getRole_id());
-            user.setUserName(userName);
-            user.setFirstName(appointment.getName());
-            user.setEmail(appointment.getEmail());
-            user.setPassword(passwordEncoder.encode(RandomUtils.nextLong(10000, 99999) + ""));
-        }
+
 
         private void updateAppointmentStatus(Long orderId,String userName, String status,String password) {
             UserData appointment = appointmentService.getAppointmentDetailsById(orderId);
@@ -337,43 +294,6 @@ if(ulist.size()>0) {
             }
         }
 
-        private String generateEmailBody(Appointment appointment, String userName) {
-            Roles roles = rolesService.getRoleDetails(appointment.getRole_id());
-            Subjects subjects = subjectsService.getSubjectById(appointment.getSubject_id());
-            Course course = courseService.getCourseDetailsById(subjects.getCourseId());
-            String customPassword = RandomUtils.nextLong(10000, 99999) + "";
-            SmsEmailTemplate s11 = smsEmailTemplateService.getEmailTemplateDetails();
-            LocalDate currentDate = LocalDate.now();
-            CollegeEntity collegeEntity = collegeService.getCollegeById(appointment.getCollege_id());
-            // Define the desired date format
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-            // Format the date to the desired format
-            String formattedDate = currentDate.format(formatter);
-
-            Context context = new Context();
-            context.setVariable("date", formattedDate);
-            context.setVariable("name", appointment.getName());
-            context.setVariable("collegeCode", collegeEntity.getCollegeCode());
-            context.setVariable("subjectCode", subjects.getSubjectCode());
-            context.setVariable("subjectName", subjects.getSubject_name());
-            context.setVariable("yearCourse", subjects.getYear() + "/" + course.getCourse_name());
-            context.setVariable("submissionDate", appointment.getSubmission_date());
-            context.setVariable("noOfSets", appointment.getNo_of_sets());
-
-            String s1 = templateEngine.process("email-template", context);
-
-            //  String emailBody =String.format(s1,formattedDate,appointment.getName(),appointment.getCollege_code(),
-            //        appointment.getSubject_code(),subjects.getSubject_name(),   course.getCourse_name(),"02-03-2025");
-
-            return s1 + "<p>Please click on the link below to accept your appointment :</p>" +
-                    "<p><a href='" + appUrl + "appointments/" + userName + "/accept'>Accept Appointment</a></p>" +
-                    //   "<p><strong>Username:</strong> " + userName + "</p>" +
-                    // "<p><strong>Password:</strong> " + customPassword + "</p>" +
-                    "<p>If you are not willing to accept this appointment, please click the link below:</p>" +
-                    "<p><a href='" + appUrl + "appointments/" + userName + "/notaccept'>Decline Appointment</a></p>";
-        }
-
 
         // Process Selected Records
         @PostMapping("/processSelected")
@@ -389,7 +309,7 @@ if(ulist.size()>0) {
                 Subjects subjects = subjectsService.getSubjectById(ap.getSubject_id()+"");
                 Course course = courseService.getCourseDetailsById(subjects.getCourseId());
                 String customPassword = RandomUtils.nextLong(10000, 99999) + "";
-                SmsEmailTemplate s11 = smsEmailTemplateService.getEmailTemplateDetails();
+
                 LocalDate currentDate = LocalDate.now();
                 CollegeEntity collegeEntity = collegeService.getCollegeById(ap.getCollege_id()+"");
                 // Define the desired date format
@@ -400,27 +320,32 @@ if(ulist.size()>0) {
 
                 Context context = new Context();
                 context.setVariable("date", formattedDate);
-                context.setVariable("name", ap.getFirst_name()+" "+ap.getLast_name());
-                context.setVariable("collegeCode", collegeEntity.getCollegeCode());
+                context.setVariable("name", ap.getFirst_name().toUpperCase()+" "+ap.getLast_name().toUpperCase());
+                context.setVariable("collegeCode", collegeEntity.getCollegeCode()+"-"+collegeEntity.getCollege_name());
                 context.setVariable("subjectCode", subjects.getSubjectCode());
                 context.setVariable("subjectName", subjects.getSubject_name());
-                context.setVariable("yearCourse", subjects.getYear() + "/" + course.getCourse_name());
-                context.setVariable("submissionDate", ap.getLast_date_to_submit());
-                context.setVariable("noOfSets", ap.getNo_of_sets());
+                context.setVariable("yearCourse",  course.getCourse_name());
+                DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+                // Parse and format the date
+                LocalDate date = LocalDate.parse(ap.getLast_date_to_submit(), inputFormatter);
+                String submissionDate = date.format(outputFormatter);
+                context.setVariable("submissionDate", submissionDate);
+                context.setVariable("noOfSets", ap.getNo_of_sets());
+                context.setVariable("userName", ap.getUser_name());
                 String s1 = templateEngine.process("email-template", context);
 
                 //  String emailBody =String.format(s1,formattedDate,appointment.getName(),appointment.getCollege_code(),
                 //        appointment.getSubject_code(),subjects.getSubject_name(),   course.getCourse_name(),"02-03-2025");
                 String syllabusFile=filePath+ File.separator+"1.pdf";
-                String s2= s1 + "<p>Please click on the link below to accept your appointment :</p>" +
-                        "<p><a href='" + appUrl + "appointments/" + ap.getId() + "/"+ap.getUser_name() +"/accept'>Accept Appointment</a></p>" +
-                        //   "<p><strong>Username:</strong> " + userName + "</p>" +
-                        // "<p><strong>Password:</strong> " + customPassword + "</p>" +
-                        "<p>If you are not willing to accept this appointment, please click the link below:</p>" +
-                        "<p><a href='" + appUrl + "appointments/" + ap.getId() + "/"+ap.getUser_name() +"/notaccept'>Decline Appointment</a></p>";
+                String s2= s1 +  "<p><a href='" + appUrl +"'>Click here to login</a></p>" ;
+//                        "<p>User ID and Password remain the same. In case you have forgotten the password, " +
+//                        "use the <strong>Forgot Password</strong> option provided on the login page.</p>" +
+//                        "<p>Thanks,</p>" ;
+                ;
 
-                sendMail.sendHtmlMail(ap.getEmail(), "Your appointment details of GTU", s2,syllabusFile);
+                sendMail.sendHtmlmail(ap.getEmail(), "Your appointment details of GTU", s2);
 
                 UserData userData=appointmentService.getAppointmentDetailsById((long) ap.getId());
                 userData.setCurrent_status("Appointment Sent");
@@ -447,12 +372,9 @@ if(ulist.size()>0) {
                     "<body>" +
                     "<p>Dear Sir/Madam,</p>" +
                     "<p>You have been appointed as a QP Setter for the Subject " +
-                    "<strong>&quot;<subject_code> - <subject_name>&quot;</strong>.</p>" +
+                    "<strong>"+subjects.getSubjectCode()+ "-" +subjects.getSubject_name()+"</strong>.</p>" +
                     "<p>Your User ID is <strong>"+userName+"</strong>.</p>" +
-                    "<p><a href='" + appUrl +"'>Click here to login</a></p>" +
-                    "<p>User ID and Password remain the same. In case you have forgotten the password, " +
-                    "use the <strong>Forgot Password</strong> option provided on the login page.</p>" +
-                    "<p>Thanks,</p>" ;
+                    "<p><a href='" + appUrl +"'>Click here to login</a></p>" ;
 
             sendMail.sendHtmlmail(user.getEmail(), "Your appointment details of GTU", emailBody);
             return "appointment-status";
@@ -486,7 +408,6 @@ if(ulist.size()>0) {
                     + "<body>"
                     + "<p>Dear "+user.getFirstName()+""+user.getLastName()+",</p>"
                     + "<p>Admin updated your QP tasks for the subject: <strong>"+subject.getSubjectCode()+"-"+subject.getSubject_name()+"</strong>.</p>"
-                    + "<p><strong>No. of sets:</strong>"+request.getNoOfSets()+"</p>"
                     + "<p><strong>Last date of submission:</strong> "+request.getLastDateToSubmit()+"</p>"
                     + "<p>Login and check the details.</p>"
                     + "<p>Thanks,<br>Admin<br>SOQPRS - GTU</p>"

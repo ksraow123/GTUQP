@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface QpTemplateMasterRepository extends JpaRepository<QpTemplateMaster,Integer> {
-    List<QpTemplateMaster> findBySubjectId(Integer subjectId);
+    List<QpTemplateMaster> findByPatternCode(String patternCode);
 }

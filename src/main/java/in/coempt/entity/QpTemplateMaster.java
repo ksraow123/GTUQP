@@ -14,8 +14,8 @@ public class QpTemplateMaster {
     @Column(name = "id", nullable = false, updatable = false)
     private Integer id;
 
-    @Column(name = "subject_id")
-    private Integer subjectId;
+    @Column(name = "pattern_code")
+    private String patternCode;
 
     @Column(name = "q_no", length = 45)
     private Integer qNo;

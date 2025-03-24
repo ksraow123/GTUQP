@@ -6,7 +6,7 @@
       <div class="cards">
         <div class="card border-0">
 
-          <h2>QP Setter / Moderator Appointment </h2>
+          <h2>QP Setter Appointment </h2>
 
           <div th:if="${message}" style="margin-top: 10px;">
             <p th:text="${message}"></p>
@@ -18,20 +18,10 @@
                   <div class="mobileExists"></div>
                   <label for="" class="form-label">Mobile No.</label>
                   <input class="form-control "  type="text"  required id="mobileNo" th:field="*{mobile_number}" onblur="fetchFacultyData()">
+               <input type="hidden" name="role_id"  value="2">
+                  <input type="hidden" name="no_of_sets" value="1">
                 </div>
               </div>
-              <div class="col-md-4">
-                <div class="mb-3">
-
-                  <label for="" class="form-label">Type</label>
-                  <select class="form-select" th:field="*{role_id}" required >
-                    <option value="0">Select</option>
-                    <option value="2">QP Setter </option>
-                    <option value="3">QP Moderator </option>
-                  </select>
-                </div>
-              </div>
-
               <div class="col-md-4">
                 <div class="mb-3">
                   <label for="" class="form-label">First Name</label>
@@ -61,7 +51,7 @@
 
               <div class="col-md-4">
                 <div class="mb-3">
-                  <label for="" class="form-label">Course Code</label>
+                  <label for="" class="form-label">Course</label>
                   <select class="form-select" id="courseCode" required  th:field="*{course_id}" >
                     <option value="">Select</option>
                     <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
@@ -79,14 +69,6 @@
               </div>
               <div class="col-md-4">
                 <div class="mb-3">
-                  <label for="" class="form-label">No. of Sets   </label>
-
-                  <input class="form-control" type="text" th:field="*{no_of_sets}" required>
-
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="mb-3">
                   <label class="form-label">Last Date of Submission</label>
                   <input type="date" required class="form-control" id="submission_date" th:field="*{submission_date}"/>
                 </div>
@@ -94,8 +76,10 @@
               <div class="col-md-4">
                 <div class="mb-3">
                   <label for="" class="form-label">Curriculum / Syllabus </label>
-                  <a id="syllabusLink" href="#" target="_blank" style="display: none;" title="View Syllabus">View Syllabus</a>
-                  <span id="noSyllabusText">No syllabus available</span>
+
+                  <h3><a href="https://syllabus.gtu.ac.in/" target="_blank" class="link-primary" title="View Syllabus">View Syllabus</a></h3>
+                 <!-- <a id="syllabusLink" href="#" target="_blank" style="display: none;" title="View Syllabus">View Syllabus</a>
+                  <span id="noSyllabusText">No syllabus available</span>-->
                 </div>
               </div>
               <div class="col-md-12">
@@ -107,40 +91,97 @@
           </form>
         </div>
       </div>
+      <div class="cards">
+      <div class="card border-0" id="alreadyMapped">
+        <h2>Already Assigned Subjects</h2>
+        <table id="appointmentTable" class="table table-bordered">
+          <thead>
+          <tr>
+          <tr>
+
+            <th>S.No.</th>
+            <th>Role</th>
+            <th>User Name</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>College</th>
+            <th>Course</th>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+            <th>Appointment sent date</th>
+            <th>Last Date of Submission</th>
+
+
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      </div>
+      </div>
     </div>
   </div>
 </div>
-
 <script>
-  function fetchFacultyData() {
-      let mobileNo = document.getElementById("mobileNo").value.trim();
+function fetchFacultyData() {
+let mobileNo = document.getElementById("mobileNo").value.trim();
 
-      if (mobileNo.length === 10) {  // Ensure mobile number is valid
-          fetch("https://online.ctestservices.com/gtuqp/api/faculty/mobile/"+mobileNo)
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error("Faculty data not found");
-                  }
-                  return response.json();
-              })
-              .then(data => {
-                  document.getElementById("fname").value = data.firstName || "";
-                  document.getElementById("lname").value = data.lastName || "";
-                  document.getElementById("email").value = data.email || "";
-                  document.getElementById("collegeCode").value = data.collegeCode || "";
-                   $(".readOnly").attr("readonly", "readonly");
-              })
-              .catch(error => {
-                  console.error("Error fetching faculty data:", error);
+if (mobileNo.length === 10) {  // Ensure valid mobile number
+fetch("https://online.ctestservices.com/gtuqp/api/faculty/mobile/" + mobileNo)
+.then(response => {
+if (!response.ok) {
+throw new Error("Faculty data not found");
+}
+return response.json();
+})
+.then(data => {
+if (data.error) {
+throw new Error(data.error);
+}
 
-                document.querySelector(".mobileExists").innerHTML = "Faculty data not found for the given Mobile Number";
-                $(".readOnly").removeAttr("readonly");
-              });
-      }
-  }
+// ✅ Populate Faculty Data
+document.getElementById("fname").value = data.faculty.firstName || "";
+document.getElementById("lname").value = data.faculty.lastName || "";
+document.getElementById("email").value = data.faculty.email || "";
+document.getElementById("collegeCode").value = data.faculty.collegeCode || "";
+$(".readOnly").attr("readonly", "readonly");
+// ✅ Populate Appointment List
+let appointmentTable = document.getElementById("appointmentTable");
+let tbody = appointmentTable.querySelector("tbody");
+tbody.innerHTML = "";  // Clear previous data
+
+data.appointments.forEach((appointment, index) => {
+let row = `<tr>
+  <td>${index + 1}</td>
+  <td>${appointment.role}</td>
+  <td>${appointment.user_name}</td>
+  <td>${appointment.first_name} - ${appointment.last_name}</td>
+  <td>${appointment.mobile_no}</td>
+  <td>${appointment.email}</td>
+  <td>${appointment.college_code} - ${appointment.college_name}</td>
+  <td>${appointment.course_name}</td>
+  <td>${appointment.subject_code}</td>
+  <td>${appointment.subject_name}</td>
+  <td>${appointment.last_date_to_submit}</td>
+  <td>${appointment.appointment_sent_date}</td>
+</tr>`;
+tbody.innerHTML += row;
+});
+
+})
+.catch(error => {
+console.error("Error fetching faculty data:", error);
+document.querySelector(".mobileExists").innerHTML = "Faculty data not found for the given Mobile Number";
+$(".readOnly").removeAttr("readonly");
+});
+}
+}
+
 </script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+  ("#alreadyMapped").hide();
       let today = new Date().toISOString().split('T')[0];
 
 

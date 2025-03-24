@@ -16,5 +16,5 @@ public class FacultyDataDTO {
     private String lastDateToSubmit;
     private Integer noOfSets;
     private String collegeCode;
-    private String roleId;
+    private int roleId;
 }

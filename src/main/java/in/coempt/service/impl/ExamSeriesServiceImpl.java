@@ -32,4 +32,9 @@ public class ExamSeriesServiceImpl implements ExamSeriesService {
     public void deleteExamSeries(Integer id) {
         examSeriesRepository.deleteById(id);
     }
+
+    @Override
+    public List<ExamSeries> getAllActiveExamSeries() {
+        return   examSeriesRepository.findByIsActive(1);
+    }
 }
