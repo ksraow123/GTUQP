@@ -3,25 +3,25 @@ document.addEventListener("DOMContentLoaded", function () {
     let subjectDropdown = document.getElementById("subjectCode");
     let syllabusLink = document.getElementById("syllabusLink");
     let noSyllabusText = document.getElementById("noSyllabusText");
+    let yearSemSelect = document.getElementById("yearsem");
+    let subjectSelect = document.getElementById("subject");
 
     if (courseCodeElement && subjectDropdown) {
         courseCodeElement.addEventListener("change", function () {
             let courseId = this.value;
-
-            // Clear existing options
             subjectDropdown.innerHTML = '<option value="">Loading...</option>';
 
             if (courseId) {
                 fetch(`https://online.ctestservices.com/gtuqp/subjects/${courseId}`)
                     .then(response => response.json())
                     .then(data => {
-                        subjectDropdown.innerHTML = '<option value="">Select a Subject</option>'; // Reset dropdown
-
+                        subjectDropdown.innerHTML = '<option value="">Select a Subject</option>';
                         data.forEach(subject => {
-                            let option = document.createElement("option");
-                            option.value = subject.id;  // Use Subject ID as value
-                            option.textContent = `${subject.subjectCode} - ${subject.subject_name}`;  // Display Code & Name
-                            option.setAttribute("data-syllabus", subject.syllabus || ""); // Set syllabus URL
+                            let option = new Option(
+                                `${subject.subjectCode} - ${subject.subject_name}`,
+                                subject.id
+                            );
+                            option.setAttribute("data-syllabus", subject.syllabus || "");
                             subjectDropdown.appendChild(option);
                         });
                     })
@@ -42,12 +42,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (syllabusLink && noSyllabusText) {
                 if (syllabusUrl) {
-                    syllabusLink.href = "../" + syllabusUrl;
-                    syllabusLink.style.display = "inline"; // Show link
-                    noSyllabusText.style.display = "none"; // Hide "No syllabus available" text
+                    syllabusLink.href = `../${syllabusUrl}`;
+                    syllabusLink.style.display = "inline";
+                    noSyllabusText.style.display = "none";
                 } else {
-                    syllabusLink.style.display = "none"; // Hide link
-                    noSyllabusText.style.display = "inline"; // Show "No syllabus available" text
+                    syllabusLink.style.display = "none";
+                    noSyllabusText.style.display = "inline";
                 }
             }
         });
@@ -63,3 +63,44 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+// Function to fetch Semesters & Subjects
+function fetchData() {
+    let courseId = document.getElementById("courseCode").value;
+    let yearSemSelect = document.getElementById("yearsem");
+
+    // Reset dropdowns
+    yearSemSelect.innerHTML = '<option value="All">All</option>';
+
+    if (!courseId || courseId === "All") return;
+
+    fetch(`https://online.ctestservices.com/gtuqp/getSemestersAndSubjects?courseId=${courseId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(sem => {
+                yearSemSelect.appendChild(new Option(sem, sem));
+            });
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}
+
+// Function to fetch subjects based on semester selection
+function fetchSubjectsData() {
+    let courseId = document.getElementById("courseCode").value;
+    let semester = document.getElementById("yearsem").value;
+    let subjectSelect = document.getElementById("subject");
+
+    // Reset subject dropdown
+    subjectSelect.innerHTML = '<option value="All">All</option>';
+
+    if (!courseId || courseId === "All" || !semester || semester === "All") return;
+
+    fetch(`https://online.ctestservices.com/gtuqp/getSubjectsByCourseAndSemester?courseId=${courseId}&semester=${semester}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(sub => {
+                subjectSelect.appendChild(new Option(`${sub.subjectCode} - ${sub.subject_name}`, sub.id));
+            });
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}

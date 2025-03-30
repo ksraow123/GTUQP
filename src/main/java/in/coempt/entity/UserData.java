@@ -36,4 +36,5 @@ public class UserData {
     private String current_status;
     private String is_appointment_sent;
     private String appointment_sent_date;
+    private String faculty_type;
 }

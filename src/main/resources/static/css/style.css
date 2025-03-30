@@ -155,6 +155,8 @@ b{
 
 
 
+.close{font-size:18px; padding:5px; border:1px solid #ffb2b2; color:#ff0000;
+	  }
 
 .wrapper {
     display: flex;

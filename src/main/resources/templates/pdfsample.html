@@ -48,8 +48,8 @@
                 <tr>
                     <td align="left" valign="middle">
                         <h2>
-                            <span th:text="${subjects.subjectCode}"> </span>-
-                            <span th:text="${subjects.subject_name}"></span>:
+                            <span th:text="${subjects.subjectCode}"> </span> -
+                            <span th:text="${subjects.subject_name}"></span>
 
                         </h2>
 
@@ -69,8 +69,8 @@
     </tr>
 
     <tr>
-        <td>
-            <table width="100%" border="0">
+        <td align="right">
+            <table width="50" border="0" align="right">
                 <tr>
                     <td align="right"><b>Marks</b></td>
                 </tr>
@@ -82,9 +82,11 @@
             <th:block th:each="entry : ${groupedQuestions}">
                 <table width="100%" border="0">
                     <tr th:each="question, iterStat : ${entry.value}">
-                        <td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${entry.key + '.'}"></b></td>
+                        <td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q.' + entry.key}"></b></td>
+                        <!--<td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q' + entry.key + '.'}"></b></td>-->
                         <td width="30" valign="top" th:unless="${iterStat.first}"></td>
-                        <td width="30" valign="top"><b th:text="${question.bit_no} + ')'"></b></td>
+                        <td width="30" valign="top"><b th:text="'(' + ${question.bit_no} + ')'"></b></td>
+                        <!-- <td width="30" valign="top"><b th:text="${question.bit_no} + ')'"></b></td>-->
                         <td valign="top">
                             <p ><b th:utext="${question.instructions}"></b></p>
                             <span class="q-desc" th:utext="${question.q_desc}"></span>
@@ -92,7 +94,7 @@
                                  th:src="'data:image/png;base64,' + ${question.image_path}"
                                  alt="Uploaded Image"  width="300" >
                         </td>
-                        <td width="30" valign="top" align="right"><b th:text="${question.marks}"></b></td>
+                        <td width="50" valign="top" align="center"><b th:text="${question.marks}"></b></td>
                     </tr>
                 </table>
             </th:block>

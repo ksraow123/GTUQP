@@ -176,18 +176,24 @@ if(ulist.size()>0) {
 
         private UserData createUserData(IndividualAppointmentVo appointmentVo, User user) {
             CollegeEntity collegeEntity = collegeService.getCollegeByCode(appointmentVo.getCollegeCode());
+            LocalDateTime now = LocalDateTime.now();
 
+            // Define the formatter
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+            // Format the date-time
+            String formattedDate = now.format(formatter);
             UserData userData = new UserData();
             userData.setNo_of_sets(Integer.parseInt(appointmentVo.getNo_of_sets()));
             userData.setUserId(Math.toIntExact(user.getId()));
             userData.setCollege_id(String.valueOf(collegeEntity.getId()));
-            userData.setOffice_order_date(LocalDateTime.now().toString());
+            userData.setOffice_order_date(formattedDate);
             userData.setLast_date_to_submit(appointmentVo.getSubmission_date());
             userData.setSubjectId(Math.toIntExact(appointmentVo.getSubject_id()));
             userData.setRole_id(appointmentVo.getRole_id());
             userData.setCurrent_status("Appointment Sent");
-            userData.setStatus_date(LocalDateTime.now().toString());
-            userData.setAppointment_sent_date(LocalDateTime.now().toString());
+            userData.setStatus_date(formattedDate);
+            userData.setAppointment_sent_date(formattedDate);
             userData.setExamSeriesId(1);
 
             return userData;
@@ -280,7 +286,15 @@ if(ulist.size()>0) {
 
         private void updateAppointmentStatus(Long orderId,String userName, String status,String password) {
             UserData appointment = appointmentService.getAppointmentDetailsById(orderId);
-            appointment.setStatus_date(LocalDateTime.now().toString());
+
+            LocalDateTime now = LocalDateTime.now();
+
+            // Define the formatter
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+            // Format the date-time
+            String formattedDate = now.format(formatter);
+            appointment.setStatus_date(formattedDate);
             appointment.setCurrent_status(status);
 
 
@@ -389,7 +403,15 @@ if(ulist.size()>0) {
 
         private void updateAppointmentDetails(Long orderId,String userName, String status) {
             UserData appointment = appointmentService.getAppointmentDetailsById(orderId);
-            appointment.setStatus_date(LocalDateTime.now().toString());
+
+            LocalDateTime now = LocalDateTime.now();
+
+            // Define the formatter
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+            // Format the date-time
+            String formattedDate = now.format(formatter);
+            appointment.setStatus_date(formattedDate);
             appointment.setCurrent_status(status);
             appointmentService.saveUserAppointment(appointment);
 

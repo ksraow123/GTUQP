@@ -112,7 +112,7 @@
                                         <tr>
                                             <th>S.No.</th>
                                             <th>Q.No</th>
-                                            <th>Bit No.</th>
+                                            <th>Sub Q.No.</th>
                                             <th>Topic</th>
                                             <th>Level</th>
                                             <th>Marks</th>
@@ -126,7 +126,7 @@
                                         <tr th:each="qpoint, iterStat : ${qPtemplate}">
                                             <td th:text="${iterStat.count}">S.No.</td>
                                             <td th:text="${qpoint.q_no}">Q No</td>
-                                            <td th:text="${qpoint.bit_no}">Bit No.</td>
+                                            <td th:text="${qpoint.bit_no}">Sub Q.No.</td>
                                             <td th:text="${qpoint.topic}">Topic</td>
                                             <td th:text="${qpoint.level}">Level</td>
                                             <td th:text="${qpoint.marks}">Marks</td>

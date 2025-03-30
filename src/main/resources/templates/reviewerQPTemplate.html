@@ -88,7 +88,7 @@
                                                                 <h3 class="modal-title">Q.No: <b><span id="qno"></span></b></h3>
                                                             </div>
                                                             <div class="col-md-2">
-                                                                <h3 class="modal-title">Bit No.: <b><span id="bitno"></span></b></h3>
+                                                                <h3 class="modal-title">Sub Q.No.: <b><span id="bitno"></span></b></h3>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <h3 class="modal-title">Topic: <b><span id="topic"></span></b></h3>
@@ -142,7 +142,7 @@
                                         <tr>
                                             <th class="text-center">S.No.</th>
                                             <th class="text-center">Q.No</th>
-                                            <th class="text-center">Bit No.</th>
+                                            <th class="text-center">Sub Q.No.</th>
                                             <th class="text-center">Topic</th>
                                             <th class="text-center">Level</th>
                                             <th class="text-center">Marks</th>
@@ -156,7 +156,7 @@
                                         <tr th:each="qpoint, iterStat : ${qPtemplate}">
                                             <td th:text="${iterStat.count}" class="text-center">S.No.</td>
                                             <td th:text="${qpoint.q_no}" class="text-center">Q.No.</td>
-                                            <td th:text="${qpoint.bit_no}" class="text-center">Bit No.</td>
+                                            <td th:text="${qpoint.bit_no}" class="text-center">Sub Q.No.</td>
                                             <td th:text="${qpoint.topic}" class="text-center">Topic</td>
                                             <td th:text="${qpoint.level}" class="text-center">Level</td>
                                             <td th:text="${qpoint.marks}" class="text-center">Marks</td>

@@ -18,17 +18,17 @@
                                 <thead>
                                 <tr>
                                     <th class="text-center">Course Name</th>
-                                    <th class="text-center">Year</th>
-                                    <th class="text-center">Sem.</th>
+
+                                    <th class="text-center">Year/Sem.</th>
                                     <th class="text-center">Subject Code</th>
                                     <th class="text-center">Subject Name</th>
                                     <th class="text-center">Syllabus</th>
-                                    <th class="text-center">Total Bits</th>
-                                    <th class="text-center">Bits Compl.</th>
-                                    <th class="text-center">Bits Pending</th>
+                                    <th class="text-center">Total no. of Qns.</th>
+                                    <th class="text-center">Qns. Compl.</th>
+                                    <th class="text-center">Qns. Pending</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-center">Preview</th>
-                                    <th class="text-center">QP Authoring</th>
+                                    <th class="text-center">Add/Edit Qns. </th>
                                     <th class="text-center">Action</th>
                                 </tr>
                                 </thead>
@@ -36,7 +36,6 @@
                                 <!-- Iterate over the setwiseDashBoard list -->
                                 <tr th:each="appointment : ${setwiseDashBoard}">
                                     <td th:text="${appointment.course_name}" class="text-center"></td>
-                                    <td th:text="${appointment.year}" class="text-center"></td>
                                     <td th:text="${appointment.semester}" class="text-center"></td>
                                     <td th:text="${appointment.subject_code}" class="text-center"></td>
                                     <td th:text="${appointment.subject_name}" class="text-center"></td>
@@ -59,7 +58,7 @@
 
                                     <!-- Preview Button -->
                                     <td class="text-center">
-                                        <a th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}"
+                                        <a th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'SUBMITTED'}"
                                            th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${appointment.setno}, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}"
                                            class="btn btn-sm btn-warning" title="preview" target="_blank">
                                             Preview
@@ -68,18 +67,18 @@
 
                                     <!-- QP Authoring Button -->
                                     <td class="text-center">
-                                        <a th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'FORWARDED'}"
+                                        <a th:if="${appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'SUBMITTED'}"
                                            th:href="@{/bitwisequestionsList(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
                                            class="btn btn-sm btn-info">
-                                            QP Authoring
+                                            Add/Edit Qns
                                         </a>
                                     </td>
 
                                     <!-- Forward to Admin Button -->
                                     <td class="text-center">
-                                        <a th:if="${appointment.no_of_questions == appointment.total_questions and appointment.qp_status != 'FORWARDED'}"
+                                        <a th:if="${appointment.no_of_questions == appointment.total_questions and appointment.qp_status != 'SUBMITTED'}"
                                            href="#"
-                                           class="btn btn-sm btn-warning"
+                                           class="btn btn-sm btn-success"
                                            title="Forward Questions"
                                            th:data-id="${appointment.setno}"
                                            th:data-subject-id="${appointment.subject_id}"
@@ -87,7 +86,7 @@
                                            th:data-subject-code="${appointment.subject_code}"
                                            th:data-subject-name="${appointment.subject_name}"
                                            onclick="openForwardModal(this)">
-                                            Forward to Admin
+                                            <!--Forward to Admin--> Submit
                                         </a>
                                     </td>
                                 </tr>

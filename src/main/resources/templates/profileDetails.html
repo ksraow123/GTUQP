@@ -5,9 +5,11 @@
         <div class="cards">
             <div class="card border-0">
                 <h2>My Profile </h2>
-                <form th:action="@{/saveProfile}" th:object="${profileDetails}" method="post">
+                <form th:action="@{/saveProfile}" th:object="${profileDetails}" id="profileform" method="post">
                     <input type="hidden" th:field="*{id}">
+
                     <div class="row mt-3">
+                        <div class="text-danger text-end col-md-12"> * All fields are mandatory</div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="" class="form-label">User ID</label>
@@ -41,10 +43,22 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="" class="form-label">Designation  </label>
-                                <input class="form-control"  required type="text" th:field="*{designation}">
+                                <label for="designation" class="form-label">Designation</label>
+                                <select class="form-control" id="designation" name="designation" required th:field="*{designation}">
+                                    <option value="">Select Designation</option>
+                                    <option th:value="'Assistant Professor'">Assistant Professor</option>
+                                    <option th:value="'HOD'">HOD</option>
+                                    <option th:value="'Associate Professor'">Associate Professor</option>
+                                    <option th:value="'Director'">Director</option>
+                                    <option th:value="'Lecturer'">Lecturer</option>
+                                    <option th:value="'Principal'">Principal</option>
+                                    <option th:value="'Studio Assistant'">Studio Assistant</option>
+                                    <option th:value="'Professor'">Professor</option>
+                                </select>
+
                             </div>
                         </div>
+
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="" class="form-label">College</label>
@@ -66,9 +80,27 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
+                                <label for="facultyType" class="form-label">Faculty Type</label>
+                                <select class="form-control" id="facultyType" name="faculty_type" required th:field="*{faculty_type}">
+                                    <option value="">Select</option>
+                                    <option th:value="'Govt. College Faculty'">Govt. College Faculty</option>
+                                    <option th:value="'Private College'">Private College</option>
+                                    <option th:value="'Consultant'">Consultant</option>
+                                    <option th:value="'Charged Hourly Basis'">Charged Hourly Basis</option>
+                                    <option th:value="'Deemed Univ. Faculty'">Deemed Univ. Faculty</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
                                 <label for="" class="form-label">Residential Address</label>
-                                <textarea class="form-control" id="raddress"
-                                          th:field="*{residential_address}" name="typingarea" rows="5" cols="10"/>
+                                <textarea class="form-control" id="raddress" required
+                                          th:field="*{residential_address}" name="typingarea"
+                                          rows="5" cols="10" oninvalid="this.setCustomValidity('Please fill out this field.')"
+                                          oninput="this.setCustomValidity('')">
+</textarea>
+
                             </div>
                         </div>
 
@@ -84,7 +116,7 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="" class="form-label">IFSC Code </label>
-                                <input class="form-control" type="text" th:field="*{ifsc_code}" required onblur="fetchBankDetails()">
+                                <input class="form-control"  type="text" th:field="*{ifsc_code}" required onblur="fetchBankDetails()">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -148,4 +180,16 @@ console.error("Error:", error);
 alert("Error fetching bank details. Please check the IFSC code.");
 });
 }
+</script>
+
+
+<script>
+    document.getElementById("profileform").addEventListener("submit", function (event) {
+        let textarea = document.getElementById("raddress");
+        if (!textarea.value.trim()) {  // Trim to remove spaces
+            alert("Please fill out the Residential Address field.");
+            textarea.focus();
+            event.preventDefault(); // Prevent form submission
+        }
+    });
 </script>

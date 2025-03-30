@@ -49,51 +49,66 @@ public class CSVServiceImpl implements CSVService {
         List<FacultyDataDTO> successList = new ArrayList<>();
         List<FacultyDataDTO> failureList = new ArrayList<>();
         List<UserData> userList = new ArrayList<>();
-        UserDetails userDetails=(UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
+
+        UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User userEntity = userRepository.findByUserName(userDetails.getUsername());
-        SectionUserMappingEntity mappingEntity=
-                sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
+        SectionUserMappingEntity mappingEntity = sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+
             for (CSVRecord record : csvParser) {
-                FacultyData facultyData =  facultyDataService.getFacultyByMobileNumber(record.get("mobile no")).get();
-                if(facultyData==null){
-                    facultyData.setEmail(record.get("email"));
-                    facultyData.setMobileNumber(record.get("mobile no"));
-                    facultyData.setFirstName(record.get("firstname"));
-                    facultyData.setLastName(record.get("lastname"));
-                    facultyData.setCollegeCode(record.get("college code"));
+                FacultyData facultyData = facultyDataService.getFacultyByMobileNumber(record.get("mobile no").trim()).orElse(null);
+
+                if (facultyData == null) {
+                    facultyData = new FacultyData();  // ✅ FIX: Initialize before setting fields
+                    facultyData.setEmail(record.get("email").trim());
+                    facultyData.setMobileNumber(record.get("mobile no").trim());
+                    facultyData.setFirstName(record.get("firstname").trim());
+                    facultyData.setLastName(record.get("lastname").trim());
+                    facultyData.setCollegeCode(record.get("college code").trim());
                     facultyDataService.saveFaculty(facultyData);
                 }
-                FacultyDataDTO faculty = new FacultyDataDTO();
-                faculty.setFirstName(record.get("firstname"));
-                faculty.setLastName(record.get("lastname"));
-                faculty.setSubjectCode(record.get("subject code"));
-                faculty.setMobileNo(record.get("mobile no"));
-                faculty.setEmail(record.get("email"));
-                faculty.setOrderDate(LocalDateTime.now()+"");
-                faculty.setLastDateToSubmit(record.get("last date to submit"));
-                faculty.setNoOfSets(1);
-                faculty.setCollegeCode(record.get("college code"));
-                faculty.setRoleId(2);
-                //int roleId = faculty.getRoleId().equalsIgnoreCase("S") ? 2 : 3;
-                User userExists = userService.getUserByMobileNoAndEmailAndRoleId(faculty.getMobileNo(), faculty.getEmail(), 2);
 
+                FacultyDataDTO faculty = new FacultyDataDTO();
+                faculty.setFirstName(record.get("firstname").trim());
+                faculty.setLastName(record.get("lastname").trim());
+                faculty.setSubjectCode(record.get("subject code").trim());
+                faculty.setMobileNo(record.get("mobile no").trim());
+                faculty.setEmail(record.get("email").trim());
+                LocalDateTime now = LocalDateTime.now();
+
+                // Define the formatter
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+                // Format the date-time
+                String formattedDate = now.format(formatter);
+
+                faculty.setOrderDate(formattedDate);
+                faculty.setLastDateToSubmit(record.get("last date to submit").trim());
+                faculty.setNoOfSets(1);
+                faculty.setCollegeCode(record.get("college code").trim());
+                faculty.setRoleId(2);
+
+                User userExists = userService.getUserByMobileNoAndEmailAndRoleId(faculty.getMobileNo(), faculty.getEmail(), 2);
                 if (userExists != null) {
                     failureList.add(faculty);
-                } else {
-                    UserData user = getUserData(faculty,mappingEntity.getSectionId());
-                    userList.add(user);
-                    successList.add(faculty);
+                    continue; // ✅ SKIP further processing for duplicates
                 }
+
+                UserData user = getUserData(userEntity.getRoleId(),faculty, mappingEntity.getSectionId());
+                userList.add(user);
+                successList.add(faculty);
             }
             userDataRepository.saveAll(userList);
+
         } catch (IOException e) {
+            e.printStackTrace();  // ✅ FIX: Log exception for debugging
         }
+
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(successList);
         arrayList.add(failureList);
-
         return arrayList;
     }
 
@@ -155,18 +170,18 @@ public class CSVServiceImpl implements CSVService {
 
     }
 
-    private UserData getUserData (FacultyDataDTO data,Integer sectionId){
+    private UserData getUserData (int uroleId,FacultyDataDTO data,Integer sectionId){
         String customPassword = RandomUtils.nextLong(10000, 99999) + "";
 
         Subjects subjects=null;
-        if(data.getRoleId()==1) {
+        if(uroleId==1) {
 
             subjects = subjectsService.getSubjectCodeAndSectionId(data.getSubjectCode(), sectionId);
-        }if(data.getRoleId()==3) {
+        }if(uroleId==3) {
 
             subjects = subjectsService.getSubject_code(data.getSubjectCode());
         }
-        int roleId = 2;
+
         UserData userData = new UserData();
         User user = new User();
         user.setFirstName(data.getFirstName());
@@ -174,9 +189,8 @@ public class CSVServiceImpl implements CSVService {
         user.setIsActive(1);
         user.setMobileNo(data.getMobileNo());
         user.setEmail(data.getEmail());
-
-        user.setUserName(generateUserName(roleId));
-        user.setRoleId(roleId);
+        user.setUserName(generateUserName(2));
+        user.setRoleId(2);
         user.setPassword(passwordEncoder.encode(customPassword));
         userService.saveUser(user);
 
@@ -190,7 +204,7 @@ public class CSVServiceImpl implements CSVService {
         userData.setNo_of_sets(data.getNoOfSets());
         userData.setSubjectId(Math.toIntExact(subjects.getId()));
         userData.setExamSeriesId(1);
-        userData.setRole_id(roleId);
+        userData.setRole_id(2);
         return userData;
 
     }

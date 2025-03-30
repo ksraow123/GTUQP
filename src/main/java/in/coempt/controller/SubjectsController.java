@@ -13,12 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @CrossOrigin(origins = "*")
@@ -34,5 +32,21 @@ private final SubjectsService subjectsService;
     public List<Subjects> getSubjectsByCourse(@PathVariable String courseId) {
 
         return subjectsService.getSubjectsByCourseId(courseId);
+    }
+    @GetMapping("/getSemestersAndSubjects")
+    @ResponseBody
+    public List<String> getSemestersAndSubjects(@RequestParam String courseId) {
+
+        List<Subjects> s1= subjectsService.getSubjectsByCourseId(courseId);
+
+        return s1.stream().map(Subjects::getSemester).sorted().distinct().collect(Collectors.toList());
+    }
+
+    @GetMapping("/getSubjectsByCourseAndSemester")
+    @ResponseBody
+    public List<Subjects> getSubjectsByCourseAndSemester(@RequestParam String courseId, @RequestParam String semester) {
+
+        return subjectsService.getSubjectsByCourseIdAndSemester(courseId,semester);
+
     }
 }

@@ -1,57 +1,150 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="_csrf" content="${_csrf.token}"/>
-<meta name="_csrf_header" content="${_csrf.headerName}"/>
-<title>QP Entry Page</title>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>QP Entry Page</title>
 
-<!-- Include CSS & Scripts -->
-<div th:replace="fragments/styles :: styles"></div>
-<!--<script th:src="@{/js/jquery-3.7.1.js}"></script>-->
-<script type="text/javascript" th:src="@{/pramukhtypepad/tiny_mce_5/js/tinymce/jquery.tinymce.min.js}"></script>
-<script type="text/javascript" th:src="@{/pramukhtypepad/tiny_mce_5/js/tinymce/tinymce.min.js}"></script>
+    <!-- Include CSS & Scripts -->
+    <div th:replace="fragments/styles :: styles"></div>
+    <script th:src="@{/js/jquery-3.7.1.js}"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENrd5LTpjEbjXa2pRtt+I5AeAUw6L32EjUUKrbkzEoy2u0IHazM98KFuo6hZk6+A"
-        crossorigin="anonymous"></script>
-<script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function () {
-        tinymce.init({
-            selector: '.qdesc',
-            plugins: 'anchor autolink autoresize autosave charmap code codesample colorpicker contextmenu directionality emoticons fullscreen help hr image insertdatetime legacyoutput link lists media nonbreaking noneditable pagebreak paste preview print quickbars save searchreplace spellchecker tabfocus table template textcolor textpattern toc visualblocks visualchars wordcount',
-            toolbar: 'undo redo | alignleft aligncenter alignright alignjustify | outdent indent | link image | preview | code help',
-            image_title: true,
-            automatic_uploads: true,
-            browser_spellcheck: true,
-            file_picker_types: 'image',
-             contextmenu: false,
-             spellchecker_rpc_url: 'https://spelling.tiny.cloud/rpc',
-  spellchecker_language: 'en',
-            file_picker_callback: function (cb, value, meta) {
-                var input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.onchange = function () {
-                    var file = this.files[0];
-                    var reader = new FileReader();
-                    reader.onload = function () {
-                        var id = 'blobid' + (new Date()).getTime();
-                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                        var base64 = reader.result.split(',')[1];
-                        var blobInfo = blobCache.create(id, file, base64);
-                        blobCache.add(blobInfo);
-                        cb(blobInfo.blobUri(), { title: file.name });
-                    };
-                    reader.readAsDataURL(file);
-                };
-                input.click();
-            }
-        });
-    });
-</script>
+    <link href="https://cdn.jsdelivr.net/npm/froala-editor@4.0.17/css/froala_editor.pkgd.min.css" rel="stylesheet">
+    <script type="text/javascript" th:src="@{https://cdn.jsdelivr.net/npm/froala-editor@4.0.17/js/froala_editor.pkgd.min.js}"></script>
+
+    <script>
+        var editorDesc;
+        var editorSolution ;
+       $(document).ready(function () {
+            editorDesc = new FroalaEditor('#q_desc', {
+                height: 200,
+                pastePlain: false,
+                pasteAllowedStyleProps: [
+                    'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
+                    'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
+                ],
+                pasteDeniedAttrs: [],
+                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select', 'canvas', 'svg'],
+                toolbarButtons: {
+                    moreText: {
+                        buttons: [
+                            'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript',
+                            'fontFamily', 'fontSize', 'textColor', 'backgroundColor', 'inlineClass', 'inlineStyle', 'clearFormatting'
+                        ],
+                        align: 'left'
+                    },
+                    moreParagraph: {
+                        buttons: [
+                            'alignLeft', 'alignCenter', 'alignRight', 'alignJustify', 'formatOL', 'formatUL',
+                            'paragraphFormat', 'paragraphStyle', 'lineHeight', 'outdent', 'indent', 'quote'
+                        ],
+                        align: 'left'
+                    },
+                    moreRich: {
+                        buttons: [
+                            'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'emoticons', 'fontAwesome',
+                            'specialCharacters', 'embedly', 'insertFile', 'insertHR'
+                        ],
+                        align: 'left'
+                    },
+                    moreMisc: {
+                        buttons: ['undo', 'redo', 'fullscreen', 'print', 'getPDF', 'spellChecker', 'selectAll', 'help'],
+                        align: 'right'
+                    }
+                },
+                imageDefaultWidth: 300,
+                htmlAllowedTags: [
+                    'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
+                    'sup', 'sub', 'ul', 'ol', 'li','hr'
+                ],
+                imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
+                htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
+                events: {
+                    'image.inserted': function ($img, response) {
+                        let img = $img[0];
+                        let reader = new FileReader();
+                        let file = img.src;
+                        fetch(file)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                reader.readAsDataURL(blob);
+                                reader.onloadend = function () {
+                                    img.src = reader.result;
+                                };
+                            })
+                            .catch(err => console.error("Image conversion error:", err));
+                    }
+                }
+            });
+
+             editorSolution = new FroalaEditor('#q_solution', {
+                height: 200,
+                pastePlain: false,
+                pasteAllowedStyleProps: [
+                    'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
+                    'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
+                ],
+                pasteDeniedAttrs: [],
+                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select', 'canvas', 'svg'],
+                toolbarButtons: {
+                    moreText: {
+                        buttons: [
+                            'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript',
+                            'fontFamily', 'fontSize', 'textColor', 'backgroundColor', 'inlineClass', 'inlineStyle', 'clearFormatting'
+                        ],
+                        align: 'left'
+                    },
+                    moreParagraph: {
+                        buttons: [
+                            'alignLeft', 'alignCenter', 'alignRight', 'alignJustify', 'formatOL', 'formatUL',
+                            'paragraphFormat', 'paragraphStyle', 'lineHeight', 'outdent', 'indent', 'quote'
+                        ],
+                        align: 'left'
+                    },
+                    moreRich: {
+                        buttons: [
+                            'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'emoticons', 'fontAwesome',
+                            'specialCharacters', 'embedly', 'insertFile', 'insertHR'
+                        ],
+                        align: 'left'
+                    },
+                    moreMisc: {
+                        buttons: ['undo', 'redo', 'fullscreen', 'print', 'getPDF', 'spellChecker', 'selectAll', 'help'],
+                        align: 'right'
+                    }
+                },
+                imageDefaultWidth: 300,
+                htmlAllowedTags: [
+                    'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
+                    'sup', 'sub', 'ul', 'ol', 'li','hr'
+                ],
+                imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
+                htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
+                events: {
+                    'image.inserted': function ($img, response) {
+                        let img = $img[0];
+                        let reader = new FileReader();
+                        let file = img.src;
+                        fetch(file)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                reader.readAsDataURL(blob);
+                                reader.onloadend = function () {
+                                    img.src = reader.result;
+                                };
+                            })
+                            .catch(err => console.error("Image conversion error:", err));
+                    }
+                }
+            });
+
+
+       });
+    </script>
 </head>
 
 <body>
@@ -69,9 +162,9 @@
                         <div class="card border-0">
                             <h2>
                                 <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
-                              <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
+                                <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
                                     |  Max. Marks:<span th:text="${subject.max_marks}"></span>
-                              </small>
+                                </small>
                             </h2>
 
                             <!-- Modal or Form Container -->
@@ -86,8 +179,9 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form th:action="@{/updateQuestions}" method="post" enctype="multipart/form-data">
+                                            <form th:action="@{/updateQuestions}" method="post" id="qpeditorform" enctype="multipart/form-data">
                                                 <input type="hidden" id="qid" name="qid">
+                                                <div class="col-12 text-end text-danger">* Question and Solution are mandatory. </div>
                                                 <div class="col-12">
                                                     <div class="card p-2 mb-3 bg-light">
                                                         <div class="row">
@@ -95,7 +189,7 @@
                                                                 <h3 class="modal-title">Q.No: <b><span id="qno"></span></b></h3>
                                                             </div>
                                                             <div class="col-md-2">
-                                                                <h3 class="modal-title">Bit No.: <b><span id="bitno"></span></b></h3>
+                                                                <h3 class="modal-title">Sub Q.No.: <b><span id="bitno"></span></b></h3>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <h3 class="modal-title">Topic: <b><span id="topic"></span></b></h3>
@@ -144,59 +238,59 @@
                         <div class="row">
                             <div class="col-12">
 
-                                    <h2>Set No: <b th:text="${setNo}"></b> ( <a href="#" class="link-primary" th:if="${sectionTeamRemarks != null and sectionTeamRemarks != ''}"
-                                                                             onclick="showRemarks(this)"
-                                                                             th:data-remarks="${sectionTeamRemarks}">Rejected- View Remarks</a> )</h2>
+                                <h2>Set No: <b th:text="${setNo}"></b> ( <a href="#" class="link-primary" th:if="${sectionTeamRemarks != null and sectionTeamRemarks != ''}"
+                                                                            onclick="showRemarks(this)"
+                                                                            th:data-remarks="${sectionTeamRemarks}">Rejected- View Remarks</a> )</h2>
 
                                 <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
                                     Preview
                                 </a>
-                                    <table class="table table-bordered" >
-                                        <thead>
-                                        <tr>
-                                            <th>S.No.</th>
-                                            <th>Q.No</th>
-                                            <th>Bit No.</th>
-                                            <th>Topic</th>
-                                            <th>Level</th>
-                                            <th>Marks</th>
-                                            <th>Instructions</th>
-                                            <th>Question</th>
-                                            <th>Solution</th>
-                                            <th>Image</th>
-                                            <th>Action</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr th:each="qpoint, iterStat : ${qPtemplate}">
-                                            <td th:text="${iterStat.count}">S.No.</td>
-                                            <td th:text="${qpoint.q_no}">Q No</td>
-                                            <td th:text="${qpoint.bit_no}">Bit No.</td>
-                                            <td th:text="${qpoint.topic}">Topic</td>
-                                            <td th:text="${qpoint.level}">Level</td>
-                                            <td th:text="${qpoint.marks}">Marks</td>
-                                            <td th:text="${qpoint.instructions}">Instructions</td>
-                                            <td th:utext="${qpoint.q_desc}">Question</td>
-                                            <td>
-                                                <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
-                                                   onclick="showSolution(this)"
-                                                   th:data-solution="${qpoint.q_solution}">View Solution</a>
-                                            </td>
-                                            <td>
-                                                <img th:if="${qpoint.image_path != null}"
-                                                     th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
-                                                     alt="Uploaded Image" width="100" height="100"></td>
-                                            <td>
+                                <table class="table table-bordered" >
+                                    <thead>
+                                    <tr>
+                                        <th>S.No.</th>
+                                        <th>Q.No</th>
+                                        <th>Sub Q.No.</th>
+                                        <th>Topic</th>
+                                        <th>Level</th>
+                                        <th>Marks</th>
+                                        <th>Instructions</th>
+                                        <th>Question</th>
+                                        <th>Solution</th>
+                                        <th>Image</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="qpoint, iterStat : ${qPtemplate}">
+                                        <td th:text="${iterStat.count}">S.No.</td>
+                                        <td th:text="${qpoint.q_no}">Q No</td>
+                                        <td th:text="${qpoint.bit_no}">Sub Q.No.</td>
+                                        <td th:text="${qpoint.topic}">Topic</td>
+                                        <td th:text="${qpoint.level}">Level</td>
+                                        <td th:text="${qpoint.marks}">Marks</td>
+                                        <td th:text="${qpoint.instructions}">Instructions</td>
+                                        <td th:utext="${qpoint.q_desc}">Question</td>
+                                        <td>
+                                            <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
+                                               onclick="showSolution(this)"
+                                               th:data-solution="${qpoint.q_solution}">View Solution</a>
+                                        </td>
+                                        <td>
+                                            <img th:if="${qpoint.image_path != null}"
+                                                 th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
+                                                 alt="Uploaded Image" width="100" height="100"></td>
+                                        <td>
 
-                                                <a href="javascript:void(0);" class="btn btn-sm btn-info edit-btn"
-                                                   th:data-id="${qpoint.id}" title="Add">
-                                                    Add/Edit Question
-                                                </a>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-info edit-btn"
+                                               th:data-id="${qpoint.id}" title="Add">
+                                                Add/Edit Question
+                                            </a>
 
-                                            </td>
+                                        </td>
 
-                                        </tr>
-                                        </tbody>
+                                    </tr>
+                                    </tbody>
                                 </table>
                                 </th:block>
                             </div>
@@ -212,8 +306,7 @@
 <script>
     $(document).ready(function () {
     $(".edit-btn").click(function () {
-    debugger;
-        var qid = $(this).data("id");
+            var qid = $(this).data("id");
 
         $.ajax({
             url: "https://online.ctestservices.com/gtuqp/getQuestionDetails/" + qid,
@@ -228,26 +321,20 @@
                 $("#qid").val(response.id);
                 $("#instructions").val(response.instructions);
                if (response.q_desc) {
-           tinymce.get("q_desc").setContent(response.q_desc);
+            editorDesc.html.set(response.q_desc);
         }
-else{
-tinymce.get("q_desc").setContent("<p></p>");
+<!--else{-->
+<!-- editorDesc.html.set("<p></p>");-->
 
-}
+<!--}-->
 
    if (response.q_solution) {
-           tinymce.get("q_solution").setContent(response.q_solution);
+          editorSolution.html.set(response.q_solution);
         }
-else{
-tinymce.get("q_solution").setContent("<p></p>");
+<!--else{-->
+<!-- editorSolution.html.set("<p></p>");-->
 
-}
-
-
-
-
-
-
+<!--}-->
 
                 $("#editModal").modal("show");
             },
@@ -256,32 +343,8 @@ tinymce.get("q_solution").setContent("<p></p>");
             }
         });
     });
-
-    $("#editForm").submit(function (e) {
-        e.preventDefault();
-  var csrfToken = $("meta[name='_csrf']").attr("content");
-    var csrfHeader = $("meta[name='_csrf_header']").attr("content");
-        var formData = new FormData(this);
-        formData.set("q_desc", tinymce.get("q_desc").getContent()); // âœ… Fetch updated TinyMCE content
-
-        $.ajax({
-    url: "../updateQuestions",
-    type: "POST",  // âœ… Ensure this is POST
-    data: formData,
-    processData: false,
-    contentType: false,
-    success: function () {
-        alert("Question updated successfully.");
-        location.reload();
-    },
-    error: function (xhr) {
-        alert("Failed to update question: " + xhr.responseText);
-        console.error("Error details:", xhr);
-    }
-});
-
     });
-});
+
 
 </script>
 <script>
@@ -338,3 +401,24 @@ tinymce.get("q_solution").setContent("<p></p>");
 </div>
 
 </html>
+
+<script>
+    document.getElementById("qpeditorform").addEventListener("submit", function (event) {
+    let question = $("#q_desc").val().trim();
+    let solution = $("#q_solution").val().trim();
+
+    if (!question) {
+        alert("Please fill out the Question field.");
+        $("#q_desc").focus();
+        event.preventDefault();
+        return;
+    }
+
+    if (!solution) {
+        alert("Please fill out the Solution field.");
+        $("#q_solution").focus();
+        event.preventDefault();
+    }
+});
+
+</script>

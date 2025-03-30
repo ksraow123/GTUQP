@@ -27,6 +27,9 @@ public class FacultyDataController {
     @GetMapping("/getAllFaculty")
     public String getAllFaculties(Model model) {
         List<FacultyData> facultyDataList =facultyDataService.getAllFaculties();
+
+
+
         model.addAttribute("facultyDataList",facultyDataList);
         model.addAttribute("page","facultyData");
         return "main";

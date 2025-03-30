@@ -21,4 +21,6 @@ public interface SubjectsRepository  extends JpaRepository<Subjects, Long> {
     Subjects findBySubjectCodeAndSectionId(String subjectCode, Integer sectionId);
 
     List<Subjects> findByCourseIdInOrderBySubjectCodeAsc(List<String> courseIds);
+
+ List<Subjects> findByCourseIdAndSemester(String courseId, String semester);
 }

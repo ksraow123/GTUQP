@@ -38,6 +38,9 @@ public class FacultyData {
     @Column(name = "designation")
     private String designation;
 
+    @Column(name = "faculty_type")
+    private String facultyType;
+
     @Column(name = "created_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime createdDate;
 }

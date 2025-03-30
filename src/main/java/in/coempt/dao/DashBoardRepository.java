@@ -15,8 +15,8 @@ public class DashBoardRepository {
         QueryUtil<QPSetterDashBoardVo> queryUtil = new QueryUtil<>(QPSetterDashBoardVo.class);
         return queryUtil.list("SELECT ts.syllabus,qp.subject_id,ts.subject_code,ts.subject_name,course_name,year,semester,no_of_sets," +
                 "last_date_to_submit as submission_date,\n" +
-                "(SELECT count(id) FROM tbl_qp_files where subject_id=ts.id and user_id=? and qp_status='FORWARDED') as no_of_sets_uploaded,\n" +
-                "(SELECT count(id) FROM tbl_qp_files where subject_id=ts.id and user_id=? and qp_status='FORWARDED') as no_of_sets_forwarded\n" +
+                "(SELECT count(id) FROM tbl_qp_files where subject_id=ts.id and user_id=? and qp_status='SUBMITTED') as no_of_sets_uploaded,\n" +
+                "(SELECT count(id) FROM tbl_qp_files where subject_id=ts.id and user_id=? and qp_status='SUBMITTED') as no_of_sets_forwarded\n" +
                 "FROM tbl_appointments_bulk qp,tbl_subjects ts,tbl_courses tc where tc.id=ts.course_id\n" +
                 "and ts.id=qp.subject_id and qp.user_id=?", userId,userId,userId);
     }
@@ -49,7 +49,7 @@ public class DashBoardRepository {
                 "    t1.course_name, \n" +
                 "    t1.subject_code, \n" +
                 "    t1.subject_name,\n" +
-                "    COALESCE(t2.qp_status, 'NOT SUBMITTED') AS qp_status, \n" +
+                "    COALESCE(t2.qp_status, 'NOT RECEIVED') AS qp_status, \n" +
                 "    t2.remarks, \n" +
                 "    t2.qp_status_date \n" +
                 "FROM (\n" +
@@ -71,8 +71,8 @@ public class DashBoardRepository {
                 ") AS t1\n" +
                 "LEFT JOIN tbl_qp_files t2 \n" +
                 "    ON t1.subject_id = t2.subject_id \n" +
-                "    AND t1.user_id = t2.user_id\n" +
-                "    AND t1.role_id = t2.role_id \n" +
+                "    AND t1.user_id = t2.qp_setter_id\n" +
+               "     AND t2.role_id =1" +
                 "    AND t1.exam_series_id = t2.exam_series_id\n" +
                 "JOIN tbl_section_user_mapping tsum\n" +
                 "    ON t1.section_id = tsum.section_id \n" +

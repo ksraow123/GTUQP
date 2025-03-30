@@ -63,7 +63,7 @@ public String getAdminDashBoard(Model model,HttpSession session) {
     model.addAttribute("subjectsList", subjectsList);
     model.addAttribute("semesterList", semesterList);
     model.addAttribute("adminDashBoardVoList",adminDashBoardVoList);
-    model.addAttribute("page","/report/admindashboard");
+        model.addAttribute("page","/report/admindashboard");
     return "main";
 }
 
@@ -72,8 +72,10 @@ public String getAdminDashBoard(Model model,HttpSession session) {
             @RequestParam("course_id") String courseId,
             @RequestParam("subject_id") String subjectId,
             @RequestParam("semester") String semester,
+            @RequestParam("assignedStatus") String assignedStatus,
             Model model,
             HttpSession session) {
+
 
         SessionDataVo sessionDataVo = (SessionDataVo) session.getAttribute("sessionData");
         List<Course> courseList=courseService.getAllCourses().stream()
@@ -104,13 +106,25 @@ public String getAdminDashBoard(Model model,HttpSession session) {
                 adminDashBoardVoList.removeIf(a -> a.getSection_id() != sectionId);
             }
         }
-
+        String assgnedNewStatus = "";
+        if (assignedStatus.equalsIgnoreCase("ASSIGNED")) {
+            assgnedNewStatus = "ASSIGNED";
+            assignedStatus = "ALL";
+        }
         // Apply filters based on the request parameters
+        String finalAssignedStatus = assignedStatus;
         adminDashBoardVoList.removeIf(a ->
+
+                (!finalAssignedStatus.equalsIgnoreCase("All") && !a.getAssigned_setters().equals(finalAssignedStatus)) ||
                 (!courseId.equalsIgnoreCase("All") && a.getCourse_id() != Integer.valueOf(courseId)) ||
                         (!subjectId.equalsIgnoreCase("All") && Integer.valueOf(a.getSubject_id()) != Integer.valueOf(subjectId)) ||
                         (!semester.equalsIgnoreCase("All") && Integer.valueOf(a.getSemester()) != Integer.valueOf(semester))
         );
+        if(assgnedNewStatus.equalsIgnoreCase("ASSIGNED")){
+            adminDashBoardVoList.removeIf(a ->
+                    (a.getAssigned_setters().equalsIgnoreCase("NOT ASSIGNED"))
+            );
+        }
         List<Subjects> subjectsList=subjectsService.getSubjectsByCourseIdList(courseIds);
         List<String> semesterList=subjectsList.stream().map(Subjects::getSemester).distinct().collect(Collectors.toList());
         model.addAttribute("coursesList", courseList);
@@ -124,12 +138,12 @@ public String getAdminDashBoard(Model model,HttpSession session) {
 
 
     @GetMapping("/subject/dashboard")
-    public String getSubjectDashBoard(Model model, HttpSession session) {
-        SessionDataVo sessionDataVo=(SessionDataVo)session.getAttribute("sessionData");
-        List<Integer> sectionIds = sessionDataVo.getSectionId();
-        String sessionIds = sectionIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(",", "(", ")"));
+        public String getSubjectDashBoard(Model model, HttpSession session) {
+            SessionDataVo sessionDataVo=(SessionDataVo)session.getAttribute("sessionData");
+            List<Integer> sectionIds = sessionDataVo.getSectionId();
+            String sessionIds = sectionIds.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(",", "(", ")"));
         List<Course> courseList=courseService.getAllCourses().stream()
                 .sorted(Comparator.comparing(Course::getCourse_name)) // Sort by name
                 .distinct() // Remove duplicates (won't work well for objects)

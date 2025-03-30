@@ -11,40 +11,40 @@
 
 
                     <div class="row">
-                        <form th:action="@{/subject/dashboard}"  method="post" >
+                        <form th:action="@{/subject/dashboard}" method="post">
                             <div class="col-md-12">
                                 <div class="row">
+                                    <!-- Course Dropdown -->
                                     <div class="col-md-3">
                                         <div class="mb-3">
-                                            <label for="" class="form-label">Course Name </label>
-                                            <select class="form-select" id="courseCode" required  name="course_id" >
-                                                <option value="">Select</option>
+                                            <label class="form-label">Course Name</label>
+                                            <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
                                                 <option value="All">All</option>
                                                 <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <!-- Year/Sem Dropdown -->
                                     <div class="col-md-3">
                                         <div class="mb-3">
-                                            <label for="" class="form-label">Year / Sem </label>
-                                            <select class="form-select" id="yearsem" required  name="semester" >
+                                            <label class="form-label">Year / Sem</label>
+                                            <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
                                                 <option value="All">All</option>
-                                                <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <!-- Subject Dropdown -->
                                     <div class="col-md-3">
                                         <div class="mb-3">
-                                            <label for="" class="form-label">Subject </label>
-                                            <select class="form-select" id="subject" required  name="subject_id" >
+                                            <label class="form-label">Subject</label>
+                                            <select class="form-select" id="subject" name="subject_id" required>
                                                 <option value="All">All</option>
-                                                <option th:each="subject : ${subjectsList}"
-                                                        th:value="${subject.id}"
-                                                        th:text="|${subject.subjectCode} - ${subject.subject_name}|">
-                                                </option>
                                             </select>
                                         </div>
                                     </div>
+
                                     <div class="col-md-3">
                                         <div class="mb-3 mt-4">
                                             <button class="btn btn-primary">Search</button>
@@ -53,8 +53,9 @@
                                 </div>
                             </div>
                         </form>
-                        </div>
-                        <div class="col-12">
+                    </div>
+
+                    <div class="col-12">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="example">
                                     <thead>
@@ -82,7 +83,7 @@
                                         <td th:text="${report.semester ?: 'N/A'}"></td>
                                         <td th:text="${report.subject_code ?: 'N/A'}"></td>
                                         <td th:text="${report.subject_name ?: 'N/A'}"></td>
-                                        <td>QP Setters count</td>
+                                        <td th:text="${report.assigned_setters}"></td>
                                         <td th:text="${report.setter_completed ?: 0}"></td>
                                         <td th:text="${report.setter_pending ?: 0}"></td>
 

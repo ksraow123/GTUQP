@@ -1,42 +1,45 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>PDF</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>pdf</title>
 </head>
-<body>
+<style type="text/css">
+    body{font-family:"Times New Roman", "serif"; font-size: 18px;}
+	p{margin:0 0 3px 0; padding:0;}
+	img{ width:70% !important; height:auto !important;}
+</style>
+<style>
+    .q-desc {
+    font-size: 16px; /* Adjust the font size */
+    max-width: 400px; /* Set a maximum width for the text */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal; /* Allows text wrapping */
+    word-wrap: break-word; /* Ensures long words break properly */
+}
 
-<table width="100%" border="0">
+</style>
+<body>
+<div class="watermarked" ></div>
+<table width="720" border="0" align="center">
     <tr>
         <td>
             <table width="100%" border="0">
-                <tr>
-                    <td colspan="3" align="right">
-                        <h1><b th:text="${subjects.subject_code}"></b></h1>
-                    </td>
-                </tr>
+
                 <tr>
                     <td align="left" valign="middle">
-                        <h2><b th:text="${subjects.exam_code}"></b><br />
-                            3 Hours / 70 Marks</h2>
+                        <h2>
+                            <span th:text="${subjects.subjectCode}"> </span>-
+                            <span th:text="${subjects.subject_name}"></span>:
+
+                        </h2>
+
                     </td>
                     <td align="right"  valign="middle">
-                        <h3>Seat No.</h3>
+                        Max Marks:<span th:text="${subjects.max_marks}"></span>
                     </td>
-                    <td align="right" valign="middle" width="200">
-                        <table width="200" border="1" cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                                <td width="25" height="30">&nbsp;</td>
-                            </tr>
-                        </table>
-                    </td>
+
                 </tr>
                 <tr>
                     <td colspan="3" >
@@ -51,89 +54,39 @@
         <td>
             <table width="100%" border="0">
                 <tr>
-                    <td valign="top" align="right" width="150">Instructions – </td>
-                    <td valign="top" align="center" width="30">(1)</td>
-                    <td valign="top">All Questions are Compulsory.</td>
-                </tr>
-                <tr>
-                    <td valign="top" align="right"></td>
-                    <td valign="top" align="center">(2)</td>
-                    <td valign="top">Answer each next main Question on a new page.</td>
-                </tr>
-                <tr>
-                    <td valign="top" align="right"></td>
-                    <td valign="top" align="center">(3)</td>
-                    <td valign="top">Illustrate your answers with neat sketches wherever necessary.</td>
-                </tr>
-                <tr>
-                    <td valign="top" align="right"></td>
-                    <td valign="top" align="center">(4)</td>
-                    <td valign="top">Figures to the right indicate full marks.</td>
-                </tr>
-                <tr>
-                    <td valign="top" align="right"></td>
-                    <td valign="top" align="center">(5)</td>
-                    <td valign="top">Assume suitable data, if necessary.</td>
-                </tr>
-                <tr>
-                    <td valign="top" align="right"></td>
-                    <td valign="top" align="center">(6)</td>
-                    <td valign="top">Mobile Phone, Pager and any other Electronic Communication devices are not permissible in Examination Hall.</td>
+                    <td align="right"><b>Marks</b></td>
                 </tr>
             </table>
         </td>
     </tr>
     <tr>
-        <td align="right">
-            <b>Marks</b>
-        </td>
-    </tr>
-    <tr>
         <td>
-            <th:block th:each="lst : ${qpTemplateList}">
+            <th:block th:each="entry : ${groupedQuestions}">
                 <table width="100%" border="0">
-                    <tr>
-                        <td valign="top"><b th:text="${lst.question_no} + '.'"></b></td>
-                        <td valign="top"></td>
-                        <td valign="top"><b th:text="${lst.instructions} + ':'"></b></td>
-                        <td valign="top"><b th:text="${lst.marks}"></b></td>
+                    <tr th:each="question, iterStat : ${entry.value}">
+                        <td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q' + entry.key + '.'}"></b></td>
+                        <td width="30" valign="top" th:unless="${iterStat.first}"></td>
+                        <td width="30" valign="top"><b th:text="${question.bit_no} + ')'"></b></td>
+                        <td valign="top">
+                            <p ><b th:utext="${question.instructions}"></b></p>
+                            <span class="q-desc" th:utext="${question.q_desc}"></span>
+                            <img th:if="${question.image_path != null}"
+                                 th:src="'data:image/png;base64,' + ${question.image_path}"
+                                 alt="Uploaded Image"  width="300" >
+                        </td>
+                        <td width="30" valign="top" align="right"><b th:text="${question.marks}"></b></td>
                     </tr>
-
-                    <!-- Iterate over groupedByQuestionNo but only if lst.q_no matches entry.key -->
-                    <th:block th:each="entry : ${groupedQuestions}">
-                        <th:block th:if="${entry.key == lst.question_no}">
-                            <tr>
-                                <td valign="top"></td>
-                                <td valign="top"></td>
-                                <td valign="top"></td>
-                                <td valign="top"></td>
-                            </tr>
-
-                            <!-- Iterate over the list of questions in entry.value -->
-                            <tr th:each="question : ${entry.value}">
-                                <td valign="top"></td>
-                                <td valign="top"><b th:text="${question.bit_no}"></b></td>
-                                <td valign="top"><span th:utext="${question.q_desc}"></span></td>
-
-                                <img th:if="${question.image_path != null and !question.image_path.isEmpty()}"
-                                     th:src="${question.image_path}"
-                                     alt="Base64 Image"
-                                     width="75%" height="50%" />
-                                <td valign="top"></td>
-                            </tr>
-                        </th:block>
-                    </th:block>
                 </table>
             </th:block>
-
-
         </td>
     </tr>
     <tr>
-        <td>
-
+        <td align="center">
+            <b>***</b>
         </td>
     </tr>
 </table>
+</div>
+
 </body>
 </html>

@@ -24,5 +24,6 @@ public class ProfileDetailsEntity {
     private Long user_id;
     private String industry_experience;
     private String residential_address;
+    private String faculty_type;
 
 }

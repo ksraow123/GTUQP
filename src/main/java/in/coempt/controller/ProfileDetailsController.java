@@ -1,13 +1,11 @@
 package in.coempt.controller;
 
-import in.coempt.entity.CollegeEntity;
-import in.coempt.entity.ProfileDetailsEntity;
-import in.coempt.entity.User;
-import in.coempt.entity.UserData;
+import in.coempt.entity.*;
 import in.coempt.repository.ProfileDetailsRepository;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.AppointmentService;
 import in.coempt.service.CollegeService;
+import in.coempt.service.FacultyDataService;
 import in.coempt.service.ProfileDetailsService;
 import in.coempt.service.impl.AppointmentServiceImpl;
 import in.coempt.util.SecurityUtil;
@@ -27,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ProfileDetailsController {
@@ -43,7 +42,8 @@ private ProfileDetailsService profileDetailsService;
     @Autowired
     private ProfileDetailsRepository profileDetailsRepository;
 
-
+    @Autowired
+    private FacultyDataService facultyDataService;
     @GetMapping("/viewProfile")
     public String getProfileDetails(Model model, HttpSession session) {
         UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
@@ -76,6 +76,19 @@ model.addAttribute("page","profileDetails");
         BeanUtils.copyProperties(profileDetailsVo, detailsEntity);
         detailsEntity.setUser_id(userEntity.getId());
         profileDetailsRepository.save(detailsEntity);
+
+        Optional<FacultyData> facultyData=facultyDataService.getFacultyByMobileNumber(userEntity.getMobileNo());
+
+        if(facultyData.isPresent()){
+            FacultyData facultyData1=facultyData.get();
+            facultyData1.setDesignation(detailsEntity.getDesignation());
+            facultyData1.setFacultyType(detailsEntity.getFaculty_type());
+
+            facultyDataService.saveFaculty(facultyData1);
+
+
+        }
+
         return "redirect:/viewProfile";
     }
 

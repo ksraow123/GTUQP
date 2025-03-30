@@ -7,44 +7,57 @@
         <div class="col-12">
             <div class="cards">
                 <div class="card border-0">
-                    <h2>QP Set-wise Details</h2>
+                    <h2>QP Subject wise Details</h2>
 
 
                     <div class="row">
                         <form th:action="@{/adminDashboard}"  method="post" >
                         <div class="col-md-12">
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="mb-3">
                                         <label for="" class="form-label">Course Name </label>
-                                        <select class="form-select" id="courseCode" required  name="course_id" >
-                                            <option value="">Select</option>
+                                        <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
                                             <option value="All">All</option>
                                             <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="mb-3">
                                         <label for="" class="form-label">Year / Sem </label>
-                                        <select class="form-select" id="yearsem" required  name="semester" >
+                                        <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
                                             <option value="All">All</option>
-                                            <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="mb-3">
                                         <label for="" class="form-label">Subject </label>
-                                        <select class="form-select" id="subject" required  name="subject_id" >
+                                        <select class="form-select" id="subject" name="subject_id" required>
                                             <option value="All">All</option>
-                                            <option th:each="subject : ${subjectsList}"
-                                                    th:value="${subject.id}"
-                                                    th:text="|${subject.subjectCode} - ${subject.subject_name}|">
-                                            </option>
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Assigned Status </label>
+                                        <select class="form-select" id="assignedStatus" required  name="assignedStatus" >
+                                            <option value="All">All</option>
+                                            <option value="ASSIGNED">ASSIGNED</option>
+                                            <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+
+
+                                        </select>
+                                    </div>
+                                </div>
+
+
+
+
+
+
                                 <div class="col-md-3">
                                     <div class="mb-3 mt-4">
                                         <button class="btn btn-primary">Search</button>
@@ -67,7 +80,7 @@
                                     <th>Assigned Setters</th>
                                     <th>QP Setting Status</th>
                                     <th>QP Review status</th>
-                                    <th>Forward to Repository</th>
+<!--                                    <th>Forward to Repository</th>-->
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -78,10 +91,10 @@
                                     <td th:text="${report.semester}"></td>
                                     <td th:text="${report.subject_code}"></td>
                                     <td th:text="${report.subject_name}"></td>
-                                    <td th:text="${report.setter_name}"></td>
-                                    <td th:text="${report.qp_setter_status}"></td>
+                                    <td th:text="${report.assigned_setters}"></td>
+                                    <td th:text="${report.setter_status}"></td>
                                     <td th:text="${report.section_team_status}"></td>
-                                    <td th:text="${report.forward_to_repo_status}"></td>
+<!--                                    <td th:text="${report.forward_to_repo_status}"></td>-->
                                 </tr>
                                 </tbody>
                             </table>

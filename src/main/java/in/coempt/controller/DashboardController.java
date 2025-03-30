@@ -5,6 +5,7 @@ import in.coempt.repository.QpTemplateMasterRepository;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.util.SecurityUtil;
+import in.coempt.vo.ProfileDetailsVo;
 import in.coempt.vo.QPSetterDashBoardVo;
 import in.coempt.vo.SectionTeamDashBoard;
 import in.coempt.vo.SessionDataVo;
@@ -15,11 +16,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -39,7 +42,9 @@ public class DashboardController {
     @Autowired
     private CourseService courseService;
     @Autowired
-   private QPFilesService qpFilesService;
+    private QPFilesService qpFilesService;
+    @Autowired
+    private ProfileDetailsService profileDetailsService;
 
     @GetMapping("/setterdashboard")
     // @Transactional
@@ -91,8 +96,8 @@ public class DashboardController {
             }
 
             List<QPSetterDashBoardVo> setwiseDashBoard = dashBoardService.getSetWiseQPDashBoard(userEntity.getId());
-            for(QPSetterDashBoardVo setterDashBoardVo:setwiseDashBoard){
-                if(setterDashBoardVo.getQp_status()!=null) {
+            for (QPSetterDashBoardVo setterDashBoardVo : setwiseDashBoard) {
+                if (setterDashBoardVo.getQp_status() != null) {
                     if (setterDashBoardVo.getQp_status().equalsIgnoreCase("Re-Submit")) {
 
                         QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByRollIdAndSubjectIdAndSetNoAndSetterId(1, setterDashBoardVo.getSubject_id() + "", 1, userEntity.getId());
@@ -101,7 +106,6 @@ public class DashboardController {
                     }
                 }
             }
-
 
 
             // model.addAttribute("qpSetterDashBoardList", qpSetterDashBoardList);
@@ -143,12 +147,19 @@ public class DashboardController {
                 dashBoardService.getSectionDashBoard(Math.toIntExact(userEntity.getId()), examSeriesId);
         for (SectionTeamDashBoard setterDashBoardVo : qpSectionDashBoardList) {
             userRepository.findById(setterDashBoardVo.getUser_id())
-                    .ifPresent(usr -> setterDashBoardVo.setSetter_details(
-                            String.join("\n", usr.getUserName(),
-                                    usr.getFirstName() + " " + usr.getLastName(),
-                                    usr.getEmail(),
-                                    usr.getMobileNo())
-                    ));
+                    .ifPresent(userRecord -> {
+                        ProfileDetailsVo profileDetails = profileDetailsService.getProfileDetails(userRecord.getId());
+                        StringBuilder setterDetails = new StringBuilder();
+                        setterDetails.append("<p>")
+                                .append("<b>User Name:</b> ").append(userRecord.getUserName()).append("<br>\n")
+                                .append("<b>Name:</b> ").append(userRecord.getFirstName()).append(" ").append(userRecord.getLastName()).append("<br>\n")
+                                .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
+                                .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
+                                .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+
+                        setterDashBoardVo.setSetter_details(setterDetails.toString());
+                    });
         }
         List<Subjects> subjectsList = subjectsService.getSubjectsByCourseIdList(courseIds);
         List<String> semesterList = subjectsList.stream().map(Subjects::getSemester).distinct().collect(Collectors.toList());
@@ -167,7 +178,7 @@ public class DashboardController {
     public String moderatorDashBoardFilters(
             @RequestParam("course_id") String courseId,
             @RequestParam("subject_id") String subjectId,
-            @RequestParam("semester") String semester,@RequestParam("qpStatus") String qpStatus,Model model, HttpSession session) {
+            @RequestParam("semester") String semester, @RequestParam("qpStatus") String qpStatus, Model model, HttpSession session) {
         Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
         UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User userEntity = userRepository.findByUserName(user.getUsername());
@@ -184,7 +195,8 @@ public class DashboardController {
         courseList = courseList.stream().filter(a -> Math.toIntExact(a.getSection_id()) == sectionIds.get(0)).collect(Collectors.toList()).stream()
                 .sorted(Comparator.comparing(Course::getCourse_name)) // Sort by name
                 .distinct() // Remove duplicates (won't work well for objects)
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+        ;
         courseIds = courseList.stream()
                 .map(course -> String.valueOf(course.getId())).sorted().distinct()
                 .collect(Collectors.toList());
@@ -192,12 +204,19 @@ public class DashboardController {
                 dashBoardService.getSectionDashBoard(Math.toIntExact(userEntity.getId()), examSeriesId);
         for (SectionTeamDashBoard setterDashBoardVo : qpSectionDashBoardList) {
             userRepository.findById(setterDashBoardVo.getUser_id())
-                    .ifPresent(usr -> setterDashBoardVo.setSetter_details(
-                            String.join("\n", usr.getUserName(),
-                                    usr.getFirstName() + " " + usr.getLastName(),
-                                    usr.getEmail(),
-                                    usr.getMobileNo())
-                    ));
+                    .ifPresent(userRecord -> {
+                        ProfileDetailsVo profileDetails = profileDetailsService.getProfileDetails(userRecord.getId());
+                        StringBuilder setterDetails = new StringBuilder();
+                        setterDetails.append("<p>")
+                                .append("<b>User Name:</b> ").append(userRecord.getUserName()).append("<br>\n")
+                                .append("<b>Name:</b> ").append(userRecord.getFirstName()).append(" ").append(userRecord.getLastName()).append("<br>\n")
+                                .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
+                                .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
+                                .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+
+                        setterDashBoardVo.setSetter_details(setterDetails.toString());
+                    });
         }
         List<Subjects> subjectsList = subjectsService.getSubjectsByCourseIdList(courseIds);
         List<String> semesterList = subjectsList.stream().map(Subjects::getSemester).distinct().collect(Collectors.toList());
@@ -214,6 +233,15 @@ public class DashboardController {
 
         model.addAttribute("page", "moderatorDashBoard");
         return "main";
+
+    }
+
+
+    @GetMapping("/subject-audit-logs")
+    @ResponseBody
+    public List<QPSetterDashBoardVo> viewAuditLogs(@RequestParam Integer subjectId, @RequestParam Long setterId, Model model, HttpSession session) {
+        Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
+        return dashBoardService.getSetterStatusReport(examSeriesId, subjectId, setterId);
 
     }
 }

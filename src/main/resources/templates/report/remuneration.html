@@ -15,8 +15,7 @@
                                     <div class="col-md-3">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Course Name </label>
-                                            <select class="form-select" id="courseCode" required  name="course_id" >
-                                                <option value="">Select</option>
+                                            <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
                                                 <option value="All">All</option>
                                                 <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
                                             </select>
@@ -25,21 +24,16 @@
                                     <div class="col-md-3">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Year / Sem </label>
-                                            <select class="form-select" id="yearsem" required  name="semester" >
+                                            <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
                                                 <option value="All">All</option>
-                                                <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Subject </label>
-                                            <select class="form-select" id="subject" required  name="subject_id" >
+                                            <select class="form-select" id="subject" name="subject_id" required>
                                                 <option value="All">All</option>
-                                                <option th:each="subject : ${subjectsList}"
-                                                        th:value="${subject.id}"
-                                                        th:text="|${subject.subjectCode} - ${subject.subject_name}|">
-                                                </option>
                                             </select>
                                         </div>
                                     </div>
@@ -59,6 +53,8 @@
                                             <th>S.No</th>
                                             <th>QP Setter ID</th>
                                             <th>Name</th>
+                                            <th>Designation</th>
+                                            <th>Empl. Type</th>
                                             <th>College Code</th>
                                            <!-- <th>Role</th>-->
                                             <th>Subject Code</th>
@@ -81,6 +77,9 @@
                                             <td th:text="${iterStat.count}"></td>
                                             <td th:text="${report.user_name}"></td>
                                             <td  th:text="${(report.first_name ?: '') + '  ' + (report.last_name ?: '')}"></td>
+                                            <td th:text="${report.designation}"></td>
+                                            <td th:text="${report.faculty_type}"></td>
+
                                             <td  th:text="${(report.college_code ?: '') + '  ' + (report.college_name ?: '')}"></td>
                                            <!-- <td th:text="${report.role}"></td>-->
                                             <td th:text="${report.subject_code}"></td>

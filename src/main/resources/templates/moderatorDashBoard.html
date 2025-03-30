@@ -15,7 +15,7 @@
                                     <div class="col-md-2">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Course Name </label>
-                                            <select class="form-select" id="courseCode" required  name="course_id" >
+                                            <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
                                                 <option value="All">All</option>
                                                 <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
                                             </select>
@@ -24,21 +24,16 @@
                                     <div class="col-md-2">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Year / Sem </label>
-                                            <select class="form-select" id="yearsem" required  name="semester" >
+                                            <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
                                                 <option value="All">All</option>
-                                                <option th:each="semester : ${semesterList}" th:value="${semester}" th:text="${semester}"></option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Subject </label>
-                                            <select class="form-select" id="subject" required  name="subject_id" >
+                                            <select class="form-select" id="subject" name="subject_id" required>
                                                 <option value="All">All</option>
-                                                <option th:each="subject : ${subjectsList}"
-                                                        th:value="${subject.id}"
-                                                        th:text="|${subject.subjectCode} - ${subject.subject_name}|">
-                                                </option>
                                             </select>
                                         </div>
                                     </div>
@@ -47,10 +42,10 @@
                                             <label for="" class="form-label">QP Status </label>
                                             <select class="form-select" id="qpStatus" required  name="qpStatus" >
                                                 <option value="All">All</option>
-                                                <option value="PENDING">PENDING</option>
-                                                <option value="NOT SUBMITTED">NOT SUBMITTED</option>
-                                                <option value="FORWARDED">FORWARDED</option>
-                                                <option value="Re-Submit">REJECTED</option>
+                                                <option value="NOT RECEIVED">NOT RECEIVED</option>
+                                                <option value="PENDING">PENDING REVIEW</option>
+                                                <option value="APPROVED">APPROVED</option>
+                                                <option value="REJECTED">REJECTED</option>
 
                                             </select>
                                         </div>
@@ -75,7 +70,7 @@
                                     <th>Subject Name</th>
                                     <th>Syllabus</th>
                                     <th>QP Setter</th>
-                                    <th>Status</th>
+                                    <th>QP Status</th>
                                     <th>Received Date</th>
                                     <th>Preview</th>
                                     <th>Action</th>
@@ -92,7 +87,7 @@
                                     <td>
                                         <a href="https://syllabus.gtu.ac.in/" target="_blank" class="link-primary" title="View Syllabus">View</a>
                                     </td>
-                                    <td th:text="${appointment.setter_details}" class="text-center"></td>
+                                    <td th:utext="${appointment.setter_details}" class="text-center"></td>
                                     <td class="text-center">
                                         <span th:text="${appointment.qp_status != null ? appointment.qp_status : 'Pending'}"></span><br>
                                         <a href="#" class="link-primary"
@@ -103,20 +98,26 @@
 
                                     <td th:text="${appointment.qp_status_date}"></td>
 
-                                    <td th:unless="${appointment.qp_status =='NOT SUBMITTED'}">
+                                    <td th:unless="${appointment.qp_status =='NOT RECEIVED'}">
                                         <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=1, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
                                             Preview
                                         </a>
                                     </td>
-                                    <td th:if="${appointment.qp_status =='NOT SUBMITTED'}">
+                                    <td th:if="${appointment.qp_status =='NOT RECEIVED'}">
 
                                     </td>
-                                    <td th:unless="${appointment.qp_status =='NOT SUBMITTED'}">
+                                    <td th:unless="${appointment.qp_status =='NOT RECEIVED'}">
                                         <a th:if="${appointment.qp_status == 'PENDING'}" th:href="@{/reviewerQuestionsList(id=1, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}" class="btn btn-sm btn-info">
                                             Review Questions
                                         </a>
+
+                                        <a href="#" class="link-primary"
+                                           onclick="getSubjectAuditLogs(this)"
+                                           th:data-subject-id="${appointment.subject_id}"
+                                           th:data-setter-id="${appointment.user_id}">View Logs</a>
+
                                     </td>
-                                    <td th:if="${appointment.qp_status =='NOT SUBMITTED'}">
+                                    <td th:if="${appointment.qp_status =='NOT RECEIVED'}">
 
                                     </td>
                                 </tr>
@@ -159,3 +160,89 @@
     </div>
     <!-- End Content  -->
 </div>
+<!-- Bootstrap Modal -->
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="auditLogsModal" tabindex="-1" aria-labelledby="auditLogsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> <!-- Increased Size -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>S No.</th>
+                        <th>Course Name</th>
+                        <th>Year</th>
+                        <th>Sem.</th>
+                        <th>Subject Code</th>
+                        <th>Subject Name</th>
+                        <th>User Name</th>
+                        <th>Role</th>
+                        <th>QP Old Status</th>
+                        <th>QP New Status</th>
+                        <th>Remarks</th>
+                        <th>QP Status Date</th>
+                    </tr>
+                    </thead>
+                    <tbody id="auditLogsTableBody">
+                    <!-- Data will be inserted dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+
+<script>
+    function getSubjectAuditLogs(element) {
+        var subjectId = $(element).attr("data-subject-id");
+        var setterId = $(element).attr("data-setter-id");
+
+        $.ajax({
+            url: 'https://online.ctestservices.com/gtuqp/subject-audit-logs',
+            type: 'GET',
+            data: { subjectId: subjectId, setterId: setterId },
+            success: function(response) {
+                var tbody = $("#auditLogsTableBody");
+                tbody.empty(); // Clear previous data
+
+                if (response.length > 0) {
+                    $.each(response, function(index, log) {
+                        tbody.append(`
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${log.course_name}</td>
+                                <td>${log.year}</td>
+                                <td>${log.semester}</td>
+                                <td>${log.subject_code}</td>
+                                <td>${log.subject_name}</td>
+                                <td>${log.user_name}</td>
+                                <td>${log.role}</td>
+                                <td>${log.old_qp_status}</td>
+                                <td>${log.new_qp_status}</td>
+                                <td>${log.remarks}</td>
+                                <td>${log.qp_status_date}</td>
+                            </tr>
+                        `);
+                    });
+                } else {
+                    tbody.append("<tr><td colspan='12' class='text-center'>No records found</td></tr>");
+                }
+
+                $("#auditLogsModal").modal("show"); // Show the modal
+            },
+            error: function() {
+                alert("Error loading audit logs!");
+            }
+        });
+    }
+</script>
