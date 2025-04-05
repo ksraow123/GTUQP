@@ -12,14 +12,14 @@ public class IndividualAppointmentVo {
     private String mobile_number;
 
     private String email;
-    private String collegeCode,fname,lname,course_id;
+    private String fname,lname,course_id;
 
     private int subject_id;
     private String order_date;
     private String submission_date;
 
     private String no_of_sets;
-
+private Integer collegeId;
 
 }
 

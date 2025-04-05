@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Controller
 @CrossOrigin(origins = "*")
@@ -52,32 +54,31 @@ public class PasswordController {
 
     @PostMapping("/forgot")
     public String processForgotPassword(@RequestParam String userName,@RequestParam String email, RedirectAttributes redirectAttributes) {
-        User user = userService.sendPasswordResetLink(email, userName);
-        if (user != null){
-            redirectAttributes.addFlashAttribute("success", "Password reset link sent to your email.");
+        String resetLink = userService.sendPasswordResetLink(email, userName);
+        if (resetLink != null){
+            redirectAttributes.addFlashAttribute("success", "Set the New Password");
+            return "redirect:/"+resetLink;
     }
-       else{
-            redirectAttributes.addFlashAttribute("success", "User name not found");
+       else {
+            redirectAttributes.addFlashAttribute("success", "User name/email not found");
+            return "redirect:/password/forgot";
         }
-        return "redirect:/password/forgot";
     }
 
     @GetMapping("/resend/{email}/{userName}")
     public String processResend(@PathVariable("email") String email,@PathVariable("userName") String userName, RedirectAttributes redirectAttributes) {
-       User user= userService.sendPasswordResetLink(email,userName);
-        if (user != null){
-            redirectAttributes.addFlashAttribute("success", "Password reset link sent to "+email+" email.");
+      // String user= userService.sendPasswordResetLink(email,userName);
+        String resetLink = userService.sendPasswordResetLink(email, userName);
+        if (resetLink != null){
+            redirectAttributes.addFlashAttribute("success", "Set the New Password");
+            return resetLink;
+
         }
         else{
             redirectAttributes.addFlashAttribute("success", "User name not found");
         }
         return "redirect:/upload";
     }
-
-
-
-
-
     @GetMapping("/reset")
     public String showResetPasswordForm(@RequestParam String token, Model model) {
         model.addAttribute("token", token);

@@ -7,13 +7,11 @@ import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.util.SecurityUtil;
 import in.coempt.vo.FacultyDataDTO;
-import in.coempt.vo.SetterModeratorMappingDTO;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,6 +42,7 @@ public class CSVServiceImpl implements CSVService {
     private final UserRepository userRepository;
     private final SectionUserMappingService sectionUserMappingService;
     private final FacultyDataService facultyDataService;
+    private final ProfileDetailsService profileDetailsService;
     @Transactional
     public ArrayList<Object> saveCSV(MultipartFile file) {
         List<FacultyDataDTO> successList = new ArrayList<>();
@@ -52,56 +51,187 @@ public class CSVServiceImpl implements CSVService {
 
         UserDetails userDetails = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User userEntity = userRepository.findByUserName(userDetails.getUsername());
-        SectionUserMappingEntity mappingEntity = sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
+        int sectionId = 0;
+        if (userEntity.getRoleId() == 1) {
+            SectionUserMappingEntity mappingEntity = sectionUserMappingService.getMappingDetailsByUserid(Math.toIntExact(userEntity.getId()));
+            sectionId = mappingEntity.getSectionId();
 
+        }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
 
             for (CSVRecord record : csvParser) {
-                FacultyData facultyData = facultyDataService.getFacultyByMobileNumber(record.get("mobile no").trim()).orElse(null);
+                User udata = userService.getUserByMobileNoAndRoleId(record.get("Contact").trim(), 2);
+                if (udata == null) {
+                    String customPassword = RandomUtils.nextLong(10000, 99999) + "";
+                    Subjects subjects = null;
+                    if (userEntity.getRoleId() == 1) {
+                        subjects = subjectsService.getSubjectCodeAndSectionId(record.get("subject code").trim(), sectionId);
+                    }
+                    if (userEntity.getRoleId() == 3) {
 
-                if (facultyData == null) {
-                    facultyData = new FacultyData();  // ✅ FIX: Initialize before setting fields
-                    facultyData.setEmail(record.get("email").trim());
-                    facultyData.setMobileNumber(record.get("mobile no").trim());
-                    facultyData.setFirstName(record.get("firstname").trim());
-                    facultyData.setLastName(record.get("lastname").trim());
-                    facultyData.setCollegeCode(record.get("college code").trim());
-                    facultyDataService.saveFaculty(facultyData);
+                        subjects = subjectsService.getSubject_code(record.get("subject code").trim());
+                    }
+                    UserData userData = new UserData();
+                    User user = new User();
+                    user.setFirstName(record.get("Staff Name").trim());
+                    //  user.setLastName(data.getLastName());
+                    user.setIsActive(1);
+                    user.setMobileNo(record.get("Contact").trim());
+                    user.setEmail(record.get("Email").trim());
+                    user.setUserName(generateUserName(2));
+                    user.setRoleId(2);
+                    user.setPassword(passwordEncoder.encode(customPassword));
+                    User usr=userService.saveUser(user);
+
+                    ProfileDetailsEntity profileDetails=new ProfileDetailsEntity();
+                    profileDetails.setUserId(user.getId());
+                    profileDetails.setContact(record.get("Contact").trim());
+                    profileDetails.setInstitute_address(record.get("Institute address").trim());
+                    profileDetails.setCourse(record.get("Course").trim());
+                    profileDetails.setCourse_name(record.get("Course Name").trim());
+                    profileDetails.setDesignation(record.get("Designation").trim());
+                    profileDetails.setDepartment(record.get("Department").trim());
+                    profileDetails.setTotal_exp(record.get("Total Experience").trim());
+                    profileDetailsService.save(profileDetails);
+                    userData.setNo_of_sets(1);
+                    userData.setUserId(Math.toIntExact(user.getId()));
+                    CollegeEntity collegeEntity = collegeService.getCollegeByCode(record.get("College Code").trim());
+                    userData.setCollege_id(String.valueOf(collegeEntity.getId()));
+                    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                    LocalDate date = LocalDate.parse(record.get("last date to submit").trim(), inputFormatter);
+                    String formattedDate = date.format(outputFormatter);
+
+                    userData.setLast_date_to_submit(formattedDate);
+                    LocalDateTime now = LocalDateTime.now();
+                    // Define the formatter
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                    // Format the date-time
+                    String officeorderDate = now.format(formatter);
+                    userData.setOffice_order_date(officeorderDate);
+                    userData.setCurrent_status("Appointment Sent");
+                    userData.setStatus_date(officeorderDate);
+                    userData.setAppointment_sent_date(officeorderDate);
+                    userData.setNo_of_sets(1);
+                    userData.setSubjectId(Math.toIntExact(subjects.getId()));
+                    userData.setExamSeriesId(1);
+                    userData.setRole_id(2);
+                    UserData u1 =appointmentService.getUserDataSubjectIdAndUserIdAndExamSeriesId(Math.toIntExact(subjects.getId()), Math.toIntExact(usr.getId()),1);
+                    if(u1==null) {
+                        userList.add(userData);
+                        FacultyDataDTO facultyDataDTO = new FacultyDataDTO();
+                        facultyDataDTO.setFirstName(record.get("Staff Name").trim());
+                        facultyDataDTO.setCollegeCode(record.get("College Code").trim());
+                        facultyDataDTO.setSubjectCode(record.get("subject code").trim());
+                        facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
+                        facultyDataDTO.setRemarks("success");
+                        facultyDataDTO.setMobileNo(record.get("Contact").trim());
+                        facultyDataDTO.setEmail(record.get("Email").trim());
+                        successList.add(facultyDataDTO);
+                    }
+                    else{
+                        FacultyDataDTO facultyDataDTO=new FacultyDataDTO();
+                        facultyDataDTO.setFirstName(record.get("Staff Name").trim());
+                        facultyDataDTO.setCollegeCode(record.get("College Code").trim());
+                        facultyDataDTO.setSubjectCode(record.get("subject code").trim());
+                        facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
+                        facultyDataDTO.setRemarks("Subject already assigned");
+                        facultyDataDTO.setMobileNo(record.get("Contact").trim());
+                        facultyDataDTO.setEmail(record.get("Email").trim());
+                        failureList.add(facultyDataDTO);
+                    }
                 }
 
-                FacultyDataDTO faculty = new FacultyDataDTO();
-                faculty.setFirstName(record.get("firstname").trim());
-                faculty.setLastName(record.get("lastname").trim());
-                faculty.setSubjectCode(record.get("subject code").trim());
-                faculty.setMobileNo(record.get("mobile no").trim());
-                faculty.setEmail(record.get("email").trim());
-                LocalDateTime now = LocalDateTime.now();
+                if (udata != null) {
 
-                // Define the formatter
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                    User udataMail = userService.getUserByEmailAndRoleId(record.get("Email").trim(), 2);
 
-                // Format the date-time
-                String formattedDate = now.format(formatter);
+                    if (udataMail != null) {
+                        if (udata.getId() == udataMail.getId()) {
+                            Subjects subjects = null;
+                            if (userEntity.getRoleId() == 1) {
+                                subjects = subjectsService.getSubjectCodeAndSectionId(record.get("subject code").trim(), sectionId);
+                            }
+                            if (userEntity.getRoleId() == 3) {
+                                subjects = subjectsService.getSubject_code(record.get("subject code").trim());
+                            }
+                            UserData userData = new UserData();
+                            userData.setNo_of_sets(1);
+                            userData.setUserId(Math.toIntExact(udata.getId()));
+                            CollegeEntity collegeEntity = collegeService.getCollegeByCode(record.get("College Code").trim());
+                            userData.setCollege_id(String.valueOf(collegeEntity.getId()));
+                            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-                faculty.setOrderDate(formattedDate);
-                faculty.setLastDateToSubmit(record.get("last date to submit").trim());
-                faculty.setNoOfSets(1);
-                faculty.setCollegeCode(record.get("college code").trim());
-                faculty.setRoleId(2);
+                            LocalDate date = LocalDate.parse(record.get("last date to submit").trim(), inputFormatter);
+                            String formattedDate = date.format(outputFormatter);
+                            userData.setLast_date_to_submit(formattedDate);
+                            LocalDateTime now = LocalDateTime.now();
+                            // Define the formatter
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                            // Format the date-time
+                            String officeorderDate = now.format(formatter);
+                            userData.setOffice_order_date(officeorderDate);
+                            userData.setCurrent_status("Appointment Sent");
+                            userData.setStatus_date(officeorderDate);
+                            userData.setAppointment_sent_date(officeorderDate);
+                            userData.setNo_of_sets(1);
+                            userData.setSubjectId(Math.toIntExact(subjects.getId()));
+                            userData.setExamSeriesId(1);
+                            userData.setRole_id(2);
+                            UserData u1 = appointmentService.getUserDataSubjectIdAndUserIdAndExamSeriesId(Math.toIntExact(subjects.getId()), Math.toIntExact(udata.getId()), 1);
+                            if (u1 == null) {
+                                userList.add(userData);
+                                FacultyDataDTO facultyDataDTO = new FacultyDataDTO();
+                                facultyDataDTO.setFirstName(record.get("Staff Name").trim());
+                                facultyDataDTO.setCollegeCode(record.get("College Code").trim());
+                                facultyDataDTO.setSubjectCode(record.get("subject code").trim());
+                                facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
+                                facultyDataDTO.setRemarks("success");
+                                facultyDataDTO.setMobileNo(record.get("Contact").trim());
+                                facultyDataDTO.setEmail(record.get("Email").trim());
+                                successList.add(facultyDataDTO);
+                            } else {
+                                FacultyDataDTO facultyDataDTO = new FacultyDataDTO();
+                                facultyDataDTO.setFirstName(record.get("Staff Name").trim());
+                                facultyDataDTO.setCollegeCode(record.get("College Code").trim());
+                                facultyDataDTO.setSubjectCode(record.get("subject code").trim());
+                                facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
+                                facultyDataDTO.setRemarks("Subject already assigned");
+                                facultyDataDTO.setMobileNo(record.get("Contact").trim());
+                                facultyDataDTO.setEmail(record.get("Email").trim());
+                                failureList.add(facultyDataDTO);
+                            }
+                        }
+                        else{
+                            FacultyDataDTO facultyDataDTO = new FacultyDataDTO();
+                            facultyDataDTO.setFirstName(record.get("Staff Name").trim());
+                            facultyDataDTO.setCollegeCode(record.get("College Code").trim());
+                            facultyDataDTO.setSubjectCode(record.get("subject code").trim());
+                            facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
+                            facultyDataDTO.setRemarks("Email vs Mobile Mismatch for existing user");
+                            facultyDataDTO.setMobileNo(record.get("Contact").trim());
+                            facultyDataDTO.setEmail(record.get("Email").trim());
+                            failureList.add(facultyDataDTO);
+                        }
 
-                User userExists = userService.getUserByMobileNoAndEmailAndRoleId(faculty.getMobileNo(), faculty.getEmail(), 2);
-                if (userExists != null) {
-                    failureList.add(faculty);
-                    continue; // ✅ SKIP further processing for duplicates
+                    }
+                    else{
+                        FacultyDataDTO facultyDataDTO = new FacultyDataDTO();
+                        facultyDataDTO.setFirstName(record.get("Staff Name").trim());
+                        facultyDataDTO.setCollegeCode(record.get("College Code").trim());
+                        facultyDataDTO.setSubjectCode(record.get("subject code").trim());
+                        facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
+                        facultyDataDTO.setRemarks("Email vs Mobile Mismatch for existing user");
+                        facultyDataDTO.setMobileNo(record.get("Contact").trim());
+                        facultyDataDTO.setEmail(record.get("Email").trim());
+                        failureList.add(facultyDataDTO);
+                    }
+                    userDataRepository.saveAll(userList);
                 }
-
-                UserData user = getUserData(userEntity.getRoleId(),faculty, mappingEntity.getSectionId());
-                userList.add(user);
-                successList.add(faculty);
             }
-            userDataRepository.saveAll(userList);
-
         } catch (IOException e) {
             e.printStackTrace();  // ✅ FIX: Log exception for debugging
         }
@@ -110,106 +240,10 @@ public class CSVServiceImpl implements CSVService {
         arrayList.add(successList);
         arrayList.add(failureList);
         return arrayList;
-    }
-
-    @Override
-    public ArrayList<Object> saveMappingCSV(MultipartFile file) {
-        List<SetterModeratorMappingDTO> successList = new ArrayList<>();
-        List<SetterModeratorMappingDTO> failureList = new ArrayList<>();
-        List<SetterModeratorMapping> userList = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
-
-            for (CSVRecord record : csvParser) {
-                SetterModeratorMappingDTO mappingDTO = new SetterModeratorMappingDTO();
-
-                try {
-                    mappingDTO.setSetterId(record.get("Setter Id"));
-                    mappingDTO.setModeratorId(record.get("Moderator Id"));
-                    mappingDTO.setSubjectCode(record.get("Subject Code"));
-
-                    User user = userService.getUserByUserName(mappingDTO.getSetterId());
-                    User user1 = userService.getUserByUserName(mappingDTO.getModeratorId());
-                    Subjects subjects = subjectsService.getSubject_code(mappingDTO.getSubjectCode());
-                    if(user!=null&&user1!=null&&subjects!=null) {
-                        successList.add(mappingDTO);
-                        SetterModeratorMapping mappingData = getSetterModeratorMapping(mappingDTO);
-                        userList.add(mappingData);
-                    }
-                    else{
-                        failureList.add(mappingDTO);
-                    }
-                } catch (Exception e) {
-                    failureList.add(mappingDTO);
-                }
-            }
-
-            moderatorRepository.saveAll(userList);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ArrayList<Object> arrayList = new ArrayList<>();
-        arrayList.add(successList);
-        arrayList.add(failureList);
-        return arrayList;
-    }
-    private SetterModeratorMapping getSetterModeratorMapping (SetterModeratorMappingDTO data){
-        UserDetails userData = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
-        User user = userService.getUserByUserName(data.getSetterId());
-        User user1 = userService.getUserByUserName(data.getModeratorId());
-        Subjects subjects = subjectsService.getSubject_code(data.getSubjectCode());
-        SetterModeratorMapping setterModeratorMapping = new SetterModeratorMapping();
-
-        setterModeratorMapping.setSetterId(user.getId());
-        setterModeratorMapping.setModeratorId(user1.getId());
-        setterModeratorMapping.setAssigned_date(LocalDate.now().toString());
-        setterModeratorMapping.setAssigned_by(userData.getUsername());
-        setterModeratorMapping.setSubjectId(subjects.getId());
-        return setterModeratorMapping;
 
     }
 
-    private UserData getUserData (int uroleId,FacultyDataDTO data,Integer sectionId){
-        String customPassword = RandomUtils.nextLong(10000, 99999) + "";
-
-        Subjects subjects=null;
-        if(uroleId==1) {
-
-            subjects = subjectsService.getSubjectCodeAndSectionId(data.getSubjectCode(), sectionId);
-        }if(uroleId==3) {
-
-            subjects = subjectsService.getSubject_code(data.getSubjectCode());
-        }
-
-        UserData userData = new UserData();
-        User user = new User();
-        user.setFirstName(data.getFirstName());
-        user.setLastName(data.getLastName());
-        user.setIsActive(1);
-        user.setMobileNo(data.getMobileNo());
-        user.setEmail(data.getEmail());
-        user.setUserName(generateUserName(2));
-        user.setRoleId(2);
-        user.setPassword(passwordEncoder.encode(customPassword));
-        userService.saveUser(user);
-
-        userData.setNo_of_sets(data.getNoOfSets());
-        userData.setUserId(Math.toIntExact(user.getId()));
-
-        CollegeEntity collegeEntity = collegeService.getCollegeByCode(data.getCollegeCode());
-        userData.setCollege_id(String.valueOf(collegeEntity.getId()));
-        userData.setOffice_order_date(data.getOrderDate());
-        userData.setLast_date_to_submit(data.getLastDateToSubmit());
-        userData.setNo_of_sets(data.getNoOfSets());
-        userData.setSubjectId(Math.toIntExact(subjects.getId()));
-        userData.setExamSeriesId(1);
-        userData.setRole_id(2);
-        return userData;
-
-    }
-
-    private String generateUserName ( int roleId){
+    private String generateUserName(int roleId) {
         return (roleId == 2 ? "S" : "M") + RandomUtils.nextLong(10000, 99999);
     }
 }

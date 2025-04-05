@@ -35,9 +35,28 @@ public class QPFilesInventoryController {
         String sessionIds = sectionIds.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(",", "(", ")"));
-
         List<QPInventoryVo> inventoryVoList=qpInventoryDao.getInventorySummary(sessionIds,sessionDataVo.getExamSeriesId());
+for(QPInventoryVo qpInventoryVo:inventoryVoList){
+    if(qpInventoryVo.getIs_used()==1){
+        qpInventoryVo.setQpr_status("Ready");
+        userRepository.findById(qpInventoryVo.getSetter_user_id())
+                .ifPresent(userRecord -> {
+                    ProfileDetailsVo profileDetails = profileDetailsService.getProfileDetails(userRecord.getId());
+                    StringBuilder setterDetails = new StringBuilder();
+                    setterDetails.append("<p>")
+                            .append("<b>User Name:</b> ").append(userRecord.getUserName()).append("<br>\n")
+                            .append("<b>Name:</b> ").append(userRecord.getFirstName()).append(" ").append(userRecord.getLastName()).append("<br>\n")
+                            .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
+                            .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
+                            .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
+                            .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                            .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
+                            .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
+                    qpInventoryVo.setSetter_details(setterDetails.toString());
+                });
 
+    }
+}
 
         model.addAttribute("inventoryVoList", inventoryVoList);
         model.addAttribute("page","/inventory/inventorySummary");
@@ -60,7 +79,9 @@ public class QPFilesInventoryController {
                                 .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
                                 .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
                                 .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
-                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                                .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
+                                .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
                         qpInventoryVo.setSetter_details(setterDetails.toString());
                     });
         }
@@ -83,7 +104,9 @@ public class QPFilesInventoryController {
                                 .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
                                 .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
                                 .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
-                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                                .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
+                                .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
                         qpInventoryVo.setSetter_details(setterDetails.toString());
                     });
         }
@@ -105,7 +128,9 @@ public class QPFilesInventoryController {
                                 .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
                                 .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
                                 .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
-                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                                .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
+                                .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
                         qpInventoryVo.setSetter_details(setterDetails.toString());
                     });
         }

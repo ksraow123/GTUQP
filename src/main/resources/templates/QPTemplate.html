@@ -19,50 +19,45 @@
     <script>
         var editorDesc;
         var editorSolution ;
+        var qp_instruction;
        $(document).ready(function () {
             editorDesc = new FroalaEditor('#q_desc', {
+                key: "uXD2lA6A5D5D4F4A3C7dNSWXf1h1MDb1CF1PLPFf1C1EESFKVlA3C11A8E7D2B4D4G2E3I3==",
                 height: 200,
                 pastePlain: false,
+                attribution: false,
+                spellcheck: true,
                 pasteAllowedStyleProps: [
                     'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
                     'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
                 ],
                 pasteDeniedAttrs: [],
-                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select', 'canvas', 'svg'],
-                toolbarButtons: {
-                    moreText: {
-                        buttons: [
-                            'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript',
-                            'fontFamily', 'fontSize', 'textColor', 'backgroundColor', 'inlineClass', 'inlineStyle', 'clearFormatting'
-                        ],
-                        align: 'left'
-                    },
-                    moreParagraph: {
-                        buttons: [
-                            'alignLeft', 'alignCenter', 'alignRight', 'alignJustify', 'formatOL', 'formatUL',
-                            'paragraphFormat', 'paragraphStyle', 'lineHeight', 'outdent', 'indent', 'quote'
-                        ],
-                        align: 'left'
-                    },
-                    moreRich: {
-                        buttons: [
-                            'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'emoticons', 'fontAwesome',
-                            'specialCharacters', 'embedly', 'insertFile', 'insertHR'
-                        ],
-                        align: 'left'
-                    },
-                    moreMisc: {
-                        buttons: ['undo', 'redo', 'fullscreen', 'print', 'getPDF', 'spellChecker', 'selectAll', 'help'],
-                        align: 'right'
-                    }
+                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select','canvas', 'svg'],
+
+                fontFamily: {
+                    "Times New Roman": "Times New Roman"
                 },
+                fontSize: ['12'],
+
+                toolbarButtons: [
+                    'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
+                    'inlineClass', 'clearFormatting', '|',
+                    'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
+                    'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
+                    'lineHeight', 'outdent', 'indent', '|',
+
+                    'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
+                ],
+
+
                 imageDefaultWidth: 300,
                 htmlAllowedTags: [
                     'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
-                    'sup', 'sub', 'ul', 'ol', 'li','hr'
+                    'sup', 'sub', 'ul', 'ol', 'li', 'hr'
                 ],
                 imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
                 htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
+
                 events: {
                     'image.inserted': function ($img, response) {
                         let img = $img[0];
@@ -80,50 +75,43 @@
                     }
                 }
             });
-
              editorSolution = new FroalaEditor('#q_solution', {
-                height: 200,
+                key: "uXD2lA6A5D5D4F4A3C7dNSWXf1h1MDb1CF1PLPFf1C1EESFKVlA3C11A8E7D2B4D4G2E3I3==",
+               height: 200,
                 pastePlain: false,
+                attribution: false,
+                spellcheck: true,
                 pasteAllowedStyleProps: [
                     'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
                     'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
                 ],
                 pasteDeniedAttrs: [],
-                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select', 'canvas', 'svg'],
-                toolbarButtons: {
-                    moreText: {
-                        buttons: [
-                            'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript',
-                            'fontFamily', 'fontSize', 'textColor', 'backgroundColor', 'inlineClass', 'inlineStyle', 'clearFormatting'
-                        ],
-                        align: 'left'
-                    },
-                    moreParagraph: {
-                        buttons: [
-                            'alignLeft', 'alignCenter', 'alignRight', 'alignJustify', 'formatOL', 'formatUL',
-                            'paragraphFormat', 'paragraphStyle', 'lineHeight', 'outdent', 'indent', 'quote'
-                        ],
-                        align: 'left'
-                    },
-                    moreRich: {
-                        buttons: [
-                            'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'emoticons', 'fontAwesome',
-                            'specialCharacters', 'embedly', 'insertFile', 'insertHR'
-                        ],
-                        align: 'left'
-                    },
-                    moreMisc: {
-                        buttons: ['undo', 'redo', 'fullscreen', 'print', 'getPDF', 'spellChecker', 'selectAll', 'help'],
-                        align: 'right'
-                    }
+                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select','canvas', 'svg'],
+
+                fontFamily: {
+                    "Times New Roman": "Times New Roman"
                 },
+                fontSize: ['12'],
+
+                toolbarButtons: [
+                    'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
+                    'inlineClass', 'clearFormatting', '|',
+                    'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
+                    'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
+                    'lineHeight', 'outdent', 'indent', '|',
+
+                    'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
+                ],
+
+
                 imageDefaultWidth: 300,
                 htmlAllowedTags: [
                     'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
-                    'sup', 'sub', 'ul', 'ol', 'li','hr'
+                    'sup', 'sub', 'ul', 'ol', 'li', 'hr'
                 ],
                 imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
                 htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
+
                 events: {
                     'image.inserted': function ($img, response) {
                         let img = $img[0];
@@ -141,8 +129,60 @@
                     }
                 }
             });
+            qp_instruction = new FroalaEditor('#qp_instruction', {
+                key: "uXD2lA6A5D5D4F4A3C7dNSWXf1h1MDb1CF1PLPFf1C1EESFKVlA3C11A8E7D2B4D4G2E3I3==",
+                height: 100,
+                pastePlain: false,
+                attribution: false,
+                spellcheck: true,
+                pasteAllowedStyleProps: [
+                    'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
+                    'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
+                ],
+                pasteDeniedAttrs: [],
+                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select','canvas', 'svg'],
+
+                fontFamily: {
+                    "Times New Roman": "Times New Roman"
+                },
+                fontSize: ['12'],
+
+                toolbarButtons: [
+                    'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
+                    'inlineClass', 'clearFormatting', '|',
+                    'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
+                    'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
+                    'lineHeight', 'outdent', 'indent', '|',
+
+                    'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
+                ],
 
 
+                imageDefaultWidth: 300,
+                htmlAllowedTags: [
+                    'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
+                    'sup', 'sub', 'ul', 'ol', 'li', 'hr'
+                ],
+                imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
+                htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
+
+                events: {
+                    'image.inserted': function ($img, response) {
+                        let img = $img[0];
+                        let reader = new FileReader();
+                        let file = img.src;
+                        fetch(file)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                reader.readAsDataURL(blob);
+                                reader.onloadend = function () {
+                                    img.src = reader.result;
+                                };
+                            })
+                            .catch(err => console.error("Image conversion error:", err));
+                    }
+                }
+            });
        });
     </script>
 </head>
@@ -245,29 +285,57 @@
                                 <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
                                     Preview
                                 </a>
-                                <table class="table table-bordered" >
+
+                                <td class="text-center">
+                                    <a th:if="${filledStatus==1}"
+                                       href="#"
+                                       class="btn btn-sm btn-success"
+                                       title="Forward Questions"
+                                       th:data-id="1"
+                                       th:data-subject-id="${subject.id}"
+                                       th:data-setter-id="${setterId}"
+                                       th:data-subject-code="${subject.subjectCode}"
+                                       th:data-subject-name="${subject.subject_name}"
+                                       onclick="openForwardModal(this)">
+                                        <!--Forward to Admin--> Submit for Approval
+                                    </a>
+                                </td>
+
+                                <div class="mt-3">
+                                    <form th:action="@{/saveSubjectInstruction}" method="post" id="saveSubjectInstruction" >
+
+                                <label class="form-label">QP Instructions, if any (optional)</label>
+                                        <textarea class="form-control qp_instruction" id="qp_instruction" name="qp_instruction" rows="2" th:text="${userData.qp_instruction}"></textarea>
+                                        <input type="hidden" id="subjectId" name="subjectId" th:value="${subject.id}">
+                                        <button type="submit"  class="btn btn-primary btn-block mb-4">Save</button>
+
+                                    </form>
+                                </div>
+                                <table class="table table-bordered mt-3" >
                                     <thead>
                                     <tr>
                                         <th>S.No.</th>
                                         <th>Q.No</th>
                                         <th>Sub Q.No.</th>
-                                        <th>Topic</th>
-                                        <th>Level</th>
+<!--                                        <th>Topic</th>-->
+<!--                                        <th>Level</th>-->
                                         <th>Marks</th>
                                         <th>Instructions</th>
                                         <th>Question</th>
                                         <th>Solution</th>
-                                        <th>Image</th>
+                                        <th width="110">Image</th>
+                                        <th width="110">Reviewer Status</th>
+                                        <th width="110">Reviewer Remarks</th>
                                         <th>Action</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr th:each="qpoint, iterStat : ${qPtemplate}">
                                         <td th:text="${iterStat.count}">S.No.</td>
-                                        <td th:text="${qpoint.q_no}">Q No</td>
+                                        <td th:text="${qpoint.q_no}"></td>
                                         <td th:text="${qpoint.bit_no}">Sub Q.No.</td>
-                                        <td th:text="${qpoint.topic}">Topic</td>
-                                        <td th:text="${qpoint.level}">Level</td>
+<!--                                        <td th:text="${qpoint.topic}">Topic</td>-->
+<!--                                        <td th:text="${qpoint.level}">Level</td>-->
                                         <td th:text="${qpoint.marks}">Marks</td>
                                         <td th:text="${qpoint.instructions}">Instructions</td>
                                         <td th:utext="${qpoint.q_desc}">Question</td>
@@ -276,13 +344,22 @@
                                                onclick="showSolution(this)"
                                                th:data-solution="${qpoint.q_solution}">View Solution</a>
                                         </td>
-                                        <td>
+                                        <td  align="center">
                                             <img th:if="${qpoint.image_path != null}"
                                                  th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
-                                                 alt="Uploaded Image" width="100" height="100"></td>
+                                                 alt="Uploaded Image" width="100" height="100" />
+
+                                            <a th:if="${qpoint.image_path != null}"
+                                               th:href="@{/removeQpImage/{id}/(id=${qpoint.id})}"
+                                               class="link-danger" title="Delete Image" >
+                                                Delete Image
+                                            </a>
+                                        </td>
+                                        <td th:text="${qpoint.qp_reviewer_status}" class="text-center">Reviewer Status</td>
+                                        <td th:text="${qpoint.reviewer_comments}" class="text-center">Reviewer Remarks</td>
                                         <td>
 
-                                            <a href="javascript:void(0);" class="btn btn-sm btn-info edit-btn"
+                                            <a th:if="${qpoint.bit_no!='OR' && qpoint.qp_reviewer_status != 'Approved'}" href="javascript:void(0);" class="btn btn-sm btn-info edit-btn"
                                                th:data-id="${qpoint.id}" title="Add">
                                                 Add/Edit Question
                                             </a>
@@ -303,13 +380,13 @@
 </div>
 <div th:replace="fragments/scripts :: scripts"></div>
 </body>
-<script>
+<script >
     $(document).ready(function () {
     $(".edit-btn").click(function () {
             var qid = $(this).data("id");
 
         $.ajax({
-            url: "https://online.ctestservices.com/gtuqp/getQuestionDetails/" + qid,
+            url: "https://online.ctestservices.com/gqpsecon/getQuestionDetails/" + qid,
             type: "GET",
             success: function (response) {
 
@@ -415,10 +492,99 @@
     }
 
     if (!solution) {
-        alert("Please fill out the Solution field.");
+        alert("Please fill the Solution for the Question before you save.");
         $("#q_solution").focus();
         event.preventDefault();
     }
 });
 
+    $('#editModal').on('hidden.bs.modal', function () {
+    $('#qpeditorform')[0].reset();
+});
+
 </script>
+<script>
+
+    function openForwardModal(element) {
+    // Get the ID and Subject ID from the button
+    var setId = element.getAttribute("data-id");
+    var subjectId = element.getAttribute("data-subject-id");
+     var setterId = element.getAttribute("data-setter-id");
+
+      var subjectCode = element.getAttribute("data-subject-code");
+     var subjectName = element.getAttribute("data-subject-name");
+
+
+    // Set values in the hidden input fields
+    document.getElementById("modalSetId").value = setId;
+    document.getElementById("modalSubjectId").value = subjectId;
+    document.getElementById("modalSetterId").value = setterId;
+     document.getElementById("modalSubjectCode").textContent = subjectCode;
+document.getElementById("modalSubjectName").textContent = subjectName;
+
+
+    // Open the modal
+    $('#forwardModal').modal('show');
+}
+
+function submitForwardForm() {
+    // Submit the form when user confirms
+    document.getElementById("forwardForm").submit();
+}
+</script>
+<div class="modal fade" id="forwardModal" tabindex="-1" aria-labelledby="forwardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel"><strong>UNDERTAKING</strong></h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="forwardForm" th:action="@{/forwardQuestions}" method="post">
+                <div class="modal-body">
+
+                    <ul class="list-group list-group-numbered">
+                        <li class="mb-2 list-group-item border-0">
+                            I undersign undertake to maintain the secrecy in matter of paper setting of subject
+                            (with code no) <b><span id="modalSubjectCode"></span>-<span id="modalSubjectName"></span></b>
+                            and all other assigned work including correspondence pertaining to Gujarat Technological University Examination.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            Further, I assure you that I shall maintain utmost secrecy in the work entrusted to me for semester/year examination
+                            and discharge all my duties impartially without involving in any type of malpractice which violates the code of conduct of examination.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            No relative* of mine is appearing in the University examination for which the work is assigned to me.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            I have neither given tuition to any student nor attached with any tuition classes.
+                            I have not imparted any private or personal tuition or training or coaching for the Gujarat Technological University examination.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            I have also not published any guides, digests of text-book concerning the examination for which I am appointed.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            I have deleted all the files/folders pertaining to assigned exam work from the hard disk of the PC/Laptop which I have used for G.T.U. exam work.
+                        </li>
+                    </ul>
+                    <p class="text-dark">
+                        * The meaning of relatives is defined as under:<br>
+                        Wife, husband, son, daughter, grandson, granddaughter, brother, sister, son-in-law, sister-in-law, daughter-in-law, nephew,
+                        niece, sister's daughter and son, their sons and daughters, uncle, aunt. Step relations are not included in the above definition.
+                    </p>
+                    <p class="text-dark text-center">
+                        <input type="checkbox" class="form-check-input border-black" id="undertakeCheckbox" required />
+                        <strong>I hereby undertake the above.</strong>
+                    </p>
+                    <input type="hidden" id="modalSetId" name="id">
+                    <input type="hidden" id="modalSubjectId" name="subjectId">
+                    <input type="hidden" id="modalSetterId" name="setterId">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <input type="submit" class="btn btn-primary" ></input>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

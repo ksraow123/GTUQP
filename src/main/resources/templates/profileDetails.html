@@ -18,8 +18,26 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
+                                <label for="" class="form-label">Mobile No.</label>
+                                <input class="form-control" type="text" th:field="*{mobile_no}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Email ID</label>
+                                <input class="form-control" type="text" th:field="*{email}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
                                 <label for="" class="form-label">First Name</label>
                                 <input class="form-control" type="text" th:field="*{first_name}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Middle Name</label>
+                                <input class="form-control" type="text" th:field="*{middle_name}" >
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -28,17 +46,11 @@
                                 <input class="form-control" type="text" th:field="*{last_name}" readonly>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="" class="form-label">Mobile No.</label>
-                                <input class="form-control" type="text" th:field="*{mobile_no}" readonly>
-                            </div>
-                        </div>
 
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="" class="form-label">Email ID</label>
-                                <input class="form-control" type="text" th:field="*{email}" readonly>
+                                <label for="" class="form-label">Staff Code (Optional)</label>
+                                <input class="form-control" type="text" th:field="*{staff_code}" >
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -52,13 +64,18 @@
                                     <option th:value="'Director'">Director</option>
                                     <option th:value="'Lecturer'">Lecturer</option>
                                     <option th:value="'Principal'">Principal</option>
-                                    <option th:value="'Studio Assistant'">Studio Assistant</option>
                                     <option th:value="'Professor'">Professor</option>
+                                    <option th:value="'Other'">Other</option>
                                 </select>
 
                             </div>
                         </div>
-
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Other Designation, if any</label>
+                                <input class="form-control" type="text" th:text="${other_designation}" >
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="" class="form-label">College</label>
@@ -80,14 +97,13 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="facultyType" class="form-label">Faculty Type</label>
-                                <select class="form-control" id="facultyType" name="faculty_type" required th:field="*{faculty_type}">
+                                <label for="institute_type" class="form-label">Institute Type</label>
+                                <select class="form-control" id="institute_type" name="institute_type" required th:field="*{institute_type}">
                                     <option value="">Select</option>
-                                    <option th:value="'Govt. College Faculty'">Govt. College Faculty</option>
-                                    <option th:value="'Private College'">Private College</option>
-                                    <option th:value="'Consultant'">Consultant</option>
-                                    <option th:value="'Charged Hourly Basis'">Charged Hourly Basis</option>
-                                    <option th:value="'Deemed Univ. Faculty'">Deemed Univ. Faculty</option>
+                                    <option th:value="'Govt. Institute'">Govt. Institute</option>
+                                    <option th:value="'Grant-in Aid Institute'">Grant-in Aid Institute</option>
+                                    <option th:value="'Self-finance Institute'">Self-finance Institute</option>
+                                    <option th:value="'External'">External</option>
                                 </select>
                             </div>
                         </div>
@@ -111,6 +127,15 @@
                             <div class="mb-3">
                                 <label for="" class="form-label">Account Number</label>
                                 <input class="form-control"  required minlength="5" maxlength="30" type="text" th:field="*{account_no}">
+                            </div>
+                        </div> <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Account Type</label>
+                                <select class="form-control" id="acc_type" name="acc_type" required th:field="*{acc_type}">
+                                    <option value="">Select</option>
+                                    <option th:value="'Savings Account'">Savings Account</option>
+                                    <option th:value="'Current Account'">Current Account</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -159,7 +184,7 @@ alert("IFSC Code must be exactly 11 characters.");
 return;
 }
 
-fetch("https://online.ctestservices.com/gtuqp/api/bank/getDetails/" + ifscCode)
+fetch("https://online.ctestservices.com/gqpsecon/api/bank/getDetails/" + ifscCode)
 .then(response => {
 if (!response.ok) {
 throw new Error("Invalid IFSC Code or API error");

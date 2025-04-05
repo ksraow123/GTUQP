@@ -17,30 +17,36 @@
                             <table class="table table-bordered" id="example">
                                 <thead>
                                 <tr>
+
                                     <th>S.No.</th>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
+                                    <th>Staff Name</th>
+<!--                                    <th>Last Name</th>-->
                                     <th>Mobile Number</th>
                                     <th>Email Id</th>
                                     <th>College Code</th>
+<!--                                    <th>Institute Address</th>-->
                                     <th>Designation</th>
-                                    <th>Empl.Type</th>
-                                    <th>Teaching Experience</th>
-                                    <th>Industry Experience</th>
+                                    <th>Course</th>
+                                    <th>Course Name</th>
+<!--                                    <th>Empl.Type</th>-->
+<!--                                    <th>Teach. Exp.<br /> (in years)</th>-->
+<!--                                    <th>Ind.  Exp.<br /> (in years)</th>-->
+
+
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="faculty, iterStat : ${facultyDataList}">
-                                    <td th:text="${iterStat.count}"></td>
-                                    <td th:text="${faculty.firstName}"></td>
-                                    <td th:text="${faculty.lastName}"></td>
-                                    <td th:text="${faculty.mobileNumber}"></td>
-                                    <td th:text="${faculty.email}"></td>
-                                    <td th:text="${faculty.collegeCode}"></td>
-                                    <td th:text="${faculty.designation}"></td>
-                                    <td th:text="${faculty.facultyType}"></td>
-                                    <td th:text="${faculty.teachingExp}"></td>
-                                    <td th:text="${faculty.industryExp}"></td>
+                                    <td th:text="${iterStat.count}" class="text-center"></td>
+                                    <td th:text="${faculty.firstName}" class="text-center"></td>
+<!--                                    <td th:text="${faculty.lastName}" class="text-center"></td>-->
+                                    <td th:text="${faculty.mobileNumber}" class="text-center"></td>
+                                    <td th:text="${faculty.email}" class="text-center"></td>
+                                    <td th:text="${faculty.collegeCode}" class="text-center"></td>
+                                    <td th:text="${faculty.designation}" class="text-center"></td>
+<!--                                    <td th:text="${faculty.facultyType}" class="text-center"></td>-->
+<!--                                    <td th:text="${faculty.teachingExp}" class="text-center"></td>-->
+<!--                                    <td th:text="${faculty.industryExp}" class="text-center"></td>-->
                                 </tr>
                                 </tbody>
                             </table>

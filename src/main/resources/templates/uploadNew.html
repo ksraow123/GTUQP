@@ -76,7 +76,7 @@
 
 
                                        <th>Extend Date</th>
-                                       <th>Reset Password</th>
+<!--                                       <th>Reset Password</th>-->
                                    </thead>
                                    <tbody>
                                    <tr th:each="appoint, iterStat : ${appointmentList}">
@@ -108,12 +108,12 @@
                                            <button type="button" class="btn btn-primary btn-sm update-btn"
                                                    th:data-id="${appoint.id}">Extend Date</button>
                                        </td>
-                                       <td>
-                                           <a th:href="@{/password/resend/{email}/{userName}(email=${appoint.email}, userName=${appoint.user_name})}"
-                                              class="btn btn-sm btn-danger" title="Reset Password">
-                                               Reset Password
-                                           </a>
-                                       </td>
+<!--                                       <td>-->
+<!--                                           <a th:href="@{/password/resend/{email}/{userName}(email=${appoint.email}, userName=${appoint.user_name})}"-->
+<!--                                              class="btn btn-sm btn-danger" title="Reset Password">-->
+<!--                                               Reset Password-->
+<!--                                           </a>-->
+<!--                                       </td>-->
 
                                    </tr>
 
@@ -127,7 +127,7 @@
                     </div>
                         </div>
                         <div class="col-12 mt-3">
-                            <p><b>Upload QP Setters (CSV File)</b> <a  th:href="@{/appointmentData.csv}"  class="link-danger">Click here to download the sample file</a></p>
+                            <p><b>Upload QP Setters (CSV File)</b> <a  th:href="@{/faculty_appointments.csv}"  class="link-danger">Click here to download the sample file</a></p>
                             <form method="post" th:action="@{/upload}" enctype="multipart/form-data">
                             <div class="row">
                                 <div class="col-md-4">
@@ -144,35 +144,31 @@
                         </div>
                     </div>
 
-                </div>
+
         <!-- Success Records Table: Show only if successList is not empty -->
         <div th:if="${not #lists.isEmpty(successList)}">
             <h3 class="success">Successfully Uploaded Records</h3>
             <table class="table table-bordered" id="example">
                 <thead>
                 <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Name</th>
                     <th>Subject Code</th>
                     <th>Mobile No</th>
                     <th>Email</th>
                     <th>Last Date to Submit</th>
-
                     <th>College Code</th>
-                    <th>Role ID</th>
+                    <th>Remarks</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="faculty : ${successList}">
                     <td th:text="${faculty.firstName}"></td>
-                    <td th:text="${faculty.lastName}"></td>
                     <td th:text="${faculty.subjectCode}"></td>
                     <td th:text="${faculty.mobileNo}"></td>
                     <td th:text="${faculty.email}"></td>
                     <td th:text="${faculty.lastDateToSubmit}"></td>
-
                     <td th:text="${faculty.collegeCode}"></td>
-                    <td th:text="${faculty.roleId}"></td>
+                    <td th:text="${faculty.remarks}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -184,29 +180,26 @@
             <table class="table table-bordered" id="example">
                 <thead>
                 <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Name Name</th>
                     <th>Subject Code</th>
                     <th>Mobile No</th>
                     <th>Email</th>
                     <th>Last Date to Submit</th>
 
                     <th>College Code</th>
-                    <th>Role ID</th>
+                    <th>Remarks</th>
 
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="faculty : ${failureList}">
                     <td th:text="${faculty.firstName}"></td>
-                    <td th:text="${faculty.lastName}"></td>
                     <td th:text="${faculty.subjectCode}"></td>
                     <td th:text="${faculty.mobileNo}"></td>
                     <td th:text="${faculty.email}"></td>
                     <td th:text="${faculty.lastDateToSubmit}"></td>
-
                     <td th:text="${faculty.collegeCode}"></td>
-                    <td th:text="${faculty.roleId}"></td>
+                    <td th:text="${faculty.remarks}"></td>
 
                 </tr>
                 </tbody>
@@ -233,7 +226,7 @@
 
             $.ajax({
                 type: "POST",
-                url: "https://online.ctestservices.com/gtuqp/appointments/update",  // ✅ Use relative URL instead of absolute URL
+                url: "https://online.ctestservices.com/gqpsecon/appointments/update",  // ✅ Use relative URL instead of absolute URL
                 contentType: "application/json",
                 data: JSON.stringify({
                     id: id,

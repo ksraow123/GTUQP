@@ -35,4 +35,8 @@ public interface AppointmentService {
 
     List<UserData> getAppointmentDetailsByUserIdAndExamSeriesId(Integer userId ,Integer examSeriesId);
 
+    public UserData getUserDataSubjectIdAndUserIdAndExamSeriesId(Integer subjectId, Integer userId,int examSeriesId);
+
+
+
 }

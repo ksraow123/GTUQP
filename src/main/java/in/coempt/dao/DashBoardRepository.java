@@ -89,12 +89,14 @@ public class DashBoardRepository {
                 "    ts.year,\n" +
                 "    ts.semester,\n" +
                 "    ns.n as setno, " +
-                "(SELECT count(id) FROM qp_set_bit_wise_questions where  set_no=ns.n and subject_id=ts.id and q_desc is  null and qp_setter_id=qp.user_id) as pending_questions," +
-                "(SELECT count(id) FROM qp_set_bit_wise_questions where  set_no=ns.n and subject_id=ts.id  and qp_setter_id=qp.user_id) as total_questions,\n" +
-                "(SELECT count(id) FROM qp_set_bit_wise_questions where  set_no=ns.n and subject_id=ts.id and q_desc is not null  and qp_setter_id=qp.user_id) as no_of_questions ,\n" +
+                "(SELECT count(id) FROM qp_set_bit_wise_questions where  set_no=ns.n and subject_id=ts.id and  bit_no!='OR' and  q_desc is  null and qp_setter_id=qp.user_id) as pending_questions," +
+                "(SELECT count(id) FROM qp_set_bit_wise_questions where  set_no=ns.n and subject_id=ts.id and bit_no!='OR'  and qp_setter_id=qp.user_id) as total_questions,\n" +
+                "(SELECT count(id) FROM qp_set_bit_wise_questions where  set_no=ns.n and subject_id=ts.id and bit_no!='OR' and q_desc is not null  and qp_setter_id=qp.user_id) as no_of_questions ,\n" +
                 "(SELECT qp_status FROM tbl_qp_files where user_id=? and set_no=ns.n and subject_id=ts.id ) as qp_status ," +
                // "(SELECT remarks FROM tbl_qp_files where user_id=? and set_no=ns.n and subject_id=ts.id ) as remarks ,\n" +
-                "  qp.last_date_to_submit AS submission_date\n" +
+                "  qp.last_date_to_submit AS submission_date,CASE WHEN last_date_to_submit > CURRENT_DATE THEN 'Valid'\n" +
+                "        ELSE 'Expired'\n" +
+                "    END AS lastDateStatus\n" +
                 "FROM tbl_appointments_bulk qp\n" +
                 "JOIN tbl_subjects ts ON ts.id = qp.subject_id\n" +
                 "JOIN tbl_courses tc ON tc.id = ts.course_id\n" +

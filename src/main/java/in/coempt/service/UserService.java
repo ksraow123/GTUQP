@@ -1,6 +1,7 @@
 package in.coempt.service;
 
 import in.coempt.entity.User;
+import in.coempt.entity.UserData;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ public interface UserService {
     public boolean changePassword(String username, String oldPassword, String newPassword);
 
     public boolean resetPassword(String token, String newPassword);
-    public User sendPasswordResetLink(String email,String userName);
+    public String sendPasswordResetLink(String email,String userName);
 
     User getUserByMobileNo(String mobileNo);
 
@@ -20,4 +21,8 @@ public interface UserService {
     User getUserByMobileNoAndEmailAndRoleId(String mobileNumber, String email, int roleId);
 
     List<User> getUserByMobileNoAndEmail(String mobileNumber, String email);
+
+    User getUserByMobileNoAndRoleId(String mobileNo, int roleId);
+
+    User getUserByEmailAndRoleId(String email, int i);
 }

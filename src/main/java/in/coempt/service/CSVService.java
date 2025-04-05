@@ -7,5 +7,4 @@ import java.util.ArrayList;
 public interface CSVService {
     public ArrayList<Object> saveCSV(MultipartFile file);
 
-    ArrayList<Object> saveMappingCSV(MultipartFile file);
 }

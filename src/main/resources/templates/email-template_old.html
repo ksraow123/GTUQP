@@ -1,6 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html xmlns:th="http://www.thymeleaf.org">
-<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>pdf</title>
@@ -17,7 +16,7 @@
         <td align="center">
             <table width="100%">
                 <tr>
-                    <td><img src="https://student.gtu.ac.in/assets/img/fnewgtulogo.png" alt="" width="100" /></td>
+                    <td><img src="images/logo.png" alt="" width="100" /></td>
                     <td align="center">
                         <h3>
                             GUJARAT TECHNOLOGICAL UNIVERSITY</h3>
@@ -61,9 +60,8 @@
                     <p> <span th:text="${collegeCode}"></span></b></p>
             </p>
             <p>Dear Sir/Madam,</p>
-            <p>I am directed to inform you that Hon. Vice Chancellor has been pleased to appoint you as a Paper-setter for<b> University
+            <p>I am directed to inform you that Hon. Vice Chancellor has been pleased to appoint you as a Paper-setter for <b>University
                 Examination</b> in the following subject(s):
-
             </p>
         </td>
     </tr>
@@ -81,6 +79,7 @@
                     <td align="center" th:text="${subjectName}"></td>
 
                     <td align="center" th:text="${submissionDate}"></td>
+
                 </tr>
             </table>
         </td>
@@ -94,26 +93,21 @@
         <td>
             <ol>
                 <li>You are instructed to draw Question Paper as per the syllabus which is available on GTU website. Please ensure that the Subject code of the Syllabus which you are referring is same as the subject code which is mentioned in your Paper-Setter order.</li>
-
-                <li>You are required to strictly follow University guidelines for setting question paper. For reference purpose Question Paper format and Paper solution/Answer Key/Assessment Chart format are given in link <b><u>(https://gtu.ac.in/QPFormat.aspx).</u></b></li>
-
-                <li>You are instructed to design question paper according to the teaching scheme, <b><u>weightage of topics/suggested specifications as per blooms taxonomy</u></b> and syllabus of the subjects, which are given on GTU website. Please set question paper as per the applicable Question paper format only. The question paper has to be typed in Times New Roman font (font size 12) only in English version.</li>
-
-                <li>It is to be noted that once the question paper is submitted to GTU, it must be deleted from the hard disk of the computer/Laptop and not to be stored in any format or in any device with you or anywhere else.</li>
-                <li>Question paper once submitted to University becomes the property of GTU and it can be used in any examination. Hence it cannot be reproduced/published fully or partially anywhere, else if at all it is violated strict action shall be taken against paper setter by University.</li>
-                <li>It is informed not to repeat questions published in mid-semester exam conducted at your institute.</li>
+                <li>You are required to strictly follow University guidelines for setting question paper. Question Paper format and Paper solution/Answer Key/Assessment Chart format are given in link <b>(https://gtu.ac.in/QPFormat.aspx).</b> </li>
+                <li>You are instructed to design question paper according to the teaching scheme, <b>weightage of topics/suggested specifications as per blooms taxonomy</b> and syllabus of the subjects, which are given on GTU website. Please set question paper as per the format given in link <b>(https://gtu.ac.in/QPFormat.aspx)</b> only. The question paper has to be typed in Times New Roman font (font size 12) only in English version.</li>
+                <li> It is to be noted that once the question paper is submitted to GTU, it must be deleted from the hard disk of the computer/Laptop and not to be stored in any format or in any device with you or anywhere else.</li>
+                <li> Question paper once submitted to University becomes the property of GTU and it can be used in any examination. Hence it cannot be reproduced/published fully or partially anywhere, else if at all it is violated strict action shall be taken against paper setter by University.</li>
+                <li> It is informed not to repeat questions published in mid-semester exam conducted at your institute.</li>
                 <li>You are instructed to submit paper solution, Answer Key, Assessment Chart which are required for examining answer book. i.e. clearly mention stage wise marks to be given by an examiner for each correct portion of the answer.</li>
-                <li>It is compulsory to submit detailed solution of the numerical part of the question paper. </li>
+                <li> It is compulsory to submit detailed solution of the numerical part of the question paper. </li>
                 <li>Further you are instructed to ensure the strict secrecy of this examination work assigned to you.</li>
-
                 <li>In case of change of address, residence phone number, mobile number and Bank details please update in SOQPRS portal immediately.</li>
-                <li>For subjects of <b><u>Diploma</u> </b>Course, it is <b><u>compulsory to provide questions in both English and Gujarati Version.</u></b> Gujarati version    question has to be typed in Shruti font having letter size 12 points. <b><u>Questions in Gujarati are required to be typed just below the questions in English to avoid any mistake between two versions of question paper.</u></b> </li>
-                <li>Do not bold any letter, word or sentence in any part of the question paper.</li>
-                <li>Last date for submission of question paper to University:  <b th:text="${submissionDate}" /> If you are unable to set question paper, you have to inform Controller of Examination, GTU immediately after receiving this paper setter order.</li>
-                <li>Diagram, charts and figures should be added against the respective questions. If required, please add instruction whether any IS codes, steam tables, or other reference materials should be provided to the students during the examination.</li>
-                <li>Please carefully add/verify bank details in SOQPRS portal.</li>
-                <li>To download syllabus Please refer https://www.gtu.ac.in/Syllubus_list.aspx</li>
-
+                <li>For subjects of <b>Diploma</b> Course, it is <b>compulsory to provide questions in both English and Gujarati Version.</b> Gujarati version    question has to be typed in Shruti font having letter size 12 points. <b>Questions in Gujarati are required to be typed just below the questions in English to avoid any mistake between two versions of question paper.</b> </li>
+                <li> Do not bold any letter, word or sentence in any part of the question paper.</li>
+                <li> Last date for submission of question paper to University: <b th:text="${submissionDate}" /> If you are unable to set question paper, you have to inform Controller of Examination, GTU immediately after receiving this paper setter order.</li>
+                <li> Diagram, charts and figures should be added against the respective questions. If required, please add instruction whether any IS codes, steam tables, or other reference materials should be provided to the students during the examination.</li>
+                <li> Please carefully add/verify bank details in SOQPRS portal.</li>
+                <li> To download syllabus Please refer https://www.gtu.ac.in/Syllubus_list.aspx</li>
 
             </ol>
         </td>

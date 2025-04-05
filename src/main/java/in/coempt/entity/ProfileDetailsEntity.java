@@ -21,9 +21,16 @@ public class ProfileDetailsEntity {
     private String   branch_details,branch_address;
     private String designation;
     private String teaching_experience;
-    private Long user_id;
+    @Column(name="user_id")
+    private Long userId;
     private String industry_experience;
     private String residential_address;
     private String faculty_type;
+    private String acc_type;
+    private String staff_code;
+        private String middle_name;
+        private String institute_type;
+        private String other_designation;
+    private String college_id,institute_address,course,course_name,email,contact,	department,total_exp;
 
 }

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
             subjectDropdown.innerHTML = '<option value="">Loading...</option>';
 
             if (courseId) {
-                fetch(`https://online.ctestservices.com/gtuqp/subjects/${courseId}`)
+                fetch(`https://online.ctestservices.com/gqpsecon/subjects/${courseId}`)
                     .then(response => response.json())
                     .then(data => {
                         subjectDropdown.innerHTML = '<option value="">Select a Subject</option>';
@@ -74,7 +74,7 @@ function fetchData() {
 
     if (!courseId || courseId === "All") return;
 
-    fetch(`https://online.ctestservices.com/gtuqp/getSemestersAndSubjects?courseId=${courseId}`)
+    fetch(`https://online.ctestservices.com/gqpsecon/getSemestersAndSubjects?courseId=${courseId}`)
         .then(response => response.json())
         .then(data => {
             data.forEach(sem => {
@@ -95,7 +95,7 @@ function fetchSubjectsData() {
 
     if (!courseId || courseId === "All" || !semester || semester === "All") return;
 
-    fetch(`https://online.ctestservices.com/gtuqp/getSubjectsByCourseAndSemester?courseId=${courseId}&semester=${semester}`)
+    fetch(`https://online.ctestservices.com/gqpsecon/getSubjectsByCourseAndSemester?courseId=${courseId}&semester=${semester}`)
         .then(response => response.json())
         .then(data => {
             data.forEach(sub => {

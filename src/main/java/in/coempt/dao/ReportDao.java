@@ -31,7 +31,8 @@ public class ReportDao {
                 "    ts.semester,\n" +
                 "    ts.subject_code,\n" +
                 "    tc.section_id,\n" +
-                "    ts.subject_name,\n" +
+                "    ts.subject_name," +
+                "    ts.pattern_code,\n" +
                 "    COALESCE(u1.user_name, 'NOT ASSIGNED') AS assigned_setters,\n" +
                 "    qf_setter.qp_status AS setter_status,\n" +
                 "    qf_section.qp_status AS section_team_status,\n" +
@@ -62,7 +63,7 @@ public class ReportDao {
 
     public List<AdminDashBoardVo> getSubjectWiseAdminDashBoard(Integer userId,String sessionIds) {
         QueryUtil<AdminDashBoardVo> queryUtil = new QueryUtil<>(AdminDashBoardVo.class);
-        return queryUtil.list("SELECT ts.course_id,ts.id as subject_id,course_name,year,semester,subject_code,subject_name," +
+        return queryUtil.list("SELECT ts.pattern_code,ts.course_id,ts.id as subject_id,course_name,year,semester,subject_code,subject_name," +
                 "(SELECT count(tb.id) FROM tbl_appointments_bulk tb,users u where u.id=tb.user_id and u.role_id=2 and subject_id=ts.id) as assigned_setters,\n" +
                 "(SELECT count(tb.id) FROM tbl_qp_files tb,users u where u.id=tb.user_id and tb.role_id=2\n" +
                 "and subject_id=ts.id and qp_status='SUBMITTED')\n" +

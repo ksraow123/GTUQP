@@ -66,6 +66,7 @@
                                         <th>Year/Sem.</th>
                                         <th>Subject</th>
                                         <th>Subject Name</th>
+                                        <th>Pattern Code</th>
                                         <th>No.of QP Setters</th>
                                         <th>QPs Completed</th>
                                         <th>QPs Pending</th>
@@ -77,20 +78,21 @@
                                     </thead>
                                     <tbody>
                                     <tr th:each="report, iterStat : ${adminDashBoardVoList}">
-                                        <td th:text="${iterStat.count}"></td>
-                                        <td th:text="${report.course_name ?: 'N/A'}"></td>
+                                        <td th:text="${iterStat.count}" class="text-center"></td>
+                                        <td th:text="${report.course_name ?: 'N/A'}" class="text-center"></td>
                                         <!--<td th:text="${report.year ?: 'N/A'}"></td>-->
-                                        <td th:text="${report.semester ?: 'N/A'}"></td>
-                                        <td th:text="${report.subject_code ?: 'N/A'}"></td>
-                                        <td th:text="${report.subject_name ?: 'N/A'}"></td>
-                                        <td th:text="${report.assigned_setters}"></td>
-                                        <td th:text="${report.setter_completed ?: 0}"></td>
-                                        <td th:text="${report.setter_pending ?: 0}"></td>
+                                        <td th:text="${report.semester ?: 'N/A'}" class="text-center"></td>
+                                        <td th:text="${report.subject_code ?: 'N/A'}" class="text-center"></td>
+                                        <td th:text="${report.subject_name ?: 'N/A'}" class="text-center"></td>
+                                        <td th:text="${report.pattern_code ?: 'N/A'}" class="text-center"></td>
+                                        <td th:text="${report.assigned_setters}" class="text-center"></td>
+                                        <td th:text="${report.setter_completed ?: 0}" class="text-center"></td>
+                                        <td th:text="${report.setter_pending ?: 0}" class="text-center"></td>
 
-                                        <td th:text="${report.moderator_completed ?: 0}"></td>
-                                        <td th:text="${report.moderator_rejected ?: 0}"></td>
-                                        <td th:text="${report.moderator_pending ?: 0}"></td>
-                                        <td th:text="${report.forward_to_repo_count ?: 0}"></td>
+                                        <td th:text="${report.moderator_completed ?: 0}" class="text-center"></td>
+                                        <td th:text="${report.moderator_rejected ?: 0}" class="text-center"></td>
+                                        <td th:text="${report.moderator_pending ?: 0}" class="text-center"></td>
+                                        <td th:text="${report.forward_to_repo_count ?: 0}" class="text-center"></td>
                                     </tr>
 
                                     </tbody>

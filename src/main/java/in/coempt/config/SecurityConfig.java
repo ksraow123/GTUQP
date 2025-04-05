@@ -46,7 +46,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.usernameParameter("userName")
 				.defaultSuccessUrl("/send-otp")
 				.permitAll()
-
 				// Logout configuration
 				.and()
 				.logout()

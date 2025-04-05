@@ -62,7 +62,7 @@
                             <table class="table table-bordered" id="example">
                                 <thead>
                                 <tr>
-                                    <th>S.No</th>
+                                    <th>S.No.</th>
                                     <th>Course Name</th>
                                    <!-- <th>Year</th>-->
                                     <th>Year/Sem.</th>
@@ -79,12 +79,12 @@
                                 <tbody>
                                 <tr th:each="appointment, iterStat : ${qpSectionDashBoardList}">
                                     <td class="text-center" th:text="${iterStat.count}"></td>
-                                    <td th:text="${appointment.course_name}"></td>
+                                    <td th:text="${appointment.course_name}" class="text-center"></td>
                                    <!-- <td th:text="${appointment.year}"></td>-->
-                                    <td th:text="${appointment.semester}"></td>
-                                    <td th:text="${appointment.subject_code}"></td>
-                                    <td th:text="${appointment.subject_name}"></td>
-                                    <td>
+                                    <td th:text="${appointment.semester}" class="text-center"></td>
+                                    <td th:text="${appointment.subject_code}" class="text-center"></td>
+                                    <td th:text="${appointment.subject_name}" class="text-center"></td>
+                                    <td class="text-center">
                                         <a href="https://syllabus.gtu.ac.in/" target="_blank" class="link-primary" title="View Syllabus">View</a>
                                     </td>
                                     <td th:utext="${appointment.setter_details}" class="text-center"></td>
@@ -96,17 +96,17 @@
                                            th:data-remarks="${appointment.remarks}">Remarks</a>
                                     </td>
 
-                                    <td th:text="${appointment.qp_status_date}"></td>
+                                    <td th:text="${appointment.qp_status_date}" class="text-center"></td>
 
-                                    <td th:unless="${appointment.qp_status =='NOT RECEIVED'}">
+                                    <td th:unless="${appointment.qp_status =='NOT RECEIVED'}" class="text-center">
                                         <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=1, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
                                             Preview
                                         </a>
                                     </td>
-                                    <td th:if="${appointment.qp_status =='NOT RECEIVED'}">
+                                    <td th:if="${appointment.qp_status =='NOT RECEIVED'}" class="text-center">
 
                                     </td>
-                                    <td th:unless="${appointment.qp_status =='NOT RECEIVED'}">
+                                    <td th:unless="${appointment.qp_status =='NOT RECEIVED'}" class="text-center">
                                         <a th:if="${appointment.qp_status == 'PENDING'}" th:href="@{/reviewerQuestionsList(id=1, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}" class="btn btn-sm btn-info">
                                             Review Questions
                                         </a>
@@ -117,7 +117,7 @@
                                            th:data-setter-id="${appointment.user_id}">View Logs</a>
 
                                     </td>
-                                    <td th:if="${appointment.qp_status =='NOT RECEIVED'}">
+                                    <td th:if="${appointment.qp_status =='NOT RECEIVED'}" class="text-center">
 
                                     </td>
                                 </tr>
@@ -208,7 +208,7 @@
         var setterId = $(element).attr("data-setter-id");
 
         $.ajax({
-            url: 'https://online.ctestservices.com/gtuqp/subject-audit-logs',
+            url: 'https://online.ctestservices.com/gqpsecon/subject-audit-logs',
             type: 'GET',
             data: { subjectId: subjectId, setterId: setterId },
             success: function(response) {

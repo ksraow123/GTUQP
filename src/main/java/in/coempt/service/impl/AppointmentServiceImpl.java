@@ -69,7 +69,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         return bulkAppointmentRepository.getAppointmentDetailsByUserIdAndExamSeriesId(userId,examSeriesId);
     }
 
-
     @Override
     public UserData saveuserData(UserData userData) {
       return   bulkAppointmentRepository.save(userData);
@@ -85,5 +84,7 @@ public class AppointmentServiceImpl implements AppointmentService {
        return bulkAppointmentRepository.findByUserIdInAndSubjectId(ulist.stream().map(u->Math.toIntExact(u.getId())).collect(Collectors.toList()),subjectId);
     }
 
-
+    public UserData getUserDataSubjectIdAndUserIdAndExamSeriesId(Integer subjectId, Integer userId,int examSeriesId){
+        return bulkAppointmentRepository.findByUserIdAndSubjectIdAndExamSeriesId(userId,subjectId,examSeriesId);
+    }
 }

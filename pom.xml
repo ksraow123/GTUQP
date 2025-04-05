@@ -11,7 +11,7 @@
 
 
 	<groupId>in.coempt</groupId>
-	<artifactId>gtuqp</artifactId>
+	<artifactId>gqpsecon</artifactId>
 	<version>1.0</version>
 	<packaging>war</packaging>
 	<name>qprs</name>

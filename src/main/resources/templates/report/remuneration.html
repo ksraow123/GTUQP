@@ -50,7 +50,7 @@
                                 <table class="table table-bordered" id="example">
                                         <thead>
                                         <tr>
-                                            <th>S.No</th>
+                                            <th>S.No.</th>
                                             <th>QP Setter ID</th>
                                             <th>Name</th>
                                             <th>Designation</th>
@@ -63,38 +63,38 @@
                                             <th>Sets Completed</th>
                                             <th>Rem. per set.</th>
                                             <th>Total Amt</th>
-                                            <th>Account No</th>
+                                            <th>Account No.</th>
                                             <th>IFSC Code</th>
                                             <th>Bank Name</th>
                                             <th>Branch </th>
                                             <th>Branch Address</th>
-                                            <th>Teach./Ind.Exp.</th>
+                                            <th>Teach./Ind.Exp.<br /> (in years)</th>
                                             <th>Residential Address</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr th:each="report,iterStat : ${remunerationReports}">
-                                            <td th:text="${iterStat.count}"></td>
-                                            <td th:text="${report.user_name}"></td>
-                                            <td  th:text="${(report.first_name ?: '') + '  ' + (report.last_name ?: '')}"></td>
-                                            <td th:text="${report.designation}"></td>
-                                            <td th:text="${report.faculty_type}"></td>
+                                            <td th:text="${iterStat.count}" class="text-center"></td>
+                                            <td th:text="${report.user_name}" class="text-center"></td>
+                                            <td  th:text="${(report.first_name ?: '') + '  ' + (report.last_name ?: '')}" class="text-center"></td>
+                                            <td th:text="${report.designation}" class="text-center"></td>
+                                            <td th:text="${report.faculty_type}" class="text-center"></td>
 
-                                            <td  th:text="${(report.college_code ?: '') + '  ' + (report.college_name ?: '')}"></td>
+                                            <td  th:text="${(report.college_code ?: '') + '  ' + (report.college_name ?: '')}" class="text-center"></td>
                                            <!-- <td th:text="${report.role}"></td>-->
-                                            <td th:text="${report.subject_code}"></td>
-                                            <td th:text="${report.subject_name}"></td>
+                                            <td th:text="${report.subject_code}" class="text-center"></td>
+                                            <td th:text="${report.subject_name}" class="text-center"></td>
                                           <!--  <td th:text="${report.no_of_sets}"></td>-->
-                                            <td th:text="${report.setsCompleted}"></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td th:text="${report.account_no}"></td>
-                                            <td th:text="${report.ifsc_code}"></td>
-                                            <td th:text="${report.bank_name}"></td>
-                                            <td th:text="${report.branch_details}"></td>
-                                            <td th:text="${report.branch_address}"></td>
-                                            <td th:text="${#strings.defaultString(report.teaching_experience, 'N/A') + '/' + #strings.defaultString(report.industry_experience, 'N/A')}"></td>
-                                            <td th:text="${report.residential_address}"></td>
+                                            <td th:text="${report.setsCompleted}" class="text-center"></td>
+                                            <td class="text-center"></td>
+                                            <td class="text-center"></td>
+                                            <td th:text="${report.account_no}" class="text-center"></td>
+                                            <td th:text="${report.ifsc_code}" class="text-center"></td>
+                                            <td th:text="${report.bank_name}" class="text-center"></td>
+                                            <td th:text="${report.branch_details}" class="text-center"></td>
+                                            <td th:text="${report.branch_address}" class="text-center"></td>
+                                            <td th:text="${#strings.defaultString(report.teaching_experience, 'N/A') + '/' + #strings.defaultString(report.industry_experience, 'N/A')}" class="text-center"></td>
+                                            <td th:text="${report.residential_address}" class="text-center"></td>
                                         </tr>
                                         </tbody>
                                     </table>

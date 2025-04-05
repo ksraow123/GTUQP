@@ -22,7 +22,6 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -52,7 +51,7 @@ public class DashboardController {
         try {
             UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
             User userEntity = userRepository.findByUserName(user.getUsername());
-
+            ProfileDetailsEntity profileDetails = profileDetailsService.getProfileDetailsByUserId(userEntity.getId());
             List<QPSetterDashBoardVo> qpSetterDashBoardList = dashBoardService.getQPSetterDashBord(userEntity.getUserName(), userEntity.getId());
             List<QPSetterDashBoardVo> setwiseStatusReport = new ArrayList<>();
             for (QPSetterDashBoardVo qpSetterDashBoardVo : qpSetterDashBoardList) {
@@ -76,7 +75,7 @@ public class DashboardController {
                                 bitwiseQuestions.setLevel(template.getLevel());
                                 bitwiseQuestions.setTopic(template.getTopic());
                                 bitwiseQuestions.setBit_no(template.getBitNo());
-                                bitwiseQuestions.setMarks(template.getMarks());
+                                bitwiseQuestions.setMarks(Integer.valueOf(template.getMarks()));
                                 bitwiseQuestions.setSetNo(setNo);
                                 bitwiseQuestions.setExamSeriesId(1);
                                 questionsList.add(bitwiseQuestions);
@@ -111,7 +110,8 @@ public class DashboardController {
             // model.addAttribute("qpSetterDashBoardList", qpSetterDashBoardList);
             model.addAttribute("setwiseDashBoard", setwiseDashBoard);
             model.addAttribute("setwiseStatusReport", setwiseStatusReport);
-            model.addAttribute("page", "setterDashBoard");
+            model.addAttribute("profileDetails", profileDetails);
+                model.addAttribute("page", "setterDashBoard");
 
             return "main";
         } catch (Exception e) {
@@ -156,7 +156,9 @@ public class DashboardController {
                                 .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
                                 .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
                                 .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
-                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                                .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
+                                .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
 
                         setterDashBoardVo.setSetter_details(setterDetails.toString());
                     });
@@ -213,7 +215,9 @@ public class DashboardController {
                                 .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
                                 .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
                                 .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
-                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("\n</p>");
+                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                                .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
+                                .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
 
                         setterDashBoardVo.setSetter_details(setterDetails.toString());
                     });

@@ -1,4 +1,4 @@
-uploadTimeTable<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <div class="container-fluid p-3">
   <div class="row">
@@ -42,9 +42,9 @@ uploadTimeTable<!DOCTYPE html>
               <div class="col-md-4">
                 <div class="mb-3">
                   <label for="" class="form-label">College</label>
-                  <select class="form-select" id="collegeCode" required  th:field="*{collegeCode}" >
+                  <select class="form-select" id="collegeId" required  th:field="*{collegeId}" >
                     <option value="">Select</option>
-                    <option th:each="college : ${collegeList}" th:value="${college.collegeCode}" th:text="${college.collegeCode + ' - ' + college.college_name}"></option>
+                    <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.collegeCode + ' - ' + college.college_name}"></option>
                   </select>
                 </div>
               </div>
@@ -128,7 +128,7 @@ function fetchFacultyData() {
 let mobileNo = document.getElementById("mobileNo").value.trim();
 
 if (mobileNo.length === 10) {  // Ensure valid mobile number
-fetch("https://online.ctestservices.com/gtuqp/api/faculty/mobile/" + mobileNo)
+fetch("https://online.ctestservices.com/gqpsecon/api/faculty/mobile/" + mobileNo)
 .then(response => {
 if (!response.ok) {
 throw new Error("Faculty data not found");
@@ -144,7 +144,7 @@ throw new Error(data.error);
 document.getElementById("fname").value = data.faculty.firstName || "";
 document.getElementById("lname").value = data.faculty.lastName || "";
 document.getElementById("email").value = data.faculty.email || "";
-document.getElementById("collegeCode").value = data.faculty.collegeCode || "";
+ // document.getElementById("collegeId").value = data.faculty.collegeId || "";
 $(".readOnly").attr("readonly", "readonly");
 // ✅ Populate Appointment List
 let appointmentTable = document.getElementById("appointmentTable");
@@ -163,8 +163,8 @@ let row = `<tr>
   <td>${appointment.course_name}</td>
   <td>${appointment.subject_code}</td>
   <td>${appointment.subject_name}</td>
-  <td>${appointment.last_date_to_submit}</td>
   <td>${appointment.appointment_sent_date}</td>
+   <td>${appointment.last_date_to_submit}</td>
 </tr>`;
 tbody.innerHTML += row;
 });

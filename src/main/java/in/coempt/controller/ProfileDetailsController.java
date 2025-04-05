@@ -7,7 +7,6 @@ import in.coempt.service.AppointmentService;
 import in.coempt.service.CollegeService;
 import in.coempt.service.FacultyDataService;
 import in.coempt.service.ProfileDetailsService;
-import in.coempt.service.impl.AppointmentServiceImpl;
 import in.coempt.util.SecurityUtil;
 import in.coempt.vo.ProfileDetailsVo;
 import in.coempt.vo.SessionDataVo;
@@ -25,7 +24,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class ProfileDetailsController {
@@ -74,20 +72,8 @@ model.addAttribute("page","profileDetails");
         // ProfileDetailsEntity profileDetailsEntity=profileDetailsRepository.findById(1L).get();
         ProfileDetailsEntity detailsEntity=new ProfileDetailsEntity();
         BeanUtils.copyProperties(profileDetailsVo, detailsEntity);
-        detailsEntity.setUser_id(userEntity.getId());
+        detailsEntity.setUserId(userEntity.getId());
         profileDetailsRepository.save(detailsEntity);
-
-        Optional<FacultyData> facultyData=facultyDataService.getFacultyByMobileNumber(userEntity.getMobileNo());
-
-        if(facultyData.isPresent()){
-            FacultyData facultyData1=facultyData.get();
-            facultyData1.setDesignation(detailsEntity.getDesignation());
-            facultyData1.setFacultyType(detailsEntity.getFaculty_type());
-
-            facultyDataService.saveFaculty(facultyData1);
-
-
-        }
 
         return "redirect:/viewProfile";
     }

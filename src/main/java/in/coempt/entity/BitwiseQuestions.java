@@ -39,7 +39,7 @@ public class BitwiseQuestions {
     private String bit_no;
     private String level;
     private String instructions;
-    private String marks;
+    private Integer marks;
     private String image_path;
     private String qp_setter_status;
     private String topic;

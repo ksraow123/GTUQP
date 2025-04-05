@@ -50,6 +50,7 @@
                         <h2>
                             <span th:text="${subjects.subjectCode}"> </span> -
                             <span th:text="${subjects.subject_name}"></span>
+
                         </h2>
 
                     </td>
@@ -61,12 +62,6 @@
                 <tr>
                     <td colspan="3" >
                         <hr />
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3" style="font-weight:bold;">
-                        <p th:utext="${patternInstructions.instructions}"></p>
-                        <p th:utext="${appointment.qp_instruction}" class="text-bold"></p>
                     </td>
                 </tr>
             </table>
@@ -93,15 +88,12 @@
                         <td width="30" valign="top"><b th:text="'(' + ${question.bit_no} + ')'"></b></td>
                         <!-- <td width="30" valign="top"><b th:text="${question.bit_no} + ')'"></b></td>-->
                         <td valign="top">
-                            <p ><b th:utext="${question.instructions}"></b></p>
-                            <span class="q-desc" th:utext="${question.q_desc}"></span>
-                            <img th:if="${question.image_path != null}"
-                                 th:src="'data:image/png;base64,' + ${question.image_path}"
-                                 alt="Uploaded Image"  width="300" >
+
+                            <span class="q-desc" th:utext="${question.q_solution}"></span>
+
                         </td>
                         <td width="50" valign="top" align="center">
-                            <b th:if="${question != null and question.bit_no != 'OR'}"
-                               th:text="${#numbers.formatInteger(question.marks, 2)}"></b>
+                            <b th:text="${#numbers.formatInteger(question.marks, 2)}"></b>
                         </td>
                     </tr>
                 </table>

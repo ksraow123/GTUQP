@@ -10,6 +10,7 @@ import in.coempt.vo.AppointmentVo;
 import in.coempt.vo.IndividualAppointmentVo;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -57,6 +58,7 @@ public class AppointmentController {
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
 
+    private final ProfileDetailsService profileDetailsService;
     private final SectionUserMappingService sectionUserMappingService;
 
     private  final FacultyDataService facultyDataService;
@@ -65,7 +67,8 @@ public class AppointmentController {
     @Value("${app.url}")
     private String appUrl;
 
-
+    @Value("${user.manual.url}")
+    private String userManualUrl;
 
     @GetMapping("/individualAppointments")
     public String individualAppointments(Model model) {
@@ -97,26 +100,16 @@ public class AppointmentController {
 
     public String saveAppointment(Model model, RedirectAttributes redirectAttributes, IndividualAppointmentVo appointmentVo) {
         try {
-            Optional<FacultyData> facultyDataOptional = facultyDataService.getFacultyByMobileNumber(appointmentVo.getMobile_number());
-
-            FacultyData facultyData;
-
-            if (facultyDataOptional.isPresent()) {
-                facultyData = facultyDataOptional.get();
-            } else {
-                facultyData = new FacultyData(); // Create a new object if not found
-                facultyData.setEmail(appointmentVo.getEmail());
-                facultyData.setMobileNumber(appointmentVo.getMobile_number());
-                facultyData.setFirstName(appointmentVo.getFname());
-                facultyData.setLastName(appointmentVo.getLname());
-                facultyData.setCollegeCode(appointmentVo.getCollegeCode());
-                facultyDataService.saveFaculty(facultyData); // Save only if new
+            Optional<ProfileDetailsEntity> profileDetails = profileDetailsService.getFacultyByMobileNumber(appointmentVo.getMobile_number());
+            ProfileDetailsEntity facultyData;
+            if (profileDetails.isPresent()) {
+                facultyData = profileDetails.get();
             }
 
             String customPassword = RandomUtils.nextLong(10000, 99999) + "";
 
-            User user = userService.getUserByMobileNoAndEmailAndRoleId(
-                    appointmentVo.getMobile_number(), appointmentVo.getEmail(), appointmentVo.getRole_id());
+            User user = userService.getUserByMobileNoAndRoleId(
+                    appointmentVo.getMobile_number(),  appointmentVo.getRole_id());
 
             List<User> ulist=userService.getUserByMobileNoAndEmail(appointmentVo.getMobile_number(), appointmentVo.getEmail());
 
@@ -132,8 +125,12 @@ if(ulist.size()>0) {
             if (isNewUser) {
                 user = createNewUser(appointmentVo, customPassword);
 
+                ProfileDetailsEntity pd=new ProfileDetailsEntity();
+                pd.setUserId(user.getId());
+                pd.setContact(user.getMobileNo());
+                pd.setCollege_id(appointmentVo.getCollegeId()+"");
+                profileDetailsService.save(pd);
             }
-
             UserData checkUserData=appointmentService.getAppointmentDetailsByUserIdAndSubjectId(appointmentVo,user);
             if(checkUserData!=null){
                 redirectAttributes.addFlashAttribute("message", "Selected Subject has already mapped");
@@ -175,7 +172,7 @@ if(ulist.size()>0) {
         }
 
         private UserData createUserData(IndividualAppointmentVo appointmentVo, User user) {
-            CollegeEntity collegeEntity = collegeService.getCollegeByCode(appointmentVo.getCollegeCode());
+          //  CollegeEntity collegeEntity = collegeService.getCollegeByCode(appointmentVo.getCollegeCode());
             LocalDateTime now = LocalDateTime.now();
 
             // Define the formatter
@@ -186,7 +183,7 @@ if(ulist.size()>0) {
             UserData userData = new UserData();
             userData.setNo_of_sets(Integer.parseInt(appointmentVo.getNo_of_sets()));
             userData.setUserId(Math.toIntExact(user.getId()));
-            userData.setCollege_id(String.valueOf(collegeEntity.getId()));
+            userData.setCollege_id(String.valueOf(appointmentVo.getCollegeId()));
             userData.setOffice_order_date(formattedDate);
             userData.setLast_date_to_submit(appointmentVo.getSubmission_date());
             userData.setSubjectId(Math.toIntExact(appointmentVo.getSubject_id()));
@@ -202,7 +199,7 @@ if(ulist.size()>0) {
         private void sendAppointmentEmail(IndividualAppointmentVo appointmentVo, User user, UserData userData, boolean isNewUser,String customPassword) {
             Subjects subject = subjectsService.getSubjectById(String.valueOf(appointmentVo.getSubject_id()));
             Course course = courseService.getCourseDetailsById(subject.getCourseId());
-            CollegeEntity collegeEntity = collegeService.getCollegeByCode(appointmentVo.getCollegeCode());
+            CollegeEntity collegeEntity = collegeService.getCollegeById(appointmentVo.getCollegeId()+"");
 
             Context context = new Context();
             context.setVariable("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -228,8 +225,9 @@ if(ulist.size()>0) {
 
             String emailBody = emailContent + "<p>You are appointed as a <strong> QP Setter </strong> for the " +
                     subject.getSubjectCode() + "-" + subject.getSubject_name() + ".</p>" +
-                    "<p><a href='" + appUrl + "'>Click here to login</a></p>" +
-                    "<p><strong>Username:</strong> " + user.getUserName() + "</p>";
+                    "<p><a href='" + userManualUrl + "'>Click here to download QP Setting Application</a></p>" +
+                    "<p>To start QP setting, use the application provided and login using the User ID and Password provided</p>" +
+                    "<p><strong>User ID:</strong> " + user.getUserName() + "</p>";
             if (isNewUser){
                 emailBody=emailBody+ "<p><strong>Password:</strong> " + customPassword + "</p>" ;
         }
@@ -238,7 +236,7 @@ if(ulist.size()>0) {
                         "use the <strong>Forgot Password</strong> option provided on the login page.</p>";
             }
 
-            sendMail.sendHtmlmail(user.getEmail(), "Your appointment is confirmed for the Subject "+subject.getSubjectCode()+"-"+subject.getSubject_name()+"- GTU SQQPRS", emailBody);
+            sendMail.sendHtmlmail(user.getEmail(), "URGENT and CONFIDENTIAL: Regarding Paper setter order for the Subject "+subject.getSubjectCode()+"-"+subject.getSubject_name()+"- Summer-25", emailBody);
             appointmentService.saveUserAppointment(userData);
         }
 
@@ -255,8 +253,8 @@ if(ulist.size()>0) {
             String emailBody = "<html><body>" +
                     "<p>You are appointed as a <strong>" + roles.getRole() + "</strong> for the " +
                     subjects.getSubjectCode()+"-" +subjects.getSubject_name() + ".</p>" +
-                    "<p><a href='" + appUrl + "'>Click here to login</a></p>" +
-                    "<p><strong>Username:</strong> " + userName + "</p>" +
+                    "<p>To start QP setting, use the application provided and login using the User ID and Password provided</p>" +
+                    "<p><strong>User ID:</strong> " + userName + "</p>" +
                     "<p><strong>Password:</strong> " + customPassword + "</p>" +
                     "<p>Thanks,</p>" +
                     "<p><strong>GTU</strong></p>" +
@@ -352,14 +350,12 @@ if(ulist.size()>0) {
 
                 //  String emailBody =String.format(s1,formattedDate,appointment.getName(),appointment.getCollege_code(),
                 //        appointment.getSubject_code(),subjects.getSubject_name(),   course.getCourse_name(),"02-03-2025");
-                String syllabusFile=filePath+ File.separator+"1.pdf";
-                String s2= s1 +  "<p><a href='" + appUrl +"'>Click here to login</a></p>" ;
-//                        "<p>User ID and Password remain the same. In case you have forgotten the password, " +
-//                        "use the <strong>Forgot Password</strong> option provided on the login page.</p>" +
-//                        "<p>Thanks,</p>" ;
-                ;
+              //  String syllabusFile=filePath+ File.separator+"1.pdf";
+                String s2= s1 +  "<p><a href='" + userManualUrl +"'>Click here to download QP Setting Application</a></p>"+
+                        "<p>User ID and Password remains the same. If you have not received the password OR in case you have forgot the password, use the  <strong>Forgot Password</strong> option provided on the login page.</p>" ;
+                       // "<p>Thanks,</p>";
 
-                sendMail.sendHtmlmail(ap.getEmail(), "Your appointment details of GTU", s2);
+                sendMail.sendHtmlmail(ap.getEmail(), "URGENT and CONFIDENTIAL: Regarding Paper setter order for the Subject "+subjects.getSubjectCode()+"-"+subjects.getSubject_name()+"- Summer-25", s2);
 
                 UserData userData=appointmentService.getAppointmentDetailsById((long) ap.getId());
                 userData.setCurrent_status("Appointment Sent");
@@ -387,8 +383,8 @@ if(ulist.size()>0) {
                     "<p>Dear Sir/Madam,</p>" +
                     "<p>You have been appointed as a QP Setter for the Subject " +
                     "<strong>"+subjects.getSubjectCode()+ "-" +subjects.getSubject_name()+"</strong>.</p>" +
-                    "<p>Your User ID is <strong>"+userName+"</strong>.</p>" +
-                    "<p><a href='" + appUrl +"'>Click here to login</a></p>" ;
+                    "<p>Your User ID is <strong>"+userName+"</strong>.</p>" ;
+                   // "<p><a href='" + appUrl +"'>Click here to login</a></p>" ;
 
             sendMail.sendHtmlmail(user.getEmail(), "Your appointment details of GTU", emailBody);
             return "appointment-status";

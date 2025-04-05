@@ -64,7 +64,7 @@
             <th:block th:each="entry : ${groupedQuestions}">
                 <table width="100%" border="0">
                     <tr th:each="question, iterStat : ${entry.value}">
-                        <td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q' + entry.key + '.'}"></b></td>
+                        <td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q.' + entry.key}"></b></td>
                         <td width="30" valign="top" th:unless="${iterStat.first}"></td>
                         <td width="30" valign="top"><b th:text="${question.bit_no} + ')'"></b></td>
                         <td valign="top">
@@ -74,7 +74,9 @@
                                  th:src="'data:image/png;base64,' + ${question.image_path}"
                                  alt="Uploaded Image"  width="300" >
                         </td>
-                        <td width="30" valign="top" align="right"><b th:text="${question.marks}"></b></td>
+                        <td width="30" valign="top" align="right">
+                            <b th:text="${#numbers.formatInteger(question.marks, 2)}"></b>
+                        </td>
                     </tr>
                 </table>
             </th:block>

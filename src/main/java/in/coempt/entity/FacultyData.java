@@ -40,6 +40,16 @@ public class FacultyData {
 
     @Column(name = "faculty_type")
     private String facultyType;
+    @Column(name = "department")
+    private String department;
+    @Column(name = "institute_address")
+    private String instituteAddress;
+    @Column(name = "course")
+    private String course;
+    @Column(name = "course_name")
+    private String courseName;
+    @Column(name = "total_exp")
+    private String totalExp;
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime createdDate;

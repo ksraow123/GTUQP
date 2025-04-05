@@ -138,22 +138,4 @@ public class CSVController {
         return "main";
     }
 
-    @PostMapping("/mappingUpload")
-    public String mappingUpload(@RequestParam("file") MultipartFile file, Model model, RedirectAttributes redirectAttributes) {
-        if (file.isEmpty()) {
-            model.addAttribute("message", "Please select a file to upload.");
-            model.addAttribute("page","mappingFileUpload");
-            return "main";
-        }
-
-        try {
-            ArrayList<Object> arrayList= csvService.saveMappingCSV(file);
-            redirectAttributes.addFlashAttribute("successList", arrayList.get(0));
-            redirectAttributes.addFlashAttribute("failureList", arrayList.get(1));
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message", "Failed to upload file: " + e.getMessage());
-        }
-        //model.addAttribute("page","upload");
-        return "redirect:/setterModeratorMapping";
-    }
 }

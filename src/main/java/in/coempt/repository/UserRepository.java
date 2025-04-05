@@ -1,6 +1,7 @@
 package in.coempt.repository;
 
 import in.coempt.entity.User;
+import in.coempt.entity.UserData;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByMobileNoAndEmail(String mobileNumber, String email);
 
 	Optional<User> findByEmailAndUserName(String email, String userName);
+
+	User findByMobileNoAndRoleId(String mobileNo, int roleId);
+
+	User findByEmailAndRoleId(String email, int roleId);
 }

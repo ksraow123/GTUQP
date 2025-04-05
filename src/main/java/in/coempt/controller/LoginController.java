@@ -5,6 +5,8 @@ import in.coempt.entity.User;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.RolesService;
 import in.coempt.service.UserService;
+import in.coempt.util.MaskingUtil;
+import in.coempt.util.SMSUtil;
 import in.coempt.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,8 @@ public class LoginController {
     private UserDao userDao;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SMSUtil smsUtil;
 @Autowired
 private RolesService rolesService;
     @GetMapping("")
@@ -75,7 +79,16 @@ private RolesService rolesService;
             session.setAttribute("email", email);
             model.addAttribute("otpRequired",true);
             model.addAttribute("otp",otp);
-            model.addAttribute("sentto","OTP was sent to your registered email id: "+user.getEmail());
+            String maskedEmail = MaskingUtil.maskEmail(user.getEmail());
+            String maskedMobile = MaskingUtil.maskMobile(user.getMobileNo());
+
+            String message = "OTP was sent to your registered email id: " + maskedEmail +
+                    " and mobile number: " + maskedMobile;
+
+
+            model.addAttribute("sentto",message);
+            smsUtil.sendSms1(user.getMobileNo(),otp+" is the OTP for login in SOQPRS application All the best GTU EXAMOE","1507166265631183761");
+
             return "login";
     }
 

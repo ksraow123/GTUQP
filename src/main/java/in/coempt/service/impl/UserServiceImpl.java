@@ -1,6 +1,7 @@
 package in.coempt.service.impl;
 
 import in.coempt.entity.User;
+import in.coempt.entity.UserData;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.UserService;
 import in.coempt.util.SendMailUtil;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,20 +49,19 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    public User sendPasswordResetLink(String email,String userName) {
-        User user = repository.findByEmailAndUserName(email,userName)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        user.setTokenExpiry(LocalDateTime.now().plusMinutes(30)); // Token valid for 30 mins
-        repository.save(user);
-
-        String resetLink = appUrl+"/password/reset?token=" + token;
-
-        sendMail.sendMail(user.getEmail(), "Password Reset Request",
-                "Click the link to reset your password: " + resetLink);
-        return user;
+    public String sendPasswordResetLink(String email,String userName) {
+        String resetLink=null;
+        Optional<User> user = repository.findByEmailAndUserName(email,userName);
+if(user.isPresent()) {
+    String token = UUID.randomUUID().toString();
+    user.get().setResetToken(token);
+    user.get().setTokenExpiry(LocalDateTime.now().plusMinutes(30)); // Token valid for 30 mins
+    repository.save(user.get());
+     resetLink = "password/reset?token=" + token;
+}
+        //sendMail.sendMail(user.getEmail(), "Password Reset Request",
+             //   "Click the link to reset your password: " + resetLink);
+        return resetLink;
     }
 
     @Override
@@ -82,6 +83,17 @@ public class UserServiceImpl implements UserService {
     public List<User> getUserByMobileNoAndEmail(String mobileNumber, String email) {
         return  repository.findByMobileNoAndEmail(mobileNumber,email);
     }
+
+    @Override
+    public User getUserByMobileNoAndRoleId(String mobileNo, int roleId) {
+        return  repository.findByMobileNoAndRoleId(mobileNo,roleId);
+    }
+
+    @Override
+    public User getUserByEmailAndRoleId(String email, int roleId) {
+        return  repository.findByEmailAndRoleId(email,roleId);
+    }
+
 
     public boolean resetPassword(String token, String newPassword) {
         User user = repository.findByResetToken(token)

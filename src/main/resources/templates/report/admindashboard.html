@@ -77,6 +77,7 @@
                                     <th>Year/Sem</th>
                                     <th>Subject</th>
                                     <th>Subject - Name</th>
+                                    <th>Pattern Code</th>
                                     <th>Assigned Setters</th>
                                     <th>QP Setting Status</th>
                                     <th>QP Review status</th>
@@ -85,15 +86,16 @@
                                 </thead>
                                 <tbody>
                                 <tr th:each="report, iterStat : ${adminDashBoardVoList}">
-                                    <td th:text="${iterStat.count}"></td>
-                                    <td th:text="${report.course_name}"></td>
+                                    <td th:text="${iterStat.count}" class="text-center"></td>
+                                    <td th:text="${report.course_name}" class="text-center"></td>
                                    <!-- <td th:text="${report.year}"></td>-->
-                                    <td th:text="${report.semester}"></td>
-                                    <td th:text="${report.subject_code}"></td>
-                                    <td th:text="${report.subject_name}"></td>
-                                    <td th:text="${report.assigned_setters}"></td>
-                                    <td th:text="${report.setter_status}"></td>
-                                    <td th:text="${report.section_team_status}"></td>
+                                    <td th:text="${report.semester}" class="text-center"></td>
+                                    <td th:text="${report.subject_code}" class="text-center"></td>
+                                    <td th:text="${report.subject_name}" class="text-center"></td>
+                                    <td th:text="${report.pattern_code}" class="text-center"></td>
+                                    <td th:text="${report.assigned_setters}" class="text-center"></td>
+                                    <td th:text="${report.setter_status}" class="text-center"></td>
+                                    <td th:text="${report.section_team_status}" class="text-center"></td>
 <!--                                    <td th:text="${report.forward_to_repo_status}"></td>-->
                                 </tr>
                                 </tbody>

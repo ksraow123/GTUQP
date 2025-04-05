@@ -37,4 +37,11 @@ public class UserData {
     private String is_appointment_sent;
     private String appointment_sent_date;
     private String faculty_type;
+    private String qp_instruction;
+
+   // private String staff_name,institute_address,course,course_name,email,contact,designation,department,total_exp;
+
+
+
+
 }

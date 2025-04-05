@@ -35,14 +35,19 @@ public class CSVHelper {
             for (CSVRecord csvRecord : csvRecords) {
                 FacultyData faculty = new FacultyData();
 
-                faculty.setFirstName(csvRecord.get("firstname"));
-                faculty.setLastName(csvRecord.get("lastname"));
-                faculty.setMobileNumber(csvRecord.get("mobile no"));
-                faculty.setEmail(csvRecord.get("email"));
-                faculty.setCollegeCode(csvRecord.get("college code"));
-                faculty.setTeachingExp(csvRecord.get("teaching experience"));
-                faculty.setIndustryExp(csvRecord.get("industry experience"));
-                faculty.setDesignation(csvRecord.get("designation"));
+                faculty.setFirstName(csvRecord.get("Staff Name"));
+               // faculty.setLastName(csvRecord.get("lastname"));
+                faculty.setMobileNumber(csvRecord.get("Contact"));
+                faculty.setEmail(csvRecord.get("Email"));
+                faculty.setCollegeCode(csvRecord.get("College Code"));
+              //  faculty.setTeachingExp(csvRecord.get("teaching experience"));
+                //faculty.setIndustryExp(csvRecord.get("industry experience"));
+                faculty.setDesignation(csvRecord.get("Designation"));
+                faculty.setDepartment(csvRecord.get("Department"));
+                faculty.setTotalExp(csvRecord.get("Total Experience"));
+                faculty.setInstituteAddress(csvRecord.get("Institute address"));
+                faculty.setCourse(csvRecord.get("Course"));
+                faculty.setCourseName(csvRecord.get("Course Name"));
 
                 facultyList.add(faculty);
             }
