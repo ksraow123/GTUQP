@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>QP Status Report</h2>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="example">
+                                    <thead>
+                                    <tr>
+                                        <th>S.No.</th>
+                                        <th>Course</th>
+                                        <th>Total Subjects</th>
+                                        <th>Total Subjects Not Assigned</th>
+                                        <th>Orders Sent</th>
+                                        <th>Orders Pending</th>
+                                        <th>QPs Submitted</th>
+                                        <th>QPs Not Submitted</th>
+                                        <th>QPs Approved</th>
+                                        <th>QPs Rejected</th>
+                                        <th>QPs Not Reviewed</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    <tr th:each="report, iterStat : ${qpStatusReport}">
+                                        <td th:text="${iterStat.count}" class="text-center"></td>
+                                        <td th:text="${report.course_name}" class="text-center"></td>
+                                        <td th:text="${report.no_of_subjects}" class="text-center"></td>
+                                        <td th:text="${report.no_of_total_subjects_pending}" class="text-center"></td>
+                                        <td th:text="${report.appointments_sent}" class="text-center"></td>
+                                        <td th:text="${report.appointments_not_sent}" class="text-center"></td>
+                                        <td th:text="${report.no_of_subjects_submitted}" class="text-center"></td>
+                                        <td th:text="${report.no_of_subjects_not_submitted}" class="text-center"></td>
+                                        <td th:text="${report.no_of_subjects_approved}" class="text-center"></td>
+                                        <td th:text="${report.no_of_subjects_rejected}" class="text-center"></td>
+                                        <td th:text="${report.no_of_subjects_pending}" class="text-center"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

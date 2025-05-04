@@ -84,7 +84,19 @@
                                         <td th:text="${report.semester ?: 'N/A'}" class="text-center"></td>
                                         <td th:text="${report.subject_code ?: 'N/A'}" class="text-center"></td>
                                         <td th:text="${report.subject_name ?: 'N/A'}" class="text-center"></td>
-                                        <td th:text="${report.pattern_code ?: 'N/A'}" class="text-center"></td>
+                                        <td class="text-center">
+                                            <a th:if="${report.pattern_code != null}"
+                                               th:href="@{/patternPreview/{subjectId}(subjectId=${report.subject_id})}"
+                                               class="btn btn-sm btn-warning"
+                                               title="preview"
+                                               target="_blank">
+                                                <span th:text="${report.pattern_code}"></span>
+                                            </a>
+                                            <a th:if="${report.pattern_code != null}"  target="_blank" class="btn btn-sm btn-primary"
+                                               th:href="@{/viewPDF(fileinfo=${'/pattern/' + report.pattern_code + '.pdf'}, filename=${report.pattern_code + '.pdf'})}">
+                                                View Pattern
+                                            </a>
+                                        </td>
                                         <td th:text="${report.assigned_setters}" class="text-center"></td>
                                         <td th:text="${report.setter_completed ?: 0}" class="text-center"></td>
                                         <td th:text="${report.setter_pending ?: 0}" class="text-center"></td>

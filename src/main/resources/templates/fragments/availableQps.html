@@ -18,7 +18,9 @@
                 <tbody>
                 <tr th:each="record, iterStat : ${viewAvailableQps}">
                     <td>
-                        <input type="radio" class="form-control" name="selectedQp" th:value="${record.id}" required>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" name="selectedQp" th:value="${record.id}" required>
+                        </div>
                     </td>
                     <td th:text="${iterStat.count}" class="text-center"></td>
                     <td th:text="${record.subject_code}" class="text-center"></td>

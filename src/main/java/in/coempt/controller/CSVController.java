@@ -1,6 +1,7 @@
 package in.coempt.controller;
 
 import in.coempt.entity.*;
+import in.coempt.repository.FacultyAppointmentRepository;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.util.SecurityUtil;
@@ -8,6 +9,7 @@ import in.coempt.vo.AppointmentVo;
 import in.coempt.vo.SessionDataVo;
 import in.coempt.vo.SetterModeratorMappingVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +31,8 @@ public class CSVController {
     private final AppointmentService appointmentService;
     private final SetterModeratorService setterModeratorService;
     private final CourseService courseService;
+
+    private final FacultyAppointmentRepository facultyAppointmentRepository;
 
     private final SubjectsService subjectsService;
     @GetMapping("/upload")
@@ -57,7 +61,11 @@ public class CSVController {
         model.addAttribute("coursesList", courseList);
         model.addAttribute("subjectsList", subjectsList);
         model.addAttribute("semesterList", semesterList);
-        model.addAttribute("appointmentList",appointmentService.getAppointmentDshBoardBySection(sessionIds));
+
+
+        List<FacultyAppointment> f1= facultyAppointmentRepository.findBySectionUserId(sessionDataVo.getUserId());
+        model.addAttribute("uploadFileResults", f1);
+       // model.addAttribute("appointmentList",appointmentService.getAppointmentDshBoardBySection(sessionIds));
 
 
         model.addAttribute("page","uploadNew");
@@ -67,8 +75,10 @@ public class CSVController {
     @PostMapping("/uploadFilters")
     public String showUploadFormFilters(
             @RequestParam("course_id") String courseId,
+            @RequestParam("review_status") String review_status,
+            @RequestParam("submit_status") String submit_status,
             @RequestParam("subject_id") String subjectId,
-            @RequestParam("semester") String semester,Model model, HttpSession session) {
+            @RequestParam("semester") String semester,@RequestParam("appointment_type") String appointment_type,Model model, HttpSession session) {
         SessionDataVo sessionDataVo=(SessionDataVo)session.getAttribute("sessionData");
         List<Integer> sectionIds = sessionDataVo.getSectionId();
         String sessionIds = sectionIds.stream()
@@ -101,7 +111,10 @@ public class CSVController {
         List<AppointmentVo> adminDashBoardVoList=  appointmentService.getAppointmentDshBoardBySection(sessionIds);
 
         adminDashBoardVoList.removeIf(a ->
-                (!courseId.equalsIgnoreCase("All") && a.getCourse_id() != Integer.valueOf(courseId)) ||
+                (!submit_status.equalsIgnoreCase("All")&&!a.getSetter_status().equals(submit_status)||
+                !review_status.equalsIgnoreCase("All")&&!a.getReview_status().equals(review_status)||
+                        !appointment_type.equalsIgnoreCase("All")&&!a.getCurrent_status().equals(appointment_type)||
+                        !courseId.equalsIgnoreCase("All") && a.getCourse_id() != Integer.valueOf(courseId)) ||
                         (!subjectId.equalsIgnoreCase("All") && Integer.valueOf(a.getSubject_id()) != Integer.valueOf(subjectId)) ||
                         (!semester.equalsIgnoreCase("All") && Integer.valueOf(a.getSemester()) != Integer.valueOf(semester))
         );
@@ -124,7 +137,8 @@ public class CSVController {
             redirectAttributes.addFlashAttribute("successList", arrayList.get(0));
             redirectAttributes.addFlashAttribute("failureList", arrayList.get(1));
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message", "Failed to upload file: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("message", "Failed to upload the file, check the column headings as per .csv file  "+ e.getMessage());
         }
 //model.addAttribute("page","upload");
         return "redirect:/upload";

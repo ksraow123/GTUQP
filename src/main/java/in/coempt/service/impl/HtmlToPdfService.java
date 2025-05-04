@@ -31,7 +31,8 @@ public class HtmlToPdfService {
         // ✅ Step 3: Run wkhtmltopdf inside xvfb (Headless Mode)
         ProcessBuilder builder = new ProcessBuilder(
                 "xvfb-run", "--auto-servernum", "--server-args=-screen 0 1024x768x24",
-                "/usr/bin/wkhtmltopdf", "--enable-local-file-access", tempHtmlPath, outputPdfPath
+                "/usr/bin/wkhtmltopdf", "--enable-local-file-access", "--encoding", "UTF-8",
+                tempHtmlPath, outputPdfPath
         );
 
         builder.redirectErrorStream(true);
@@ -67,5 +68,60 @@ public class HtmlToPdfService {
             return templateEngine.process("pdfcopy", context);
         }
 
+
+    public void generateFinalPdfFromHtml(Model model, String outputPdfPath) throws IOException, InterruptedException {
+        // ✅ Step 1: Render Thymeleaf Template into HTML
+        String htmlContent = renderHtmlContentWithModelFinalPdf(model);
+
+        // ✅ Step 2: Save HTML to a temporary file
+        String tempHtmlPath = System.getProperty("java.io.tmpdir") + "/report_" + UUID.randomUUID() + ".html";
+        Files.write(new File(tempHtmlPath).toPath(), htmlContent.getBytes());
+
+        ProcessBuilder builder = new ProcessBuilder(
+                "xvfb-run", "--auto-servernum", "--server-args=-screen 0 1024x768x24",
+                "/usr/bin/wkhtmltopdf",
+                "--enable-local-file-access",
+                "--encoding", "UTF-8",
+                "--margin-bottom", "20mm",
+                "--footer-center", "Page [page] of [toPage]",
+                "--footer-font-size", "10",
+                "--footer-spacing", "5",
+                tempHtmlPath, outputPdfPath
+        );
+
+
+        builder.redirectErrorStream(true);
+        Process process = builder.start();
+
+        // ✅ Step 4: Capture and Log Process Output
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("wkhtmltopdf: " + line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        System.out.println("wkhtmltopdf exited with code: " + exitCode);
+
+        if (exitCode != 0) {
+            throw new IOException("wkhtmltopdf failed to generate PDF. Exit code: " + exitCode);
+        }
+
+        // ✅ Step 5: Delete Temporary HTML File
+        new File(tempHtmlPath).delete();
     }
+
+    private String renderHtmlContentWithModelFinalPdf(Model model) {
+        Context context = new Context();
+        context.setVariables(model.asMap());
+
+        // ✅ Ensure CSS and image paths are absolute
+        String baseUrl = new File(servletContext.getRealPath("/static/")).toURI().toString();
+        context.setVariable("baseUrl", baseUrl);
+
+        return templateEngine.process("timetable/finalpdfcopy", context);
+    }
+
+}
 

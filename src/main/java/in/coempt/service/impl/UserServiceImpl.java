@@ -94,6 +94,11 @@ if(user.isPresent()) {
         return  repository.findByEmailAndRoleId(email,roleId);
     }
 
+    @Override
+    public void deleteUserDetails(Long id) {
+        repository.deleteById(id);
+    }
+
 
     public boolean resetPassword(String token, String newPassword) {
         User user = repository.findByResetToken(token)

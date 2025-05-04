@@ -1,15 +1,19 @@
 package in.coempt.controller;
 
+import in.coempt.dao.UserDao;
 import in.coempt.entity.User;
 import in.coempt.service.UserService;
+import in.coempt.vo.UserMacIdsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -18,6 +22,8 @@ import java.util.UUID;
 public class PasswordController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserDao userDao;
 
     @GetMapping("/change")
     public String showChangePasswordForm(Model model) {
@@ -48,13 +54,25 @@ public class PasswordController {
     }
 
     @GetMapping("/forgot")
-    public String showForgotPasswordForm() {
+    public String showForgotPasswordForm(HttpSession session,Model model) {
+        String macId= (String) session.getAttribute("macid");
+        model.addAttribute("macid",macId);
+        List<UserMacIdsVo> userMacIdsVos=userDao.getMacIds(macId);
+        if(userMacIdsVos.size()>0){
+            model.addAttribute("userName",userMacIdsVos.get(0).getCenter_code());
+        }
         return "forgot-password";
     }
 
     @PostMapping("/forgot")
-    public String processForgotPassword(@RequestParam String userName,@RequestParam String email, RedirectAttributes redirectAttributes) {
+    public String processForgotPassword(@RequestParam String userName,@RequestParam String email, RedirectAttributes redirectAttributes,HttpSession session,Model model) {
         String resetLink = userService.sendPasswordResetLink(email, userName);
+        String macId= (String) session.getAttribute("macid");
+        model.addAttribute("macid",macId);
+        List<UserMacIdsVo> userMacIdsVos=userDao.getMacIds(macId);
+        if(userMacIdsVos.size()>0){
+            model.addAttribute("userName",userMacIdsVos.get(0).getCenter_code());
+        }
         if (resetLink != null){
             redirectAttributes.addFlashAttribute("success", "Set the New Password");
             return "redirect:/"+resetLink;
@@ -80,8 +98,14 @@ public class PasswordController {
         return "redirect:/upload";
     }
     @GetMapping("/reset")
-    public String showResetPasswordForm(@RequestParam String token, Model model) {
+    public String showResetPasswordForm(@RequestParam String token, Model model,HttpSession session) {
         model.addAttribute("token", token);
+        String macId= (String) session.getAttribute("macid");
+        model.addAttribute("macid",macId);
+        List<UserMacIdsVo> userMacIdsVos=userDao.getMacIds(macId);
+        if(userMacIdsVos.size()>0){
+            model.addAttribute("userName",userMacIdsVos.get(0).getCenter_code());
+        }
         return "reset-password";
     }
 
@@ -89,7 +113,9 @@ public class PasswordController {
     public String processResetPassword(@RequestParam String token,
                                        @RequestParam String newPassword,
                                        @RequestParam String confirmPassword,
-                                       RedirectAttributes redirectAttributes) {
+                                       RedirectAttributes redirectAttributes,HttpSession session) {
+        String macId= (String) session.getAttribute("macid");
+        redirectAttributes.addFlashAttribute("macid",macId);
         if (!newPassword.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("error", "Passwords do not match.");
             return "redirect:/password/reset?token=" + token;
@@ -102,7 +128,7 @@ public class PasswordController {
         }
 
         redirectAttributes.addFlashAttribute("success", "Password reset successfully!");
-        return "redirect:/";
+        return "redirect:/?macid="+macId;
     }
 
 

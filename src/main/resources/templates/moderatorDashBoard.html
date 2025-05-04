@@ -59,6 +59,7 @@
                             </div>
                         </form>
                         <div class="col-12">
+                            <div class="table-responsive">
                             <table class="table table-bordered" id="example">
                                 <thead>
                                 <tr>
@@ -94,6 +95,11 @@
                                            th:if="${not #strings.isEmpty(appointment.remarks)}"
                                            onclick="showRemarks(this)"
                                            th:data-remarks="${appointment.remarks}">Remarks</a>
+
+                                        <span th:if="${appointment.rejectedQnos != null and !#strings.isEmpty(appointment.rejectedQnos)}">
+                                         Rejected Questions: <span th:text="${appointment.rejectedQnos}"></span>
+                                        </span>
+
                                     </td>
 
                                     <td th:text="${appointment.qp_status_date}" class="text-center"></td>
@@ -107,7 +113,7 @@
 
                                     </td>
                                     <td th:unless="${appointment.qp_status =='NOT RECEIVED'}" class="text-center">
-                                        <a th:if="${appointment.qp_status == 'PENDING'}" th:href="@{/reviewerQuestionsList(id=1, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}" class="btn btn-sm btn-info">
+                                        <a th:if="${appointment.is_used == 0}" th:href="@{/reviewerQuestionsList(id=1, subjectId=${appointment.subject_id},setterId=${appointment.user_id})}" class="btn btn-sm btn-info" target="_blank">
                                             Review Questions
                                         </a>
 
@@ -123,7 +129,7 @@
                                 </tr>
                                 </tbody>
                             </table>
-
+                        </div>
                         </div>
                     </div>
 

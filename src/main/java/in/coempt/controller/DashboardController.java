@@ -1,6 +1,8 @@
 package in.coempt.controller;
 
 import in.coempt.entity.*;
+import in.coempt.repository.PatternInstructionsRepository;
+import in.coempt.repository.PatternQnoInstructionsRepository;
 import in.coempt.repository.QpTemplateMasterRepository;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
@@ -13,14 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,13 @@ public class DashboardController {
     private QPFilesService qpFilesService;
     @Autowired
     private ProfileDetailsService profileDetailsService;
+    @Autowired
+    private  CollegeService collegeService;
+    @Autowired
+    private PatternQnoInstructionsRepository patternQnoInstructionsRepository;
+
+    @Autowired
+    private PatternInstructionsRepository patternInstructionsRepository;
 
     @GetMapping("/setterdashboard")
     // @Transactional
@@ -75,9 +84,14 @@ public class DashboardController {
                                 bitwiseQuestions.setLevel(template.getLevel());
                                 bitwiseQuestions.setTopic(template.getTopic());
                                 bitwiseQuestions.setBit_no(template.getBitNo());
-                                bitwiseQuestions.setMarks(Integer.valueOf(template.getMarks()));
+                                bitwiseQuestions.setMarks(template.getMarks());
                                 bitwiseQuestions.setSetNo(setNo);
                                 bitwiseQuestions.setExamSeriesId(1);
+                                bitwiseQuestions.setQ_flag(template.getQ_flag());
+                                bitwiseQuestions.setQp_template_auto_id(template.getId());
+                                bitwiseQuestions.setInstructions(template.getInstructions());
+                                bitwiseQuestions.setQorder(template.getQorder());
+                               // bitwiseQuestions.setExamSeriesId(1);
                                 questionsList.add(bitwiseQuestions);
                             }
                             if (!questionsList.isEmpty()) {
@@ -124,7 +138,7 @@ public class DashboardController {
 
     @GetMapping("/moderatordashboard")
     public String moderatorDashBoard(Model model, HttpSession session) {
-        Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
+       // Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
         UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User userEntity = userRepository.findByUserName(user.getUsername());
         SessionDataVo sessionDataVo = (SessionDataVo) session.getAttribute("sessionData");
@@ -144,22 +158,23 @@ public class DashboardController {
                 .map(course -> String.valueOf(course.getId())).sorted().distinct()
                 .collect(Collectors.toList());
         List<SectionTeamDashBoard> qpSectionDashBoardList =
-                dashBoardService.getSectionDashBoard(Math.toIntExact(userEntity.getId()), examSeriesId);
+                dashBoardService.getSectionDashBoard(Math.toIntExact(userEntity.getId()), sessionDataVo.getExamSeriesId());
         for (SectionTeamDashBoard setterDashBoardVo : qpSectionDashBoardList) {
             userRepository.findById(setterDashBoardVo.getUser_id())
                     .ifPresent(userRecord -> {
                         ProfileDetailsVo profileDetails = profileDetailsService.getProfileDetails(userRecord.getId());
+                        CollegeEntity collegeEntity = collegeService.getCollegeById(profileDetails.getCollege_id());
                         StringBuilder setterDetails = new StringBuilder();
                         setterDetails.append("<p>")
                                 .append("<b>User Name:</b> ").append(userRecord.getUserName()).append("<br>\n")
                                 .append("<b>Name:</b> ").append(userRecord.getFirstName()).append(" ").append(userRecord.getLastName()).append("<br>\n")
+                                .append("<b>College:</b> ").append(collegeEntity.getCollegeCode()).append("-").append(collegeEntity.getCollege_name()).append("<br>\n")
                                 .append("<b>Mobile:</b> ").append(userRecord.getMobileNo()).append("<br>\n")
                                 .append("<b>Email:</b> ").append(userRecord.getEmail()).append("<br>\n")
                                 .append("<b>Designation:</b> ").append(profileDetails.getDesignation()).append("<br>\n")
-                                .append("<b>Faculty Type:</b> ").append(profileDetails.getFaculty_type()).append("<br>\n")
+                                .append("<b>Institute Type:</b> ").append(profileDetails.getInstitute_type()).append("<br>\n")
                                 .append("<b>Teaching Exp:</b> ").append(profileDetails.getTeaching_experience()).append("<br>\n")
                                 .append("<b>Industry Exp:</b> ").append(profileDetails.getIndustry_experience()).append("<br>\n</p>");
-
                         setterDashBoardVo.setSetter_details(setterDetails.toString());
                     });
         }
@@ -181,7 +196,7 @@ public class DashboardController {
             @RequestParam("course_id") String courseId,
             @RequestParam("subject_id") String subjectId,
             @RequestParam("semester") String semester, @RequestParam("qpStatus") String qpStatus, Model model, HttpSession session) {
-        Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
+        //Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
         UserDetails user = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
         User userEntity = userRepository.findByUserName(user.getUsername());
         SessionDataVo sessionDataVo = (SessionDataVo) session.getAttribute("sessionData");
@@ -203,7 +218,7 @@ public class DashboardController {
                 .map(course -> String.valueOf(course.getId())).sorted().distinct()
                 .collect(Collectors.toList());
         List<SectionTeamDashBoard> qpSectionDashBoardList =
-                dashBoardService.getSectionDashBoard(Math.toIntExact(userEntity.getId()), examSeriesId);
+                dashBoardService.getSectionDashBoard(Math.toIntExact(userEntity.getId()), sessionDataVo.getExamSeriesId());
         for (SectionTeamDashBoard setterDashBoardVo : qpSectionDashBoardList) {
             userRepository.findById(setterDashBoardVo.getUser_id())
                     .ifPresent(userRecord -> {
@@ -244,8 +259,50 @@ public class DashboardController {
     @GetMapping("/subject-audit-logs")
     @ResponseBody
     public List<QPSetterDashBoardVo> viewAuditLogs(@RequestParam Integer subjectId, @RequestParam Long setterId, Model model, HttpSession session) {
-        Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
-        return dashBoardService.getSetterStatusReport(examSeriesId, subjectId, setterId);
+       // Integer examSeriesId = (Integer) session.getAttribute("selectedExamSeriesId");
+        SessionDataVo sessionDataVo = (SessionDataVo) session.getAttribute("sessionData");
+        return dashBoardService.getSetterStatusReport(sessionDataVo.getExamSeriesId(), subjectId, setterId);
+
+    }
+    @GetMapping("/viewPatternDetails")
+    public String viewPatternDetails(Model model) {
+
+        List<QpTemplateMaster> patternsList= qpTemplateMasterRepository.findAll();
+        model.addAttribute("patternsList", patternsList);
+        model.addAttribute("page", "report/patternsList");
+        return "main";
+    }
+
+
+    @GetMapping("/patternPreview/{subjectId}")
+    public String patternWisePreview(HttpServletRequest request, Model model, @PathVariable("subjectId") String subjectId) throws IOException {
+
+        Subjects subjects = subjectsService.getSubjectById(subjectId + "");
+        if (subjects.getPatternCode() != null) {
+            List<QpTemplateMaster> patternsList = qpTemplateMasterRepository.findByPatternCode(subjects.getPatternCode());
+
+
+            model.addAttribute("questionsList", patternsList);
+            model.addAttribute("groupedQuestions", patternsList.stream()
+                    //.sorted(Comparator.comparing(QpTemplateMaster::getQNo))
+                    .collect(Collectors.groupingBy(
+                            QpTemplateMaster::getQNo,
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    )));
+            PatternInstructionsEntity instructionsEntity = patternInstructionsRepository.findByPatternCode(subjects.getPatternCode()).get();
+          ///  List<PatternQnoInstructions> patternQnoInstructions = patternQnoInstructionsRepository.findByPatternCode(subjects.getPatternCode());
+
+            model.addAttribute("patternInstructions", instructionsEntity);
+            //model.addAttribute("patternQnoInstructions", patternQnoInstructions);
+
+            model.addAttribute("subjects", subjects);
+
+//            if (patternQnoInstructions.size() > 0) {
+//                return "patternQnoPreview";
+//            }
+        }
+            return "patternPreview";
 
     }
 }

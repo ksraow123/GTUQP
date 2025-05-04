@@ -21,4 +21,8 @@ public interface SubjectsService {
     List<Subjects> getSubjectsByCourseIdList(List<String> courseIds);
 
     List<Subjects> getSubjectsByCourseIdAndSemester(String courseId, String semester);
+
+    Subjects getSubjectCodeAndSectionIdAbdCourseId(String subjectCode, int sectionId, Long courseId);
+
+    Subjects getSubject_codeAndCourseId(String subjectCode, Long courseId);
 }

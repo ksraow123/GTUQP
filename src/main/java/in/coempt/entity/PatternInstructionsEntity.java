@@ -14,4 +14,6 @@ public class PatternInstructionsEntity {
     @Column(name="pattern_code")
     private String patternCode;
     private String instructions;
+    private String instructions_to_setter;
+    private String is_cognitive;
 }

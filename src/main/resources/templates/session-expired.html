@@ -1,10 +1,60 @@
 <!DOCTYPE html>
+<html lang="en">
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Session Expired</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTU-SOQPRS</title>
+
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+
 </head>
+
 <body>
-<h2>Your session has expired</h2>
-<p>Please <a th:href="@{/}">login</a> again.</p>
+
+<div class="container-fluid bg-primary">
+  <div class="d-flex  align-items-center justify-content-between text-white p-2">
+<!--    <div><strong>Helpline No. 9063992318, 9063992130</strong></div>-->
+<!--    <div><strong>Email: papersetterorder@gtu.edu.in</strong></div>-->
+  </div>
+</div>
+<div class="container-fluid ps-3 pe-3 white">
+  <div class="d-flex  align-items-center justify-content-between">
+    <div>
+      <img src="images/logo.png" height="80" alt="" />
+    </div>
+    <div>
+      <h2></h2>
+    </div>
+
+
+  </div>
+</div>
+
+
+<div class="container-fluid p-3">
+  <!-- Content Start -->
+
+  <div class="cards">
+    <div class="card border m-auto mt-5 text-center" >
+
+      <h2 class="text-success">You have been logged out / session has expired.</h2>
+      <h2>Close the application and login again. </h2>
+    </div>
+  </div>
+
+  <!-- End Content  -->
+</div>
+
+
+<script  th:src="@{js/bootstrap.bundle.min.js}"></script>
+<script  th:src="@{js/script.js}"></script>
+
+
+
 </body>
+
 </html>

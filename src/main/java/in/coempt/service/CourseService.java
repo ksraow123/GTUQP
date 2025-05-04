@@ -7,4 +7,5 @@ import java.util.List;
 public interface CourseService {
    public List<Course> getAllCourses();
    public Course getCourseDetailsById(String courseId);
+   public Course getCourseDetailsByCode(String courseCode);
 }

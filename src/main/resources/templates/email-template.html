@@ -112,7 +112,7 @@
                 <li>Last date for submission of question paper to University:  <b th:text="${submissionDate}" /> If you are unable to set question paper, you have to inform Controller of Examination, GTU immediately after receiving this paper setter order.</li>
                 <li>Diagram, charts and figures should be added against the respective questions. If required, please add instruction whether any IS codes, steam tables, or other reference materials should be provided to the students during the examination.</li>
                 <li>Please carefully add/verify bank details in SOQPRS portal.</li>
-                <li>To download syllabus Please refer https://www.gtu.ac.in/Syllubus_list.aspx</li>
+                <li>To download syllabus Please refer https://syllabus.gtu.ac.in/</li>
 
 
             </ol>
@@ -123,9 +123,11 @@
             Your cooperation in maintaining the secrecy of this assigned examination work and its completion as per the schedule of G.T.U. is highly needed.
         </td>
     </tr>
+
     <tr>
         <td>
-
+        <p>You are appointed as a QP Setter for the Subject: <b th:text="${subjectCode}" /> - <b th:text="${subjectName}" /></p>
+           <p> Last date to submit: <b th:text="${submissionDate}" /> </p>
         </td>
     </tr>
 </table>

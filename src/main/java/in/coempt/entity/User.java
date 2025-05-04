@@ -43,5 +43,8 @@ public class User {
 	@Column(name = "mobile_no", nullable = false, length = 20)
 	private String mobileNo;
 
+	private String alternate_mobile;
+	private String alternate_email;
+
 	private LocalDateTime tokenExpiry;
 }

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>QP Setter and Remuneration Details</h2>
+                    <div class="row">
+                        <form th:action="@{/subject/remunerationReport}"  method="post" >
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Course Name </label>
+                                            <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
+                                                <option value="All">All</option>
+                                                <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Year / Sem </label>
+                                            <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
+                                                <option value="All">All</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Subject </label>
+                                            <select class="form-select" id="subject" name="subject_id" required>
+                                                <option value="All">All</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3 mt-4">
+                                            <button class="btn btn-primary">Search</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="example">
+                                        <thead>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>QP Setter ID</th>
+                                            <th>Name</th>
+                                            <th>Designation</th>
+                                            <th>Mobile Number</th>
+                                            <th>Email Id</th>
+                                            <th>Institute Type</th>
+                                            <th>College Code</th>
+                                           <!-- <th>Role</th>-->
+                                            <th>Subject Code</th>
+                                            <th>Subject Name</th>
+                                           <!-- <th>No. of Sets</th>-->
+                                            <th>Status</th>
+                                            <th>Rem. per QP
+                                                (in INR)</th>
+
+                                            <th>Account No.</th>
+                                            <th>IFSC Code</th>
+                                            <th>Bank Name</th>
+                                            <th>Branch </th>
+                                            <th>Branch Address</th>
+                                            <th>Teach./Ind.Exp.<br /> (in years)</th>
+                                            <th>Residential Address</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="report,iterStat : ${remunerationReports}">
+                                            <td th:text="${iterStat.count}" class="text-center"></td>
+                                            <td class="text-center">
+                                                <a href="javascript:void(0);"
+                                                   class="open-setter-modal"
+                                                   data-toggle="modal"
+
+                                                   th:data-name="${(report.first_name ?: '') + ' ' + (report.last_name ?: '')}"
+                                                   th:data-mobile="${report.mobile_no}"
+                                                   th:data-email="${report.email}"
+                                                   th:data-college="${report.college_id}"
+                                                   th:data-userName="${report.user_name}">
+                                                    <span th:text="${report.user_name}">User</span>
+                                                </a>
+                                            </td>
+
+                                            <td  th:text="${(report.first_name ?: '') + '  ' + (report.last_name ?: '')}" class="text-center"></td>
+                                            <td th:text="${report.designation}" class="text-center"></td>
+                                            <td th:text="${report.mobile_no}" class="text-center"></td>
+                                            <td th:text="${report.email}" class="text-center"></td>
+                                            <td th:text="${report.institute_type}" class="text-center"></td>
+
+                                            <td  th:text="${(report.college_code ?: '') + '  ' + (report.college_name ?: '')}" class="text-center"></td>
+                                           <!-- <td th:text="${report.role}"></td>-->
+                                            <td th:text="${report.subject_code}" class="text-center"></td>
+                                            <td th:text="${report.subject_name}" class="text-center"></td>
+                                            <td th:text="${report.status}" class="text-center"></td>
+                                            <td th:text="${report.remuneration_amount}" class="text-center"></td>
+                                          <!--  <td th:text="${report.no_of_sets}"></td>-->
+<!--                                            <td th:text="${report.setsCompleted}" class="text-center"></td>-->
+
+                                            <td th:text="${report.account_no}" class="text-center"></td>
+                                            <td th:text="${report.ifsc_code}" class="text-center"></td>
+                                            <td th:text="${report.bank_name}" class="text-center"></td>
+                                            <td th:text="${report.branch_details}" class="text-center"></td>
+                                            <td th:text="${report.branch_address}" class="text-center"></td>
+                                            <td th:text="${#strings.defaultString(report.teaching_experience, 'N/A') + '/' + #strings.defaultString(report.industry_experience, 'N/A')}" class="text-center"></td>
+                                            <td th:text="${report.residential_address}" class="text-center"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // When a user clicks the edit icon/link
+        $('.open-setter-modal').on('click', function () {
+            $('#modalName').val($(this).data('name'));
+            $('#modalMobile').val($(this).data('mobile'));
+            $('#modalEmail').val($(this).data('email'));
+            $('#modalCollege').val($(this).data('college'));
+            $('#modelUserName').val($(this).data('username'));
+
+            $('#setterId').modal('show');
+        });
+
+        // Handle form submission via AJAX
+        $('#updateProfileForm').submit(function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            let formData = $(this).serialize(); // Serialize the form fields
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            $.ajax({
+                type: 'POST',
+                url: 'https://online.ctestservices.com/gqpsecon/updateProfileForm',
+                data: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    [csrfHeader]: csrfToken
+                },
+                success: function (response) {
+                    $('#setterId').modal('hide');
+                    alert("Profile updated successfully");
+                    location.reload(); // Reload the page to reflect changes
+                },
+                error: function (xhr, status, error) {
+                    alert("Error occurred while updating profile: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
+
+
+<!-- Modal SettetId -->
+<div class="modal fade" id="setterId" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <form id="updateProfileForm" th:action="@{/updateProfileForm}" method="post">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">Name</label>
+                            <input type="hidden" id="modelUserName" name="user_name" class="form-control">
+                            <input type="text" id="modalName" name="staff_name" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">Mobile Number</label>
+                            <input type="text" id="modalMobile" name="mobile_no" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">Email Id</label>
+                            <input type="email" id="modalEmail" name="email_id" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">College</label>
+                            <select class="form-select" id="modalCollege" name="college_id" required  >
+                                <option value="">Select</option>
+                                <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.collegeCode + ' - ' + college.college_name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <button type="Submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+    </form>
+    </div>
+</html>

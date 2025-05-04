@@ -1,13 +1,21 @@
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>pdf</title>
 </head>
 <style type="text/css">
-    body{font-family:"Times New Roman", "serif"; font-size: 18px;}
-	p{margin:0 0 3px 0; padding:0;}
-	img{ width:70% !important; height:auto !important;}
+    body{font-family:"Times New Roman", "serif"  !important; font-size:14px  !important;}
+    p{margin:0 0 3px 0; padding:0;}
+    h3{margin: 0; padding: 0;}
+    img{ width:70% !important; height:auto !important;}
+    .watermarked {
+  position: relative;
+  overflow: hidden;
+}
+
 </style>
 <style>
     .q-desc {
@@ -21,41 +29,72 @@
 
 </style>
 <body>
-<div class="watermarked" ></div>
 <table width="720" border="0" align="center">
+    <tr>
+        <td>Enrolment No./Seat No.:
+           <!-- <table width="100%" border="0">
+                <tr><td>
+                    <b>Seat No.: </b>
+                </td>
+                    <td align="right">
+                        <b>Enrolment No.: </b>
+                    </td></tr>
+            </table>-->
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <h2>GUJARAT TECHNOLOGICAL UNIVERSITY<br />
+                <small th:text="${course.course_name + ' - SEMESTER - ' + subjects.semester + ' EXAMINATION'}"></small>
+
+            </h2>
+        </td>
+    </tr>
     <tr>
         <td>
             <table width="100%" border="0">
-
                 <tr>
-                    <td align="left" valign="middle">
-                        <h2>
-                            <span th:text="${subjects.subjectCode}"> </span>-
-                            <span th:text="${subjects.subject_name}"></span>:
-
-                        </h2>
-
+                    <td>
+                        <h3>Subject Code:  <span th:text="${subjects.subjectCode}"> </span> </h3>
                     </td>
-                    <td align="right"  valign="middle">
-                        Max Marks:<span th:text="${subjects.max_marks}"></span>
+                    <td align="right">
+                        <h3>Date:  </h3>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table width="100%" border="0">
+                            <tr><td width="125" valign="top">
+                                <h3>Subject Name:</h3>
+                            </td>
+                                <td align="left" valign="top">
+                                    <h3><span th:text="${subjects.subject_name}"></span></h3>
+                                </td></tr>
+                        </table>
                     </td>
 
                 </tr>
                 <tr>
-                    <td colspan="3" >
-                        <hr />
+                    <td>
+                        <h3>Time:  </h3>
+                    </td>
+                    <td align="right">
+                        <h3>Total Marks: <span th:text="${subjects.max_marks}"></span>      </h3>
                     </td>
                 </tr>
             </table>
         </td>
     </tr>
-
     <tr>
         <td>
             <table width="100%" border="0">
                 <tr>
-                    <td align="right"><b>Marks</b></td>
+                    <td style="font-weight:bold;">
+                        <p th:utext="${patternInstructions.instructions}"></p>
+                        <p th:utext="${appointment.qp_instruction}" class="text-bold"></p>
+                    </td>
                 </tr>
+
             </table>
         </td>
     </tr>
@@ -65,17 +104,24 @@
                 <table width="100%" border="0">
                     <tr th:each="question, iterStat : ${entry.value}">
                         <td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q.' + entry.key}"></b></td>
+                        <!--<td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q' + entry.key + '.'}"></b></td>-->
                         <td width="30" valign="top" th:unless="${iterStat.first}"></td>
-                        <td width="30" valign="top"><b th:text="${question.bit_no} + ')'"></b></td>
-                        <td valign="top">
+                        <td width="30" valign="top">
+                            <!--                            <b th:if="${!question.bit_no.contains('OR')}" th:text="'(' + ${question.bit_no} + ')'"></b>-->
+                            <b th:if="${question.bit_no != '' and !question.bit_no.contains('OR')}" th:text="'(' + ${question.bit_no} + ')'"></b>
+                        </td>
+                        <td valign="top" th:if="${!question.bit_no.contains('OR')}">
                             <p ><b th:utext="${question.instructions}"></b></p>
                             <span class="q-desc" th:utext="${question.q_desc}"></span>
                             <img th:if="${question.image_path != null}"
                                  th:src="'data:image/png;base64,' + ${question.image_path}"
                                  alt="Uploaded Image"  width="300" >
                         </td>
-                        <td width="30" valign="top" align="right">
-                            <b th:text="${#numbers.formatInteger(question.marks, 2)}"></b>
+                        <td valign="top"  align="center" th:if="${question.bit_no.contains('OR')}">
+                            <p > <b th:text="${question.bit_no}"></b></p>
+                        </td>
+                        <td width="50" valign="top" align="center">
+                            <b th:text="${question.marks}"></b>
                         </td>
                     </tr>
                 </table>
@@ -83,12 +129,13 @@
         </td>
     </tr>
     <tr>
-        <td align="center">
-            <b>***</b>
-        </td>
+        <td align="center"><b>***</b></td>
     </tr>
 </table>
-</div>
+
+
+
+
 
 </body>
 </html>

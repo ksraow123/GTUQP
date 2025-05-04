@@ -12,94 +12,118 @@
 
                     <div class="row">
                         <form th:action="@{/adminDashboard}"  method="post" >
-                        <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <div class="mb-3">
-                                        <label for="" class="form-label">Course Name </label>
-                                        <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
-                                            <option value="All">All</option>
-                                            <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
-                                        </select>
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Course Name </label>
+                                            <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
+                                                <option value="All">All</option>
+                                                <option th:each="course : ${coursesList}" th:value="${course.id}" th:text="${course.course_name}"></option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="mb-3">
-                                        <label for="" class="form-label">Year / Sem </label>
-                                        <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
-                                            <option value="All">All</option>
-                                        </select>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Year / Sem </label>
+                                            <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
+                                                <option value="All">All</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="" class="form-label">Subject </label>
-                                        <select class="form-select" id="subject" name="subject_id" required>
-                                            <option value="All">All</option>
-                                        </select>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Subject </label>
+                                            <select class="form-select" id="subject" name="subject_id" required>
+                                                <option value="All">All</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-md-2">
-                                    <div class="mb-3">
-                                        <label for="" class="form-label">Assigned Status </label>
-                                        <select class="form-select" id="assignedStatus" required  name="assignedStatus" >
-                                            <option value="All">All</option>
-                                            <option value="ASSIGNED">ASSIGNED</option>
-                                            <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Assigned Status </label>
+                                            <select class="form-select" id="assignedStatus" required  name="assignedStatus" >
+                                                <option value="All">All</option>
+                                                <option value="ASSIGNED">ASSIGNED</option>
+                                                <option value="NOT ASSIGNED">NOT ASSIGNED</option>
 
 
-                                        </select>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
 
 
 
 
 
-                                <div class="col-md-3">
-                                    <div class="mb-3 mt-4">
-                                        <button class="btn btn-primary">Search</button>
+                                    <div class="col-md-3">
+                                        <div class="mb-3 mt-4">
+                                            <button class="btn btn-primary">Search</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         </form>
                         <div class="col-12">
                             <div class="table-responsive">
-                            <table class="table table-bordered" id="example">
-                                <thead>
-                                <tr>
-                                    <th>S.No.</th>
-                                    <th>Course</th>
-                                    <!--<th>Year</th>-->
-                                    <th>Year/Sem</th>
-                                    <th>Subject</th>
-                                    <th>Subject - Name</th>
-                                    <th>Pattern Code</th>
-                                    <th>Assigned Setters</th>
-                                    <th>QP Setting Status</th>
-                                    <th>QP Review status</th>
-<!--                                    <th>Forward to Repository</th>-->
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="report, iterStat : ${adminDashBoardVoList}">
-                                    <td th:text="${iterStat.count}" class="text-center"></td>
-                                    <td th:text="${report.course_name}" class="text-center"></td>
-                                   <!-- <td th:text="${report.year}"></td>-->
-                                    <td th:text="${report.semester}" class="text-center"></td>
-                                    <td th:text="${report.subject_code}" class="text-center"></td>
-                                    <td th:text="${report.subject_name}" class="text-center"></td>
-                                    <td th:text="${report.pattern_code}" class="text-center"></td>
-                                    <td th:text="${report.assigned_setters}" class="text-center"></td>
-                                    <td th:text="${report.setter_status}" class="text-center"></td>
-                                    <td th:text="${report.section_team_status}" class="text-center"></td>
-<!--                                    <td th:text="${report.forward_to_repo_status}"></td>-->
-                                </tr>
-                                </tbody>
-                            </table>
+                                <table class="table table-bordered" id="example">
+                                    <thead>
+                                    <tr>
+                                        <th>S.No.</th>
+                                        <th>Course</th>
+                                        <!--<th>Year</th>-->
+                                        <th>Year/Sem</th>
+                                        <th>Subject</th>
+                                        <th>Subject - Name</th>
+                                        <th>Pattern Code</th>
+                                        <th>Assigned Setters</th>
+                                        <th>QP Setting Status</th>
+                                        <th>QP Review status</th>
+                                        <!--                                    <th>Forward to Repository</th>-->
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="report, iterStat : ${adminDashBoardVoList}">
+                                        <td th:text="${iterStat.count}" class="text-center"></td>
+                                        <td th:text="${report.course_name}" class="text-center"></td>
+                                        <!-- <td th:text="${report.year}"></td>-->
+                                        <td th:text="${report.semester}" class="text-center"></td>
+                                        <td class="text-center">
+                                            <span th:text="${report.subject_code}"></span>
+
+                                        </td>
+
+
+                                        <td th:text="${report.subject_name}" class="text-center"></td>
+                                        <td class="text-center">
+                                            <a th:if="${report.pattern_code != null}"  th:href="@{/patternPreview/{subjectId}(subjectId=${report.subject_id})}"
+                                               class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                                <span th:text="${report.pattern_code}"></span>
+                                            </a>
+                                            <a th:if="${report.pattern_code != null}"  target="_blank" class="btn btn-sm btn-primary"
+                                               th:href="@{/viewPDF(fileinfo=${'/pattern/' + report.pattern_code + '.pdf'}, filename=${report.pattern_code + '.pdf'})}">
+                                                View Pattern
+                                            </a>
+                                        </td>
+                                        <td th:text="${report.assigned_setters}" class="text-center"></td>
+                                        <td class="text-center">
+
+                                            <a th:if="${report.qp_setter_id != null and report.setter_status == 'SUBMITTED'}"
+                                               th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=1, subjectId=${report.subject_id}, setterId=${report.qp_setter_id})}"
+                                               class="btn btn-sm btn-warning"
+                                               title="Preview"
+                                               target="_blank">
+                                                <span th:text="${report.setter_status}"></span>
+                                            </a>
+
+                                        </td>
+                                        <td th:text="${report.section_team_status}" class="text-center"></td>
+                                        <!--                                    <td th:text="${report.forward_to_repo_status}"></td>-->
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 

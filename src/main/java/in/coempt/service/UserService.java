@@ -25,4 +25,6 @@ public interface UserService {
     User getUserByMobileNoAndRoleId(String mobileNo, int roleId);
 
     User getUserByEmailAndRoleId(String email, int i);
+
+    void deleteUserDetails(Long id);
 }

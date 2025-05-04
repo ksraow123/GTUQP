@@ -18,7 +18,7 @@
                   <div class="mobileExists"></div>
                   <label for="" class="form-label">Mobile No.</label>
                   <input class="form-control "  type="text"  required id="mobileNo" th:field="*{mobile_number}" onblur="fetchFacultyData()">
-               <input type="hidden" name="role_id"  value="2">
+                  <input type="hidden" name="role_id"  value="2">
                   <input type="hidden" name="no_of_sets" value="1">
                 </div>
               </div>
@@ -28,11 +28,11 @@
                   <input class="form-control readOnly" type="text" th:field="*{fname}" required>
                 </div>
               </div><div class="col-md-4">
-                <div class="mb-3">
-                  <label for="" class="form-label">Last Name</label>
-                  <input class="form-control readOnly" type="text" th:field="*{lname}" required >
-                </div>
+              <div class="mb-3">
+                <label for="" class="form-label">Last Name</label>
+                <input class="form-control readOnly" type="text" th:field="*{lname}" required >
               </div>
+            </div>
               <div class="col-md-4">
                 <div class="mb-3">
                   <label for="" class="form-label">Email ID</label>
@@ -78,7 +78,16 @@
                   <label for="" class="form-label">Curriculum / Syllabus </label>
 
                   <h3><a href="https://syllabus.gtu.ac.in/" target="_blank" class="link-primary" title="View Syllabus">View Syllabus</a></h3>
-                 <!-- <a id="syllabusLink" href="#" target="_blank" style="display: none;" title="View Syllabus">View Syllabus</a>
+
+                  <a id="previewLink"
+
+                     class="btn btn-sm btn-warning"
+                     title="preview"
+                     target="_blank">
+                    View Pattern
+                  </a>
+
+                  <!-- <a id="syllabusLink" href="#" target="_blank" style="display: none;" title="View Syllabus">View Syllabus</a>
                   <span id="noSyllabusText">No syllabus available</span>-->
                 </div>
               </div>
@@ -92,91 +101,91 @@
         </div>
       </div>
       <div class="cards">
-      <div class="card border-0" id="alreadyMapped">
-        <h2>Already Assigned Subjects</h2>
-        <table id="appointmentTable" class="table table-bordered">
-          <thead>
-          <tr>
-          <tr>
+        <div class="card border-0" id="alreadyMapped">
+          <h2>Already Assigned Subjects</h2>
+          <table id="appointmentTable" class="table table-bordered">
+            <thead>
+            <tr>
+            <tr>
 
-            <th>S.No.</th>
-            <th>Role</th>
-            <th>User Name</th>
-            <th>Name</th>
-            <th>Mobile</th>
-            <th>Email</th>
-            <th>College</th>
-            <th>Course</th>
-            <th>Subject Code</th>
-            <th>Subject Name</th>
-            <th>Appointment sent date</th>
-            <th>Last Date of Submission</th>
+              <th>S.No.</th>
+              <th>Role</th>
+              <th>User Name</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Email</th>
+              <th>College</th>
+              <th>Course</th>
+              <th>Subject Code</th>
+              <th>Subject Name</th>
+              <th>Appointment sent date</th>
+              <th>Last Date of Submission</th>
 
 
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-      </div>
-      </div>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
+</div>
 <script>
-function fetchFacultyData() {
-let mobileNo = document.getElementById("mobileNo").value.trim();
+  function fetchFacultyData() {
+  let mobileNo = document.getElementById("mobileNo").value.trim();
 
-if (mobileNo.length === 10) {  // Ensure valid mobile number
-fetch("https://online.ctestservices.com/gqpsecon/api/faculty/mobile/" + mobileNo)
-.then(response => {
-if (!response.ok) {
-throw new Error("Faculty data not found");
-}
-return response.json();
-})
-.then(data => {
-if (data.error) {
-throw new Error(data.error);
-}
+  if (mobileNo.length === 10) {  // Ensure valid mobile number
+  fetch("https://online.ctestservices.com/gqpsecon/api/faculty/mobile/" + mobileNo)
+  .then(response => {
+  if (!response.ok) {
+  throw new Error("Faculty data not found");
+  }
+  return response.json();
+  })
+  .then(data => {
+  if (data.error) {
+  throw new Error(data.error);
+  }
 
-// ✅ Populate Faculty Data
-document.getElementById("fname").value = data.faculty.firstName || "";
-document.getElementById("lname").value = data.faculty.lastName || "";
-document.getElementById("email").value = data.faculty.email || "";
- // document.getElementById("collegeId").value = data.faculty.collegeId || "";
-$(".readOnly").attr("readonly", "readonly");
-// ✅ Populate Appointment List
-let appointmentTable = document.getElementById("appointmentTable");
-let tbody = appointmentTable.querySelector("tbody");
-tbody.innerHTML = "";  // Clear previous data
+  // âœ… Populate Faculty Data
+  document.getElementById("fname").value = data.faculty.firstName || "";
+  document.getElementById("lname").value = data.faculty.lastName || "";
+  document.getElementById("email").value = data.faculty.email || "";
+   // document.getElementById("collegeId").value = data.faculty.collegeId || "";
+  $(".readOnly").attr("readonly", "readonly");
+  // âœ… Populate Appointment List
+  let appointmentTable = document.getElementById("appointmentTable");
+  let tbody = appointmentTable.querySelector("tbody");
+  tbody.innerHTML = "";  // Clear previous data
 
-data.appointments.forEach((appointment, index) => {
-let row = `<tr>
-  <td>${index + 1}</td>
-  <td>${appointment.role}</td>
-  <td>${appointment.user_name}</td>
-  <td>${appointment.first_name} - ${appointment.last_name}</td>
-  <td>${appointment.mobile_no}</td>
-  <td>${appointment.email}</td>
-  <td>${appointment.college_code} - ${appointment.college_name}</td>
-  <td>${appointment.course_name}</td>
-  <td>${appointment.subject_code}</td>
-  <td>${appointment.subject_name}</td>
-  <td>${appointment.appointment_sent_date}</td>
-   <td>${appointment.last_date_to_submit}</td>
-</tr>`;
-tbody.innerHTML += row;
-});
+  data.appointments.forEach((appointment, index) => {
+  let row = `<tr>
+    <td>${index + 1}</td>
+    <td>${appointment.role}</td>
+    <td>${appointment.user_name}</td>
+    <td>${appointment.first_name} - ${appointment.last_name}</td>
+    <td>${appointment.mobile_no}</td>
+    <td>${appointment.email}</td>
+    <td>${appointment.college_code} - ${appointment.college_name}</td>
+    <td>${appointment.course_name}</td>
+    <td>${appointment.subject_code}</td>
+    <td>${appointment.subject_name}</td>
+    <td>${appointment.appointment_sent_date}</td>
+     <td>${appointment.last_date_to_submit}</td>
+  </tr>`;
+  tbody.innerHTML += row;
+  });
 
-})
-.catch(error => {
-console.error("Error fetching faculty data:", error);
-document.querySelector(".mobileExists").innerHTML = "Faculty data not found for the given Mobile Number";
-$(".readOnly").removeAttr("readonly");
-});
-}
-}
+  })
+  .catch(error => {
+  console.error("Error fetching faculty data:", error);
+  document.querySelector(".mobileExists").innerHTML = "Faculty data not found for the given Mobile Number";
+  $(".readOnly").removeAttr("readonly");
+  });
+  }
+  }
 
 </script>
 <script>
@@ -219,4 +228,16 @@ $(".readOnly").removeAttr("readonly");
             }
         });
     });
+</script>
+<script>
+  document.getElementById("subjectCode").addEventListener("change", function () {
+    const selectedId = this.value;
+    const previewLink = document.getElementById("previewLink");
+
+    if (selectedId && selectedId !== "0") {
+      previewLink.href = `/gqpsecon/patternPreview/${selectedId}`;
+    } else {
+      previewLink.href = `/gqpsecon/patternPreview/0`;
+    }
+  });
 </script>

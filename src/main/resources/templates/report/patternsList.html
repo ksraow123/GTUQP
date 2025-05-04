@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>Patterns List</h2>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                            <table class="table table-bordered" id="example">
+                                <thead>
+                                <tr>
+                                    <th  class="text-center">S.No.</th>
+                                    <th  class="text-center">Pattern Code</th>
+                                    <th  class="text-center">Q.No</th>
+                                    <th  class="text-center">Sub Q.No</th>
+                                    <th  class="text-center">Marks</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="report, iterStat : ${patternsList}">
+                                    <td th:text="${iterStat.count}" class="text-center"></td>
+                                    <td th:text="${report.patternCode}" class="text-center"></td>
+                                    <td th:text="${report.qNo}" class="text-center"></td>
+                                    <td th:text="${report.bitNo}" class="text-center"></td>
+                                    <td th:text="${report.marks}" class="text-center"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

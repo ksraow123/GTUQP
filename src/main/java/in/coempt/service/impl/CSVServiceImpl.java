@@ -7,6 +7,7 @@ import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.util.SecurityUtil;
 import in.coempt.vo.FacultyDataDTO;
+import in.coempt.vo.ProfileDetailsVo;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -26,11 +27,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CSVServiceImpl implements CSVService {
-
+    private final CourseService courseService;
     private final SubjectsService subjectsService;
     private final UserDataRepository userDataRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -65,12 +67,13 @@ public class CSVServiceImpl implements CSVService {
                 if (udata == null) {
                     String customPassword = RandomUtils.nextLong(10000, 99999) + "";
                     Subjects subjects = null;
+                    Course course=courseService.getCourseDetailsByCode(record.get("Course").trim());
                     if (userEntity.getRoleId() == 1) {
-                        subjects = subjectsService.getSubjectCodeAndSectionId(record.get("subject code").trim(), sectionId);
+                        subjects = subjectsService.getSubjectCodeAndSectionIdAbdCourseId(record.get("subject code").trim(), sectionId,course.getId());
                     }
                     if (userEntity.getRoleId() == 3) {
 
-                        subjects = subjectsService.getSubject_code(record.get("subject code").trim());
+                        subjects = subjectsService.getSubject_codeAndCourseId(record.get("subject code").trim(),course.getId());
                     }
                     UserData userData = new UserData();
                     User user = new User();
@@ -82,10 +85,14 @@ public class CSVServiceImpl implements CSVService {
                     user.setUserName(generateUserName(2));
                     user.setRoleId(2);
                     user.setPassword(passwordEncoder.encode(customPassword));
+
                     User usr=userService.saveUser(user);
 
                     ProfileDetailsEntity profileDetails=new ProfileDetailsEntity();
                     profileDetails.setUserId(user.getId());
+                    CollegeEntity collegeEntity = collegeService.getCollegeByCode(record.get("College Code").trim());
+
+                    profileDetails.setCollege_id(String.valueOf(collegeEntity.getId()));
                     profileDetails.setContact(record.get("Contact").trim());
                     profileDetails.setInstitute_address(record.get("Institute address").trim());
                     profileDetails.setCourse(record.get("Course").trim());
@@ -96,8 +103,8 @@ public class CSVServiceImpl implements CSVService {
                     profileDetailsService.save(profileDetails);
                     userData.setNo_of_sets(1);
                     userData.setUserId(Math.toIntExact(user.getId()));
-                    CollegeEntity collegeEntity = collegeService.getCollegeByCode(record.get("College Code").trim());
-                    userData.setCollege_id(String.valueOf(collegeEntity.getId()));
+                    CollegeEntity collegeData = collegeService.getCollegeByCode(record.get("College Code").trim());
+                    userData.setCollege_id(String.valueOf(collegeData.getId()));
                     DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -111,9 +118,9 @@ public class CSVServiceImpl implements CSVService {
                     // Format the date-time
                     String officeorderDate = now.format(formatter);
                     userData.setOffice_order_date(officeorderDate);
-                    userData.setCurrent_status("Appointment Sent");
-                    userData.setStatus_date(officeorderDate);
-                    userData.setAppointment_sent_date(officeorderDate);
+                    userData.setCurrent_status("Not Sent");
+                   // userData.setStatus_date(officeorderDate);
+                  //  userData.setAppointment_sent_date(officeorderDate);
                     userData.setNo_of_sets(1);
                     userData.setSubjectId(Math.toIntExact(subjects.getId()));
                     userData.setExamSeriesId(1);
@@ -147,20 +154,23 @@ public class CSVServiceImpl implements CSVService {
                 if (udata != null) {
 
                     User udataMail = userService.getUserByEmailAndRoleId(record.get("Email").trim(), 2);
-
-                    if (udataMail != null) {
-                        if (udata.getId() == udataMail.getId()) {
+                    Optional<ProfileDetailsEntity> profileDetails = profileDetailsService.getFacultyByMobileNumber(udata.getMobileNo());
+                    CollegeEntity collegeEntity = collegeService.getCollegeByCode(record.get("College Code").trim());
+                    if (udataMail != null&&profileDetails.get()!=null) {
+                        if (udata.getId() == udataMail.getId()&&(Integer.parseInt(profileDetails.get().getCollege_id())==collegeEntity.getId())) {
                             Subjects subjects = null;
+                            Course course=courseService.getCourseDetailsByCode(record.get("Course").trim());
                             if (userEntity.getRoleId() == 1) {
-                                subjects = subjectsService.getSubjectCodeAndSectionId(record.get("subject code").trim(), sectionId);
+                                subjects = subjectsService.getSubjectCodeAndSectionIdAbdCourseId(record.get("subject code").trim(), sectionId,course.getId());
                             }
                             if (userEntity.getRoleId() == 3) {
-                                subjects = subjectsService.getSubject_code(record.get("subject code").trim());
+
+                                subjects = subjectsService.getSubject_codeAndCourseId(record.get("subject code").trim(),course.getId());
                             }
                             UserData userData = new UserData();
                             userData.setNo_of_sets(1);
                             userData.setUserId(Math.toIntExact(udata.getId()));
-                            CollegeEntity collegeEntity = collegeService.getCollegeByCode(record.get("College Code").trim());
+
                             userData.setCollege_id(String.valueOf(collegeEntity.getId()));
                             DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                             DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -174,9 +184,9 @@ public class CSVServiceImpl implements CSVService {
                             // Format the date-time
                             String officeorderDate = now.format(formatter);
                             userData.setOffice_order_date(officeorderDate);
-                            userData.setCurrent_status("Appointment Sent");
-                            userData.setStatus_date(officeorderDate);
-                            userData.setAppointment_sent_date(officeorderDate);
+                           userData.setCurrent_status("Not Sent");
+                            //userData.setStatus_date(officeorderDate);
+                            //userData.setAppointment_sent_date(officeorderDate);
                             userData.setNo_of_sets(1);
                             userData.setSubjectId(Math.toIntExact(subjects.getId()));
                             userData.setExamSeriesId(1);
@@ -211,7 +221,7 @@ public class CSVServiceImpl implements CSVService {
                             facultyDataDTO.setCollegeCode(record.get("College Code").trim());
                             facultyDataDTO.setSubjectCode(record.get("subject code").trim());
                             facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
-                            facultyDataDTO.setRemarks("Email vs Mobile Mismatch for existing user");
+                            facultyDataDTO.setRemarks("Email or College Mismatch for existing user");
                             facultyDataDTO.setMobileNo(record.get("Contact").trim());
                             facultyDataDTO.setEmail(record.get("Email").trim());
                             failureList.add(facultyDataDTO);
@@ -224,13 +234,15 @@ public class CSVServiceImpl implements CSVService {
                         facultyDataDTO.setCollegeCode(record.get("College Code").trim());
                         facultyDataDTO.setSubjectCode(record.get("subject code").trim());
                         facultyDataDTO.setLastDateToSubmit(record.get("last date to submit").trim());
-                        facultyDataDTO.setRemarks("Email vs Mobile Mismatch for existing user");
+                        facultyDataDTO.setRemarks("Email or College Mismatch for existing user");
                         facultyDataDTO.setMobileNo(record.get("Contact").trim());
                         facultyDataDTO.setEmail(record.get("Email").trim());
                         failureList.add(facultyDataDTO);
                     }
-                    userDataRepository.saveAll(userList);
+
                 }
+
+                userDataRepository.saveAll(userList);
             }
         } catch (IOException e) {
             e.printStackTrace();  // ✅ FIX: Log exception for debugging

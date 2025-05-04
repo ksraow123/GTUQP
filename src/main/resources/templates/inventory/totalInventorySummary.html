@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+<div class="container-fluid p-3">
+    <!-- Content Start -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="cards">
+                <div class="card border-0">
+                    <h2>QP Repository Summary (QP Inventory)</h2>
+
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="example">
+                                <thead>
+                                <tr>
+                                    <th>S.No.</th>
+
+                                    <th>Course</th>
+                                    <th>Year / Sem</th>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+
+                                    <th>Max. Marks</th>
+                                    <th>Total QPs</th>
+                                    <th>Used QPs</th>
+                                    <th>Available QPs</th>
+                                    <th>Drafted QP</th>
+
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <tr th:each="exam , iterStat :${inventoryVoList}" th:with="availableQps=${exam.total_qps - exam.used_qps}">
+                                    <td th:text="${iterStat.count}" class="text-center"></td>
+                                    <td th:text="${exam.course_name}" class="text-center"></td>
+                                    <td th:text="${exam.semester}" class="text-center"></td>
+                                    <td th:text="${exam.subject_code}" class="text-center"></td>
+                                    <td th:text="${exam.subject_name}" class="text-center"></td>
+                                    <td th:text="${exam.max_marks}" class="text-center"></td>
+                                    <td  class="text-center">
+                                        <p><span th:text="${exam.total_qps}"></span></p>
+                                        <a th:if="${exam.subject_id != null}"
+                                           href="javascript:void(0);"
+                                           th:attr="onclick=|fetchTotalQps(${exam.subject_id})|"
+                                           class="btn btn-sm btn-warning">
+                                            View
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        <p><span th:text="${exam.used_qps}"></span></p>
+                                        <a th:if="${exam.subject_id != null}"
+                                           href="javascript:void(0);"
+                                           th:attr="onclick=|fetchUsedQps(${exam.subject_id})|"
+                                           class="btn btn-sm btn-warning">
+                                            View
+                                        </a>
+
+                                    </td>
+                                    <td  class="text-center">
+                                        <p> <span th:text="${availableQps}"></span></p>
+                                        <a  href="javascript:void(0);"
+                                           th:attr="onclick=|getAvailableQps(${exam.subject_id})|"
+                                           class="btn btn-sm btn-warning">
+                                            View
+                                        </a>
+                                    </td>
+                                    <td  class="text-center">
+                                        <a th:if="${exam.qp_file_path != null}"
+                                           th:href="@{/viewPDF(fileinfo=${exam.qp_file_path}, filename=${exam.subject_code})}"
+                                           target="_blank"
+                                           class="btn btn-primary btn-sm">View</a>
+                                        <br/>
+                                        <button type="button" th:if="${exam.final_qp != null}"
+                                                class="btn btn-sm btn-danger mt-2 btn-remove"
+                                                th:attr="data-id=${exam.id}"
+                                                title="Remove">
+                                            Remove
+                                        </button>
+
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="totalQpsContainer">
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function fetchTotalQps(subjectId) {
+        fetch(`https://online.ctestservices.com/gqpsecon/getTotalQpFiles/` + subjectId) // Send GET request
+            .then(response => response.text()) // Get the HTML response
+            .then(html => {
+                document.getElementById("totalQpsContainer").innerHTML = html; // Update the table dynamically
+           scrollToContainer();
+            })
+            .catch(error => console.error('Error fetching Total QPs:', error));
+    }
+</script>
+<script>
+    function scrollToContainer() {
+        const container = document.getElementById("totalQpsContainer");
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            container.style.backgroundColor = '#fff3cd'; // optional highlight
+            setTimeout(() => container.style.backgroundColor = '', 1000); // fade highlight
+        }
+    }
+
+    function fetchUsedQps(subjectId) {
+        fetch(`https://online.ctestservices.com/gqpsecon/getUsedQpFiles/` + subjectId) // Send GET request
+            .then(response => response.text()) // Get the HTML response
+            .then(html => {
+                document.getElementById("totalQpsContainer").innerHTML = html; // Update the section dynamically
+            scrollToContainer();
+            })
+            .catch(error => console.error('Error fetching Used QPs:', error));
+    }
+</script>
+<script>
+    function getAvailableQps(subjectId) {
+        fetch(`https://online.ctestservices.com/gqpsecon/getAvailableQps/` + subjectId) // Send GET request
+            .then(response => response.text()) // Get the HTML response
+            .then(html => {
+                document.getElementById("totalQpsContainer").innerHTML = html; // Update the section dynamically
+             scrollToContainer();
+            })
+            .catch(error => console.error('Error fetching Available QPs:', error));
+    }
+</script>
+
+
+</html>

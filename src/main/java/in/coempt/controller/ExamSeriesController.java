@@ -46,7 +46,7 @@ private final SectionUserMappingService sectionUserMappingService;
         @GetMapping("/selectExamSeries")
         public String setExamSeriesInSession(@RequestParam("series_id") Integer seriesId, HttpSession session) {
             session.setAttribute("selectedExamSeriesId", seriesId);
-            return "redirect:/moderatordashboard"; // Redirect to the dashboard or another page
+            return "redirect:/subject/dashboard"; // Redirect to the dashboard or another page
         }
 
     }

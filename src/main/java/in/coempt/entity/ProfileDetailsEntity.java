@@ -33,4 +33,7 @@ public class ProfileDetailsEntity {
         private String other_designation;
     private String college_id,institute_address,course,course_name,email,contact,	department,total_exp;
 
+    @Column(name="last_name")
+    private String lastName;
+
 }

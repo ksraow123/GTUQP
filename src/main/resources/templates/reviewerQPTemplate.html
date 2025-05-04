@@ -12,7 +12,17 @@
     <!-- Include CSS & Scripts -->
     <div th:replace="fragments/styles :: styles"></div>
     <script th:src="@{/js/jquery-3.7.1.js}"></script>
+    <style>
+        body{
+        -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+        }
 
+    </style>
 </head>
 
 <body>
@@ -28,96 +38,123 @@
                             <p th:if="${successMessage}" class="text-danger" th:text="${successMessage}"></p>
                             <p th:if="${errorMessage}" class="text-danger" th:text="${errorMessage}"></p>
                             <h2>
-                                Subject Details: <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
+                                Subject Details: <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span>
 
                             </h2>
                             <p>Max. Marks: <span th:text="${subject.max_marks}"></span> |
-                                <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
-                            <!-- Modal or Form Container -->
-                        <div class="row">
-                            <div class="col-12">
+                                <small style="font-size:14px;"> <!--<a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>-->
+                                    <a th:if="${subject.patternCode != null}"  target="_blank" class="btn btn-sm btn-primary"
+                                       th:href="@{/viewPDF(fileinfo=${'/pattern/' + subject.patternCode + '.pdf'}, filename=${subject.patternCode + '.pdf'})}">
+                                        View Pattern
+                                    </a> |
+                                    <a th:if="${subject.patternCode != null}"  th:href="@{/patternPreview/{subjectId}(subjectId=${subject.id})}"
+                                       class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                        <span th:text="${subject.patternCode}"></span>
+                                    </a>
+                                    <br>
+                                    <p  style="font-size:16px;">Instructions to Setter:<br> </p>
+                                    <p style="font-size:16px;"><span th:text="${patternInstructions.instructions_to_setter}"> </span> </p>
+
+                                </small>
+                            <div class="row">
+                                <div class="col-12">
 
                                     <h2>Set No: <b th:text="${setNo}"></b></h2>
 
-                                    <table class="table table-bordered" >
-                                        <thead>
-                                        <tr>
-                                            <th class="text-center">S.No.</th>
-                                            <th class="text-center">Q.No</th>
-                                            <th class="text-center">Sub Q.No.</th>
-<!--                                            <th class="text-center">Topic</th>-->
-<!--                                            <th class="text-center">Level</th>-->
-                                            <th class="text-center">Marks</th>
-                                            <th class="text-center">Instructions</th>
-                                            <th class="text-center">Question</th>
-                                            <th class="text-center">Solution</th>
-                                            <th class="text-center">Image </th>
-                                            <th class="text-center">Review Status </th>
-                                            <th class="text-center">Review Remarks </th>
-                                            <th class="text-center">Action </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr th:each="qpoint, iterStat : ${qPtemplate}">
-                                            <td th:text="${iterStat.count}" class="text-center">S.No.</td>
-                                            <td th:text="${qpoint.q_no}" class="text-center">Q.No.</td>
-                                            <td th:text="${qpoint.bit_no}" class="text-center">Sub Q.No.</td>
-<!--                                            <td th:text="${qpoint.topic}" class="text-center">Topic</td>-->
-<!--                                            <td th:text="${qpoint.level}" class="text-center">Level</td>-->
-                                            <td th:text="${qpoint.marks}" class="text-center">Marks</td>
-                                            <td th:text="${qpoint.instructions}">Instructions</td>
-                                            <td th:utext="${qpoint.q_desc}">Question</td>
-                                            <td>
-                                                <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
-                                                   onclick="showSolution(this)"
-                                                   th:data-solution="${qpoint.q_solution}">View Solution</a>
-                                            </td>
-                                            <td>
-                                                <img th:if="${qpoint.image_path != null}"
-                                                     th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
-                                                     alt="Uploaded Image" width="100" height="100"></td>
-                                            <td th:text="${qpoint.qp_reviewer_status}" class="text-center">Review Status</td>
-                                             <td th:text="${qpoint.reviewer_comments}" class="text-center">Review Remarks</td>
+                                    <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-primary me-2" title="preview" target="_blank">
+                                        Preview
+                                    </a>
+                                    <a href="#" th:if="${isApproved}" class="btn btn-sm btn-success me-2" title="Approve"
+                                       th:data-id="${setNo} + '/' + ${subject.id}+ '/'+ ${setterId}"
+                                       onclick="openSetWiseApprovalModal(this,'a')">
+                                        Approve
+                                    </a>
 
-                                                                                        <td>
+                                    <a href="#" class="btn btn-sm btn-danger me-2" title="Reject"
+                                       th:data-id="${setNo} + '/' + ${subject.id}+ '/'+ ${setterId}"
+                                       onclick="openSetWiseApprovalModal(this,'r')">
+                                        Reject and Opened for Resubmit by QP setter
+                                    </a>
+                                    <br><br>
 
-                                                                                            <a th:if="${qpoint != null and qpoint.bit_no != 'OR'}"
-                                                                                               th:href="@{/questionApprove/{id}(id=${qpoint.id})}"
-                                                                                               class="btn btn-sm btn-success mb-2"
-                                                                                               title="Approve">
-                                                                                                Approve
-                                                                                            </a>
+                                    <form method="post" th:action="@{/questionApproveMultiple}">
+                                        <button type="submit" class="btn btn-primary mb-2">Approve Selected</button>
 
-                                                                                            <a th:if="${qpoint != null and qpoint.bit_no != 'OR'}" href="#"
-                                                                                           class="btn btn-sm btn-danger "
-                                                                                           title="Reject Questions"
-                                                                                           th:data-id="${qpoint.id}"
-                                                                                           onclick="openRejectModal(this)">
-                                                                                             Reject
-                                                                                                </a>
+                                        <table class="table table-bordered">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-center">
+                                                    <input type="checkbox" id="selectAll" class="form-check-input border-dark" onclick="toggleSelectAll(this)">
+                                                    All
+                                                </th>
 
-                                            </td>
-                                        </tr>
-                                        </tbody>
+                                                <th class="text-center">Q.No</th>
+                                                <th class="text-center">Sub Q.No.</th>
+                                                <th class="text-center">Level</th>
+                                                <th class="text-center">Marks</th>
+                                                <th class="text-center">Instructions</th>
+                                                <th class="text-center">Question</th>
+                                                <th class="text-center">Solution</th>
+                                                <th class="text-center">Course Outcome</th>
+                                                <th class="text-center">Cognitive Level (Bloom’s Taxonomy Level)</th>
+                                                <th class="text-center">Image</th>
+                                                <th class="text-center">Review Status</th>
+                                                <th class="text-center">Review Remarks</th>
+                                                <th class="text-center">Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="qpoint, iterStat : ${qPtemplate}">
+                                                <td class="text-center"  >
+                                                    <span th:text="${iterStat.count}"></span>
+                                                    <input type="checkbox" class="form-check-input border-dark" name="selectedIds" th:value="${qpoint.id}">
+                                                </td>
+                                                <td th:text="${qpoint.q_no}" class="text-center">Q.No.</td>
+                                                <td th:text="${qpoint.bit_no}" class="text-center">Sub Q.No.</td>
+                                                <td th:text="${qpoint.level}" class="text-center">Level</td>
+                                                <td th:text="${qpoint.marks}" class="text-center">Marks</td>
+                                                <td th:text="${qpoint.instructions}">Instructions</td>
+                                                <td th:utext="${qpoint.q_desc}">Question</td>
+                                                <td>
+                                                    <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
+                                                       onclick="showSolution(this)"
+                                                       th:data-solution="${qpoint.q_solution}">View Solution</a>
+                                                </td>
+                                                <td th:utext="${qpoint.outcome}">Course Outcome</td>
+                                                <td th:utext="${qpoint.cognitive}">Cognitive Level</td>
+                                                <td>
+                                                    <img th:if="${qpoint.image_path != null}"
+                                                         th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
+                                                         alt="Uploaded Image" width="100" height="100">
+                                                </td>
+                                                <td th:text="${qpoint.qp_reviewer_status}" class="text-center">
+                                                </td>
+                                                <td th:text="${qpoint.reviewer_comments}" class="text-center"></td>
+                                                <td>
 
-                                        <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-primary me-2" title="preview" target="_blank">
-                                                    Preview
-                                                </a>
-                                        <a href="#" th:if="${isApproved}" class="btn btn-sm btn-success me-2" title="Approve"
-                                           th:data-id="${setNo} + '/' + ${subject.id}+ '/'+ ${setterId}"
-                                           onclick="openSetWiseApprovalModal(this,'a')">
-                                            Approve
-                                        </a>
+                                                    <a th:if="${qpoint != null and qpoint.bit_no != 'OR'}"
+                                                       th:href="@{/questionApprove/{id}(id=${qpoint.id})}"
+                                                       class="btn btn-sm btn-success"
+                                                       title="Approve">
+                                                        Approve
+                                                    </a>
 
-                                                <a href="#" class="btn btn-sm btn-danger me-2" title="Reject"
-                                                   th:data-id="${setNo} + '/' + ${subject.id}+ '/'+ ${setterId}"
-                                                   onclick="openSetWiseApprovalModal(this,'r')">
-                                                   Reject and Opened for Resubmit by QP setter
-                                                </a>
+                                                    <a th:if="${qpoint != null and qpoint.bit_no != 'OR'}" href="#"
+                                                       class="btn btn-sm btn-danger "
+                                                       title="Reject Questions"
+                                                       th:data-id="${qpoint.id}"
+                                                       onclick="openRejectModal(this)">
+                                                        Reject
+                                                    </a>
 
-                                    </table>
-                                </th:block>
+                                                </td>
 
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </form>
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -125,87 +162,86 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Bootstrap Modal -->
-<div class="modal fade" id="solutionModal" tabindex="-1" aria-labelledby="solutionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="solutionModalLabel">Solution</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="solutionContent"></p> <!-- Solution text will be inserted here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <!-- Bootstrap Modal -->
+    <div class="modal fade" id="solutionModal" tabindex="-1" aria-labelledby="solutionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="solutionModalLabel">Solution</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="solutionContent"></p> <!-- Solution text will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Include Common Scripts -->
-<div th:replace="fragments/scripts :: scripts"></div>
+    <!-- Include Common Scripts -->
+    <div th:replace="fragments/scripts :: scripts"></div>
 </body>
 <script>
-function openSetWiseApprovalModal(element, i) {
+    function openSetWiseApprovalModal(element, i) {
 
-if(i=='u'){
-alert("please approve all questions");
-}
-else{
-    const dataId = element.getAttribute("data-id");
-    const [id, subjectId,setterId] = dataId.split('/');
-   // alert(i);  // debugging alert
-
-    // Toggle approve/reject based on 'i'
-    if(i == 'r') {
-        console.log("Reject option selected");
-        $("#approvediv").hide();
-        $("#rejectdiv").show();
+    if(i=='u'){
+    alert("please approve all questions");
     }
-    if(i == 'a') {
+    else{
+        const dataId = element.getAttribute("data-id");
+        const [id, subjectId,setterId] = dataId.split('/');
+       // alert(i);  // debugging alert
 
-         $("#comments").val(".  ");
-        $("#rejectdiv").hide();
-        $("#approvediv").show();
-    }
-
-    // Set values for the hidden inputs
-    $("#setId").val(id);
-    $("#subjectId").val(subjectId);
-    $("#setterId").val(setterId);
-
-    // Show the modal
-    $("#reviewerApprovalModal").modal("show");
-}
-}
-
-
-function submitApproval() {
-    var formData = {
-        qpointId: $("#qpointId").val(),
-        approved: $("input[name='approved']:checked").val(),
-        comments: $("#comments").val()
-    };
-var csrfToken = $("meta[name='_csrf']").attr("content");
-    var csrfHeader = $("meta[name='_csrf_header']").attr("content");
-    $.ajax({
-        type: "POST",
-        url: "../reviewerApproval",
-        contentType: "application/json",
-        data: JSON.stringify(formData),
-        success: function(response) {
-            alert("Approval Submitted Successfully!");
-            $("#approvalModal").modal("hide");
-            location.reload(); // Refresh page after submission
-        },
-        error: function(error) {
-            alert("Error submitting approval!");
+        // Toggle approve/reject based on 'i'
+        if(i == 'r') {
+            console.log("Reject option selected");
+            $("#approvediv").hide();
+            $("#rejectdiv").show();
         }
-    });
-}
+        if(i == 'a') {
+
+             $("#comments").val(".  ");
+            $("#rejectdiv").hide();
+            $("#approvediv").show();
+        }
+
+        // Set values for the hidden inputs
+        $("#setId").val(id);
+        $("#subjectId").val(subjectId);
+        $("#setterId").val(setterId);
+
+        // Show the modal
+        $("#reviewerApprovalModal").modal("show");
+    }
+    }
+
+
+    function submitApproval() {
+        var formData = {
+            qpointId: $("#qpointId").val(),
+            approved: $("input[name='approved']:checked").val(),
+            comments: $("#comments").val()
+        };
+    var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+        $.ajax({
+            type: "POST",
+            url: "../reviewerApproval",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function(response) {
+                alert("Approval Submitted Successfully!");
+                $("#approvalModal").modal("hide");
+                location.reload(); // Refresh page after submission
+            },
+            error: function(error) {
+                alert("Error submitting approval!");
+            }
+        });
+    }
 </script>
 <!-- Bootstrap Modal -->
 <!-- Bootstrap Modal -->
@@ -213,7 +249,7 @@ var csrfToken = $("meta[name='_csrf']").attr("content");
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <form id="approvalForm" th:action="@{/setWiseReviewerApproval}" method="post">
+                        <form id="approvalForm" th:action="@{/setWiseReviewerApproval}" method="post">
                     <input type="hidden" id="setId" name="setId" />
                     <input type="hidden" id="subjectId" name="subjectId" />
                     <input type="hidden" id="setterId" name="setterId" />
@@ -365,6 +401,12 @@ var approveValue=$("input[type='radio'][name=approved]:checked", '#approvalForm'
     }
     });
 
+    function toggleSelectAll(source) {
+        const checkboxes = document.querySelectorAll('input[name="selectedIds"]');
+        for (let checkbox of checkboxes) {
+            checkbox.checked = source.checked;
+        }
+    }
 
 </script>
 </html>

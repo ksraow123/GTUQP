@@ -50,4 +50,15 @@ public class SubjectsServiceImpl implements SubjectsService {
     public List<Subjects> getSubjectsByCourseIdAndSemester(String courseId, String semester) {
         return subjectsRepository.findByCourseIdAndSemester(courseId,semester);
     }
-}
+
+    @Override
+    public Subjects getSubjectCodeAndSectionIdAbdCourseId(String subjectCode, int sectionId, Long courseId) {
+        return subjectsRepository.findBySubjectCodeAndSectionIdAndCourseId(subjectCode,sectionId,courseId+"");
+    }
+
+    @Override
+    public Subjects getSubject_codeAndCourseId(String subjectCode, Long courseId) {
+        return subjectsRepository.findBySubjectCodeAndCourseId(subjectCode,courseId+"");
+    }
+    }
+

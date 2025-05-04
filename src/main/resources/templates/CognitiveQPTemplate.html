@@ -1,0 +1,663 @@
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<title>QP Entry Page</title>
+<div th:replace="fragments/styles :: styles"></div>
+<div th:replace="fragments/styles :: styles"></div>
+
+<script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/froala-editor@4.0.19/css/froala_editor.pkgd.min.css" rel="stylesheet">
+<script th:src="@{js/froala_editor.pkgd.min.js}"></script>
+<script th:src="@{node_modules/wiris/mathtype-froala3/wiris.js}"></script>
+<!--<script th:src="@{js/bootstrap.bundle.min.js}"></script> -->
+ <style>
+    #customAlert {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 30px;
+      background-color: white;
+      border: 2px solid #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 9999;
+    }
+    #customAlert button {
+      margin-top: 10px;
+    }
+.center-alert-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1055;
+    padding: 1rem;
+}
+
+#editModal {
+    width: 80%;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+#editModal .btn-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    margin-left: auto;
+    background-color: #fff; /* Optional: make sure it's visible */
+}
+     p{font-size:14px;}
+</style>
+<script>
+    var editorDesc, editorSolution, qp_instruction;
+
+    $(document).ready(function () {
+        const sharedOptions = {
+            key: "XAG4eC3H3C7B10A5E5E2A-9UJHAEFZMUJOYGYQEa1c1ZJg1RAeF5C4C3C3E2C2C5D6D4F2==",
+            height: 200,
+            pastePlain: false,
+            attribution: false,
+            spellcheck: true,
+            pluginsEnabled: [
+                'align', 'charCounter', 'codeBeautifier', 'codeView', 'colors', 'draggable', 'embedly', 'emoticons',
+                'entities', 'fontFamily', 'fontSize', 'fullscreen', 'image', 'imageManager', 'inlineClass',
+                'inlineStyle', 'lineBreaker', 'link', 'lists', 'paragraphFormat', 'paragraphStyle', 'quickInsert',
+                'quote', 'save', 'table', 'url', 'video', 'wordPaste', 'spellChecker', 'specialCharacters',
+                'wiris'  // âœ… MathType plugins
+            ],
+            pasteAllowedStyleProps: [
+                'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
+                'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
+            ],
+            pasteDeniedAttrs: [],
+            pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select', 'canvas', 'svg'],
+            fontFamily: {
+                "Times New Roman": "Times New Roman"
+            },
+            fontSize: ['12'],
+            toolbarButtons: [
+                'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
+                'inlineClass', 'clearFormatting', '|',
+                'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
+                'wirisEditor', 'wirisChemistry','|',  // âœ… MathType buttons
+                'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
+                'lineHeight', 'outdent', 'indent', '|',
+                'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
+            ],
+             imageEditButtons: ['wirisEditor','wirisChemistry'],
+            imageDefaultWidth: 300,
+             htmlAllowedTags: ['.*'],
+             htmlAllowedAttrs: ['.*'],
+             htmlAllowedEmptyTags: ['mprescripts', 'none'],
+            events: {
+                'image.inserted': function ($img) {
+                    let img = $img[0];
+                    fetch(img.src)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onloadend = () => {
+                                img.src = reader.result;
+                            };
+                        })
+                        .catch(err => console.error("Image conversion error:", err));
+                }
+            }
+        };
+
+        editorDesc = new FroalaEditor('#q_desc', { ...sharedOptions });
+        editorSolution = new FroalaEditor('#q_solution', { ...sharedOptions });
+        qp_instruction = new FroalaEditor('#qp_instruction', {
+            ...sharedOptions,
+            height: 100  // shorter height for instructions
+        });
+    });
+</script>
+
+
+</head>
+
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidenav :: sidenav"></div>
+    <div class="main">
+        <div th:replace="fragments/navbar :: navbar"></div>
+
+        <div class="container-fluid p-3">
+            <p th:if="${successMessage}" class="text-danger" th:text="${successMessage}"></p>
+            <p th:if="${errorMessage}" class="text-danger" th:text="${errorMessage}"></p>
+            <div class="row">
+                <div class="col-12">
+                    <div class="cards">
+                        <div class="card border-0">
+                            <h2>
+                                <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
+                                <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
+                                    |  Max. Marks:<span th:text="${subject.max_marks}"></span>
+                                    | <a th:if="${subject.patternCode != null}"  target="_blank" class="btn btn-sm btn-primary"
+                                                        th:href="@{/viewPDF(fileinfo=${'/pattern/' + subject.patternCode + '.pdf'}, filename=${subject.patternCode + '.pdf'})}">
+                                        View Pattern
+                                    </a></span>
+
+                                </small>
+                                <br>
+                                <p>Important Note:<br> View and follow the instructions as given in the QP pattern before adding questions. </p>
+                                <p ><span th:utext="${patternInstructions.instructions_to_setter}"> </span> </p>
+
+                            </h2>
+
+                            <!-- Modal or Form Container -->
+                            <div id="alertWrapper" class="center-alert-wrapper d-none">
+                                <div id="editModal" class="alert alert-light border alert-dismissible "   role="alert">
+                                    <div class="row">
+                                        <div class="col-md-12  ps-4 pe-4">
+                                            <h2 class="modal-title border-bottom">Add/Edit Question</h2>
+
+                                            <div id="customAlert">
+                                                <p id="alertMessage"></p>
+                                                <button onclick="closeCustomAlert()">OK</button>
+                                            </div>
+
+                                            <form th:action="@{/updateQuestions}" method="post" id="qpeditorform" enctype="multipart/form-data">
+                                                <input type="hidden" id="qid" name="qid">
+                                                <div class="col-12 text-end text-danger">All "*" marked fields are mandatory.  </div>
+                                                <div class="mb-4 text-end">
+                                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="card p-2 mb-3 bg-light">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <h3 class="modal-title">Q.No: <b><span id="qno"></span></b></h3>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <h3 class="modal-title">Sub Q.No.: <b><span id="bit_no"></span></b></h3>
+                                                            </div>
+                                                            <!--                                                            <div class="col-md-4">-->
+                                                            <!--                                                                <h3 class="modal-title">Topic: <b><span id="topic"></span></b></h3>-->
+                                                            <!--                                                            </div>-->
+                                                            <!--                                                            <div class="col-md-2">-->
+                                                            <!--                                                                <h3 class="modal-title">Level: <b><span id="level"></span></b></h3>-->
+                                                            <!--                                                            </div>-->
+                                                            <div class="col-md-4">
+                                                                <h3 class="modal-title">Marks: <b><span id="marks"></span></b></h3>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Instructions if any</label>
+                                                    <input class="form-control" type="text" id="instructions" name="instructions">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label"><span class="text-danger">*</span> Question</label>
+                                                    <textarea class="form-control qdesc" id="q_desc" name="q_desc" rows="53"></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Browse Image</label>
+                                                    <input class="form-control" type="file" id="image_file" name="image_file" accept=".jpg, .jpeg, .png">
+                                                    <div  style="color:red">Upload only .jpg/.png file < 2MB size</div>
+                                                    <div id="file_error" style="color:red; display:none;"></div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label"><span class="text-danger">*</span> Solution</label>
+                                                    <textarea class="form-control qdesc" id="q_solution" name="q_solution" rows="3"></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label"><span class="text-danger">*</span> Course Outcome</label>
+                                                    <textarea class="form-control " id="outcome" name="outcome" rows="5"></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label"><span class="text-danger">*</span> Cognitive Level (Bloom’s Taxonomy Level)</label>
+                                                    <textarea class="form-control " id="cognitive" name="cognitive" rows="4"></textarea>
+                                                </div>
+                                                <div class="col-12">
+
+                                                    <div class="mb-4 text-end">
+                                                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="hideAlert()" >Close</button>
+                                                        <!--                                            <button type="close" class="btn btn-sm btn-danger">Close</button>-->
+                                                    </div>
+                                                    <div class="mb-4">
+                                                        <!--                                                <button type="button" class="btn-close" onclick="hideAlert()" >Close</button>-->
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <button type="button" class="btn-close" onclick="hideAlert()" aria-label="Close"></button>
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="cards">
+                        <div class="card border-0">
+                            <div class="row">
+                                <div class="col-12">
+
+                                <h2>Set No: <b th:text="${setNo}"></b> ( <a href="#" class="link-primary" th:if="${sectionTeamRemarks != null and sectionTeamRemarks != ''}"
+                                                                            onclick="showRemarks(this)"
+                                                                            th:data-remarks="${sectionTeamRemarks}">Rejected- View Remarks</a> )</h2>
+
+                                <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                    Preview
+                                </a>
+
+                                <td class="text-center">
+                                    <a th:if="${filledStatus==1}"
+                                       href="#"
+                                       class="btn btn-sm btn-success"
+                                       title="Forward Questions"
+                                       th:data-id="1"
+                                       th:data-subject-id="${subject.id}"
+                                       th:data-setter-id="${setterId}"
+                                       th:data-subject-code="${subject.subjectCode}"
+                                       th:data-subject-name="${subject.subject_name}"
+                                       onclick="openForwardModal(this)">
+                                        <!--Forward to Admin--> Submit for Approval
+                                    </a>
+                                </td>
+
+                                <div class="mt-3">
+                                    <form th:action="@{/saveSubjectInstruction}" method="post" id="saveSubjectInstruction" >
+
+                                        <label class="form-label">QP Instructions, if any (optional)</label>
+                                        <p>Note: Standard Instructions are already given. If any specific instructions are required only add. Check the preview before adding instructions.</p>
+                                        <textarea class="form-control qp_instruction" id="qp_instruction" name="qp_instruction" rows="2" th:text="${userData.qp_instruction}"></textarea>
+                                        <input type="hidden" id="subjectId" name="subjectId" th:value="${subject.id}">
+                                        <button type="submit"  class="btn btn-primary btn-block mb-4">Save</button>
+
+                                    </form>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered mt-3" >
+                                        <thead>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>Q.No</th>
+                                            <th>Sub Q.No.</th>
+                                            <!--                                        <th>Topic</th>-->
+                                            <th>Level</th>
+                                            <th>Marks</th>
+                                            <th>Instructions</th>
+                                            <th>Question</th>
+                                            <th>Solution</th>
+                                            <th>Course Outcome</th>
+                                            <th>Cognitive Level (Bloom’s Taxonomy Level)</th>
+
+                                            <th width="110">Image</th>
+                                            <th width="110">Reviewer Status</th>
+                                            <th width="110">Reviewer Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="qpoint, iterStat : ${qPtemplate}">
+                                            <td th:text="${iterStat.count}">S.No.</td>
+                                            <td th:text="${qpoint.q_no}"></td>
+                                            <td th:text="${qpoint.bit_no}">Sub Q.No.</td>
+                                            <!--                                        <td th:text="${qpoint.topic}">Topic</td>-->
+                                            <td th:utext="${qpoint.level}">Level</td>
+                                            <td th:text="${qpoint.marks}">Marks</td>
+                                            <td th:text="${qpoint.instructions}">Instructions</td>
+                                            <td th:utext="${qpoint.q_desc}">Question</td>
+
+                                            <td>
+                                                <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
+                                                   onclick="showSolution(this)"
+                                                   th:data-solution="${qpoint.q_solution}">View Solution</a>
+                                            </td>
+                                            <td th:utext="${qpoint.outcome}">Course Outcome</td>
+                                            <td th:utext="${qpoint.cognitive}">Cognitive Level (Bloom’s Taxonomy Level)</td>
+                                            <td  align="center">
+                                                <img th:if="${qpoint.image_path != null}"
+                                                     th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
+                                                     alt="Uploaded Image" width="100" height="100" />
+
+                                                <a th:if="${qpoint.image_path != null}"
+                                                   th:href="@{/removeQpImage/{id}/(id=${qpoint.id})}"
+                                                   class="link-danger" title="Delete Image" >
+                                                    Delete Image
+                                                </a>
+                                            </td>
+
+                                            <td th:text="${qpoint.qp_reviewer_status}" class="text-center">Reviewer Status</td>
+                                            <td th:text="${qpoint.reviewer_comments}" class="text-center">Reviewer Remarks</td>
+                                            <td>
+
+                                                <a th:if="${qpoint.q_flag == 1 and qpoint.qp_reviewer_status != 'Approved'}"
+                                                   href="javascript:void(0);"
+                                                   class="btn btn-sm btn-info edit-btn"
+                                                   th:data-id="${qpoint.id}"
+                                                   title="Add">
+                                                    Add/Edit Question
+                                                </a>
+
+                                            </td>
+
+                                        </tr>
+                                        </tbody>
+                                    </table></div>
+                                </th:block>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/scripts :: scripts"></div>
+</body>
+<script >
+    $(document).ready(function () {
+    $(".edit-btn").click(function () {
+            var qid = $(this).data("id");
+
+        $.ajax({
+            url: "https://online.ctestservices.com/gqpsecon/getQuestionDetails/" + qid,
+            type: "GET",
+            success: function (response) {
+
+                  //  $("#level").text(response.level);
+                    $("#marks").text(response.marks);
+                    $("#qno").text(response.q_no);
+                    $("#bit_no").text(response.bit_no);
+                   // $("#topic").text(response.topic);
+                $("#qid").val(response.id);
+                $("#cognitive").val(response.cognitive);
+                $("#outcome").val(response.outcome);
+                $("#instructions").val(response.instructions);
+               if (response.q_desc) {
+            editorDesc.html.set(response.q_desc);
+        }
+<!--else{-->
+<!-- editorDesc.html.set("<p></p>");-->
+
+<!--}-->
+
+   if (response.q_solution) {
+          editorSolution.html.set(response.q_solution);
+        }
+<!--else{-->
+<!-- editorSolution.html.set("<p></p>");-->
+
+<!--}-->
+
+                $("#editModal").modal("show");
+            },
+            error: function () {
+                alert("Failed to fetch question details.");
+            }
+        });
+    });
+    });
+
+
+</script>
+<script>
+    function showSolution(link) {
+        var solutionText = link.getAttribute("data-solution"); // Get solution text
+        document.getElementById("solutionContent").innerHTML = solutionText; // Insert solution into modal
+        var solutionModal = new bootstrap.Modal(document.getElementById('solutionModal'));
+        solutionModal.show(); // Show the modal
+    }
+</script>
+<script>
+    function showRemarks(link) {
+        var remarksText = link.getAttribute("data-remarks"); // Get solution text
+        document.getElementById("remarksContent").innerHTML = remarksText; // Insert solution into modal
+        var remarksModal = new bootstrap.Modal(document.getElementById('remarksModal'));
+        remarksModal.show(); // Show the modal
+    }
+</script>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="solutionModal" tabindex="-1" aria-labelledby="solutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="solutionModalLabel">Solution</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="solutionContent"></p> <!-- Solution text will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="remarksModal" tabindex="-1" aria-labelledby="remarksModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="remarksModalLabel">Remarks</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="remarksContent"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
+
+<script>
+
+    function openForwardModal(element) {
+    // Get the ID and Subject ID from the button
+    var setId = element.getAttribute("data-id");
+    var subjectId = element.getAttribute("data-subject-id");
+     var setterId = element.getAttribute("data-setter-id");
+
+      var subjectCode = element.getAttribute("data-subject-code");
+     var subjectName = element.getAttribute("data-subject-name");
+
+
+    // Set values in the hidden input fields
+    document.getElementById("modalSetId").value = setId;
+    document.getElementById("modalSubjectId").value = subjectId;
+    document.getElementById("modalSetterId").value = setterId;
+     document.getElementById("modalSubjectCode").textContent = subjectCode;
+document.getElementById("modalSubjectName").textContent = subjectName;
+
+
+    // Open the modal
+    $('#forwardModal').modal('show');
+}
+
+function submitForwardForm() {
+    // Submit the form when user confirms
+    document.getElementById("forwardForm").submit();
+}
+</script>
+<div class="modal fade" id="forwardModal" tabindex="-1" aria-labelledby="forwardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel"><strong>UNDERTAKING</strong></h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="forwardForm" th:action="@{/forwardQuestions}" method="post">
+                <div class="modal-body">
+
+                    <ul class="list-group list-group-numbered">
+                        <li class="mb-2 list-group-item border-0">
+                            I undersign undertake to maintain the secrecy in matter of paper setting of subject
+                            (with code no) <b><span id="modalSubjectCode"></span>-<span id="modalSubjectName"></span></b>
+                            and all other assigned work including correspondence pertaining to Gujarat Technological University Examination.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            Further, I assure you that I shall maintain utmost secrecy in the work entrusted to me for semester/year examination
+                            and discharge all my duties impartially without involving in any type of malpractice which violates the code of conduct of examination.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            No relative* of mine is appearing in the University examination for which the work is assigned to me.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            I have neither given tuition to any student nor attached with any tuition classes.
+                            I have not imparted any private or personal tuition or training or coaching for the Gujarat Technological University examination.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            I have also not published any guides, digests of text-book concerning the examination for which I am appointed.
+                        </li>
+                        <li class="mb-2 list-group-item border-0">
+                            I have deleted all the files/folders pertaining to assigned exam work from the hard disk of the PC/Laptop which I have used for G.T.U. exam work.
+                        </li>
+                    </ul>
+                    <p class="text-dark">
+                        * The meaning of relatives is defined as under:<br>
+                        Wife, husband, son, daughter, grandson, granddaughter, brother, sister, son-in-law, sister-in-law, daughter-in-law, nephew,
+                        niece, sister's daughter and son, their sons and daughters, uncle, aunt. Step relations are not included in the above definition.
+                    </p>
+                    <p class="text-dark text-center">
+                        <input type="checkbox" class="form-check-input border-black" id="undertakeCheckbox" required />
+                        <strong>I hereby undertake the above.</strong>
+                    </p>
+                    <input type="hidden" id="modalSetId" name="id">
+                    <input type="hidden" id="modalSubjectId" name="subjectId">
+                    <input type="hidden" id="modalSetterId" name="setterId">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <input type="submit" class="btn btn-primary" ></input>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCustomAlert(message) {
+document.getElementById('alertMessage').textContent = message;
+document.getElementById('customAlert').style.display = 'block';
+}
+
+function closeCustomAlert() {
+document.getElementById('customAlert').style.display = 'none';
+}
+</script>
+
+<script>
+    $(document).on("click", ".edit-btn", function () {
+          // alert('hai');
+
+           const alertBox = document.getElementById("alertWrapper");
+           alertBox.classList.remove("d-none");
+           alertBox.classList.add("show");
+
+
+       });
+
+       function hideAlert() {
+           const alertBox = document.getElementById("alertWrapper");
+           alertBox.classList.remove("show");
+           alertBox.classList.add("d-none");
+           document.getElementById("qpeditorform").reset();
+        document.getElementById("file_error").style.display = "none";
+         location.reload();
+       }
+
+</script>
+<script>
+    document.getElementById("qpeditorform").addEventListener("submit", function (event) {
+        let isValid = true;
+        const qDesc = document.getElementById("q_desc").value.trim();
+        const qSolution = document.getElementById("q_solution").value.trim();
+        const outcome = document.getElementById("outcome").value.trim();
+        const cognitive = document.getElementById("cognitive").value.trim();
+        const imageFile = document.getElementById("image_file").files[0];
+        const fileError = document.getElementById("file_error");
+
+        fileError.style.display = "none";
+        fileError.textContent = "";
+
+        // Validate Question
+        if (!qDesc) {
+            showCustomAlert("Question is mandatory.");
+            isValid = false;
+        }
+
+        // Validate Solution
+        if (!qSolution) {
+            showCustomAlert("Solution is mandatory.");
+            isValid = false;
+        }
+
+        // Validate Course Outcome
+        if (!outcome) {
+            showCustomAlert("Course Outcome is mandatory.");
+            isValid = false;
+        }
+
+        // Validate Cognitive Level
+        if (!cognitive) {
+            showCustomAlert("Cognitive Level is mandatory.");
+            isValid = false;
+        }
+
+        // Validate image if selected
+        if (imageFile) {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            const maxSize = 2 * 1024 * 1024; // 2MB
+
+            if (!allowedTypes.includes(imageFile.type)) {
+            alert("Only .jpg, .jpeg, or .png files are allowed.");
+                fileError.textContent = "Only .jpg, .jpeg, or .png files are allowed.";
+                fileError.style.display = "block";
+                isValid = false;
+            } else if (imageFile.size > maxSize) {
+            showCustomAlert("File size must be less than 2MB.");
+                fileError.textContent = "File size must be less than 2MB.";
+                fileError.style.display = "block";
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            event.preventDefault(); // Stop form submission
+        }
+    });
+
+</script>

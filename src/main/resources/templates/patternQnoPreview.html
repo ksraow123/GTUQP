@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Question Paper</title>
+    <style type="text/css">
+        body {
+            font-family: "Times New Roman", "serif";
+            font-size: 18px;
+        }
+        p {
+            margin: 0 0 3px 0;
+            padding: 0;
+        }
+        img {
+            width: 70% !important;
+            height: auto !important;
+        }
+        .q-desc {
+            font-size: 16px;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        .watermarked {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<table width="720" border="0" align="center">
+    <!-- Subject Header -->
+    <tr>
+        <td>
+            <table width="100%" border="0">
+                <tr>
+                    <td align="left" valign="middle">
+                        <h2>
+                            <span th:text="${subjects.subjectCode}"></span> -
+                            <span th:text="${subjects.subject_name}"></span><br/>
+                            Pattern Code: <span th:text="${subjects.patternCode}"></span>
+                        </h2>
+                    </td>
+                    <td align="right" valign="middle">
+                        Max Marks: <span th:text="${subjects.max_marks}"></span>
+                    </td>
+                </tr>
+                <tr><td colspan="2"><hr/></td></tr>
+                <tr th:if="${groupedQuestions != null}">
+                    <td colspan="2" style="font-weight:bold;">
+                        <p th:utext="${patternInstructions.instructions}"></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Marks Header -->
+    <tr>
+        <td align="right">
+            <table width="50" border="0" align="right">
+                <tr>
+                    <td align="right"><b>Marks</b></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Questions Loop -->
+    <th:block th:each="lst : ${patternQnoInstructions}">
+        <tr>
+            <td>
+                <table width="100%" border="0">
+                    <!-- QNo and Combined Instructions -->
+                    <tr>
+                        <td valign="top" width="30"><b th:text="${lst.qNo} + '.'"></b></td>
+                        <td valign="top" colspan="3">
+                            <div>
+                                <b th:text="${lst.english_instructions} + ':'"></b><br/>
+                                <b th:text="${lst.gujarti_instructions}"></b>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Questions under this instruction -->
+                    <tr th:if="${groupedQuestions != null}">
+                        <td colspan="4">
+                            <th:block th:each="entry : ${groupedQuestions}">
+                                <th:block th:if="${entry.key == lst.qNo}">
+                                    <table width="100%" border="0">
+                                        <tr th:each="question, iterStat : ${entry.value}">
+                                            <!-- Display Q.no only for first sub-question -->
+                                            <td width="30" valign="top" th:if="${iterStat.first}">
+                                                <b th:text="${'Q.' + entry.key}">Q.1</b>
+                                            </td>
+                                            <td width="30" valign="top" th:unless="${iterStat.first}"></td>
+
+                                            <!-- BitNo -->
+                                            <td width="30" valign="top">
+                                                <b th:if="${!question.bitNo.contains('OR')}"
+                                                   th:text="'(' + ${question.bitNo} + ')'">(a)</b>
+                                            </td>
+                                            <td valign="top" align="center">
+                                                <b th:if="${question.bitNo.contains('OR')}"
+                                                   th:text="'(' + ${question.bitNo} + ')'">(OR)</b>
+                                            </td>
+
+                                            <!-- Marks -->
+                                            <td width="50" valign="top" align="center">
+                                                <b th:text="${question.marks}">5</b>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </th:block>
+                            </th:block>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </th:block>
+
+    <!-- Footer / End Marker -->
+    <tr>
+        <td align="center">
+            <b>***</b>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

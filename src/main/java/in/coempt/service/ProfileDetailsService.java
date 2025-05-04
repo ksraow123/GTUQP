@@ -12,4 +12,7 @@ public interface ProfileDetailsService {
    public ProfileDetailsEntity save(ProfileDetailsEntity profileDetails);
 
     Optional<ProfileDetailsEntity> getFacultyByMobileNumber(String mobileNumber);
+    Optional<ProfileDetailsEntity> getFindById(Long userId);
+
+    void deleteProfileDetails(Long id);
 }

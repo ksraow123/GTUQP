@@ -8,6 +8,7 @@ import in.coempt.service.UserService;
 import in.coempt.util.MaskingUtil;
 import in.coempt.util.SMSUtil;
 import in.coempt.util.SecurityUtil;
+import in.coempt.vo.UserMacIdsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,13 +16,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @CrossOrigin(origins = "*")
@@ -60,8 +63,13 @@ private RolesService rolesService;
     }
 
     @GetMapping("/")
-    public String showLoginPage(Model model) {
+    public String showLoginPage(@RequestParam(value = "macid",required = false) String macid , Model model, HttpSession httpSession) {
 
+        httpSession.setAttribute("macid",macid);
+        List<UserMacIdsVo> userMacIdsVos=userDao.getMacIds(macid);
+        if(userMacIdsVos.size()>0){
+            model.addAttribute("userName",userMacIdsVos.get(0).getCenter_code());
+        }
         return "login";  // Returns login.html
     }
     @GetMapping("/session-expired")
@@ -69,13 +77,31 @@ private RolesService rolesService;
 
         return "session-expired";
     }
+    @GetMapping("/error")
+    public String error() {
+
+        return "error";
+    }
         @GetMapping("/send-otp")
         public String sendOtp(HttpSession session,Model model) {
-            UserDetails userData = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
+
+        String macId= (String) session.getAttribute("macid");
+        UserDetails userData = (UserDetails) SecurityUtil.getLoggedUserDetails().getPrincipal();
             User user = userService.getUserByUserName(userData.getUsername());
+            String[] alternateMobileNumbers=null;
+            if(user.getAlternate_mobile()!=null){
+                alternateMobileNumbers=user.getAlternate_mobile().split(",");
+            }
+
+            if(user.getRoleId()==1){
+                if(macId==null||macId.equalsIgnoreCase("")){
+                    return "redirect:/logoutApi";
+                }
+            }
+
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = user.getEmail(); // Assuming email is used for authentication
-          String otp=  rolesService.generateOtp(email);
+          String otp=  rolesService.generateOtp(user);
             session.setAttribute("email", email);
             model.addAttribute("otpRequired",true);
             model.addAttribute("otp",otp);
@@ -87,8 +113,10 @@ private RolesService rolesService;
 
 
             model.addAttribute("sentto",message);
-            smsUtil.sendSms1(user.getMobileNo(),otp+" is the OTP for login in SOQPRS application All the best GTU EXAMOE","1507166265631183761");
-
+           smsUtil.sendSms1(user.getMobileNo(),otp+" is the OTP for login in SOQPRS application All the best GTU EXAMOE","1507166265631183761");
+            if(alternateMobileNumbers!=null) {
+             smsUtil.sendBulkSms(alternateMobileNumbers, otp + " is the OTP for login in SOQPRS application All the best GTU EXAMOE", "1507166265631183761");
+            }
             return "login";
     }
 
@@ -105,5 +133,13 @@ private RolesService rolesService;
             session.setAttribute("authenticatedUser", email); // OTP verified, user is fully authenticated
             return "redirect:/roles";
         }
+
+    @GetMapping("/logoutApi")
+    public String logoutApi() {
+
+        return "session-expired";
     }
+
+
+}
 

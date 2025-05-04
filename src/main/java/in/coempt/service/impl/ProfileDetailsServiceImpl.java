@@ -38,4 +38,14 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
     public Optional<ProfileDetailsEntity> getFacultyByMobileNumber(String mobileNumber) {
         return profileDetailsRepository.findByContact(mobileNumber);
     }
+
+    @Override
+    public Optional<ProfileDetailsEntity> getFindById(Long userId) {
+        return profileDetailsRepository.findById(userId);
+    }
+
+    @Override
+    public void deleteProfileDetails(Long id) {
+         profileDetailsRepository.deleteById(id);
+    }
 }

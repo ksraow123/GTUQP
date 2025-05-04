@@ -1,16 +1,14 @@
 package in.coempt.service.impl;
 
 import in.coempt.entity.Roles;
+import in.coempt.entity.User;
 import in.coempt.repository.RolesRepository;
 import in.coempt.service.RolesService;
 import in.coempt.util.SendMailUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class RolesServiceImpl implements RolesService {
@@ -25,9 +23,9 @@ public class RolesServiceImpl implements RolesService {
     public List<Roles> getAllRoles() {
         return repository.findAll();
     }
-    public String generateOtp(String email) {
+    public String generateOtp(User user) {
         String otp = String.valueOf(new Random().nextInt(900000) + 100000); // 6-digit OTP
-        otpStorage.put(email, otp);
+        otpStorage.put(user.getEmail(), otp);
         String emailBody="Dear User,\n" +
                 "\n" +
                 otp+" is the login OTP for GTU SOQPRS.\n" +
@@ -36,7 +34,10 @@ public class RolesServiceImpl implements RolesService {
                 "Thanks,\n" +
                 "Admin\n" +
                 "SOQPRS - GTU.";
-        sendMail.sendMail(email, "OTP for login in GTU QP Application",emailBody);
+        sendMail.sendMail(user.getEmail(), "OTP for login in GTU QP Application",emailBody);
+       if(user.getAlternate_email()!=null) {
+           sendMail.sendBulkMail(Arrays.asList(user.getAlternate_email().split(",")), "OTP for login in GTU QP Application", emailBody);
+       }
         return otp;
     }
     @Override

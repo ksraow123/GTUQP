@@ -5,10 +5,9 @@ import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
 import in.coempt.util.SecurityUtil;
 import in.coempt.util.SendMailUtil;
-import in.coempt.vo.AppointmentUpdateRequest;
-import in.coempt.vo.AppointmentVo;
-import in.coempt.vo.IndividualAppointmentVo;
+import in.coempt.vo.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +22,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.File;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
 @RequestMapping("/appointments")
 @CrossOrigin(origins = "*")
@@ -46,6 +47,7 @@ public class AppointmentController {
     @Value("${filePath}")
     private String filePath;
 
+    private final QPFilesService qpFilesService;
     private final TemplateEngine templateEngine;
     private final AppointmentService appointmentService;
     private final CourseService courseService;
@@ -101,7 +103,7 @@ public class AppointmentController {
     public String saveAppointment(Model model, RedirectAttributes redirectAttributes, IndividualAppointmentVo appointmentVo) {
         try {
             Optional<ProfileDetailsEntity> profileDetails = profileDetailsService.getFacultyByMobileNumber(appointmentVo.getMobile_number());
-            ProfileDetailsEntity facultyData;
+            ProfileDetailsEntity facultyData=null;
             if (profileDetails.isPresent()) {
                 facultyData = profileDetails.get();
             }
@@ -111,16 +113,12 @@ public class AppointmentController {
             User user = userService.getUserByMobileNoAndRoleId(
                     appointmentVo.getMobile_number(),  appointmentVo.getRole_id());
 
-            List<User> ulist=userService.getUserByMobileNoAndEmail(appointmentVo.getMobile_number(), appointmentVo.getEmail());
-
-if(ulist.size()>0) {
-    List<UserData> userData = appointmentService.checkSubjectAvailableByUserList(ulist, appointmentVo.getSubject_id());
-    if (userData.size() > 0) {
-        redirectAttributes.addFlashAttribute("message", "Same user cannot be as a QP Setter and QP Moderator for same subject.");
-        return "redirect:/appointments/individualAppointments";
-    }
-}
-
+            if (facultyData != null && user!=null) {
+                if (Integer.parseInt(facultyData.getCollege_id()) != appointmentVo.getCollegeId()) {
+                    redirectAttributes.addFlashAttribute("message", "College Code mismatch for this user.");
+                    return "redirect:/appointments/individualAppointments";
+                }
+            }
             boolean isNewUser = (user == null);
             if (isNewUser) {
                 user = createNewUser(appointmentVo, customPassword);
@@ -137,8 +135,6 @@ if(ulist.size()>0) {
                 return "redirect:/appointments/individualAppointments";
             }
             UserData userData = createUserData(appointmentVo, user);
-
-
             UserData savedUserData = appointmentService.saveuserData(userData);
 
             sendAppointmentEmail(appointmentVo, user, savedUserData, isNewUser,customPassword);
@@ -188,7 +184,7 @@ if(ulist.size()>0) {
             userData.setLast_date_to_submit(appointmentVo.getSubmission_date());
             userData.setSubjectId(Math.toIntExact(appointmentVo.getSubject_id()));
             userData.setRole_id(appointmentVo.getRole_id());
-            userData.setCurrent_status("Appointment Sent");
+            userData.setCurrent_status("Sent");
             userData.setStatus_date(formattedDate);
             userData.setAppointment_sent_date(formattedDate);
             userData.setExamSeriesId(1);
@@ -223,18 +219,27 @@ if(ulist.size()>0) {
             String password = isNewUser ? customPassword : "";
             String declineActionType = isNewUser ? "notaccept" : "addlSubjectDecline";
 
-            String emailBody = emailContent + "<p>You are appointed as a <strong> QP Setter </strong> for the " +
-                    subject.getSubjectCode() + "-" + subject.getSubject_name() + ".</p>" +
+            String emailBody = emailContent +
+                    "<p>You are appointed as a <strong>QP Setter</strong> for the <strong>" +
+                    subject.getSubjectCode() + " - " + subject.getSubject_name() + "</strong>.</p>" +
+
                     "<p><a href='" + userManualUrl + "'>Click here to download QP Setting Application</a></p>" +
-                    "<p>To start QP setting, use the application provided and login using the User ID and Password provided</p>" +
-                    "<p><strong>User ID:</strong> " + user.getUserName() + "</p>";
-            if (isNewUser){
-                emailBody=emailBody+ "<p><strong>Password:</strong> " + customPassword + "</p>" ;
-        }
-          else{
-                emailBody=emailBody+  "<p>User ID and Password remain the same. In case you have forgotten the password, " +
-                        "use the <strong>Forgot Password</strong> option provided on the login page.</p>";
-            }
+
+                    "<p><strong>Your User ID:</strong> " + user.getUserName() + "</p>" +
+
+                    "<p>Generate your <strong>Password</strong> using the <strong>Set New Password / Forgot Password</strong> option provided on the Login Page.</p>" +
+
+                    "<p>Download the <a href='" + userManualUrl + "'>QP Setting Application</a> zip file and unzip it. You will find the file <strong>GTU_QPSetter.bat</strong>.</p>" +
+
+                    "<p>Double-click on <strong>GTU_QPSetter.bat</strong> to open the QP Setter Application.</p>" +
+
+                    "<p>Once the login page is displayed, enter your <strong>User ID</strong> and <strong>Password</strong> to log in.</p>"+
+                    "<p>Technical Support No.s: +91-7923267607 / 608\n" +
+                            "(Mon-Sat 10 AM - 6 PM on all Working Days)\n" +
+                            " \n" +
+                    "<p style='color: red; font-weight: bold;'>This is an auto-generated email. Please do not reply.</p>";
+
+
 
             sendMail.sendHtmlmail(user.getEmail(), "URGENT and CONFIDENTIAL: Regarding Paper setter order for the Subject "+subject.getSubjectCode()+"-"+subject.getSubject_name()+"- Summer-25", emailBody);
             appointmentService.saveUserAppointment(userData);
@@ -332,7 +337,11 @@ if(ulist.size()>0) {
 
                 Context context = new Context();
                 context.setVariable("date", formattedDate);
-                context.setVariable("name", ap.getFirst_name().toUpperCase()+" "+ap.getLast_name().toUpperCase());
+                if(ap.getLast_name()!=null) {
+                    context.setVariable("name", ap.getFirst_name().toUpperCase() + " " + ap.getLast_name().toUpperCase());
+                } else {
+                    context.setVariable("name", ap.getFirst_name().toUpperCase());
+                }
                 context.setVariable("collegeCode", collegeEntity.getCollegeCode()+"-"+collegeEntity.getCollege_name());
                 context.setVariable("subjectCode", subjects.getSubjectCode());
                 context.setVariable("subjectName", subjects.getSubject_name());
@@ -347,20 +356,47 @@ if(ulist.size()>0) {
                 context.setVariable("noOfSets", ap.getNo_of_sets());
                 context.setVariable("userName", ap.getUser_name());
                 String s1 = templateEngine.process("email-template", context);
+                String emailBody = s1 +
+                        "<p>You are appointed as a <strong>QP Setter</strong> for the <strong>" +
+                        subjects.getSubjectCode() + " - " + subjects.getSubject_name() + "</strong>.</p>" +
 
-                //  String emailBody =String.format(s1,formattedDate,appointment.getName(),appointment.getCollege_code(),
-                //        appointment.getSubject_code(),subjects.getSubject_name(),   course.getCourse_name(),"02-03-2025");
-              //  String syllabusFile=filePath+ File.separator+"1.pdf";
-                String s2= s1 +  "<p><a href='" + userManualUrl +"'>Click here to download QP Setting Application</a></p>"+
-                        "<p>User ID and Password remains the same. If you have not received the password OR in case you have forgot the password, use the  <strong>Forgot Password</strong> option provided on the login page.</p>" ;
-                       // "<p>Thanks,</p>";
+                        "<p><a href='" + userManualUrl + "'>Click here to download QP Setting Application</a></p>" +
 
-                sendMail.sendHtmlmail(ap.getEmail(), "URGENT and CONFIDENTIAL: Regarding Paper setter order for the Subject "+subjects.getSubjectCode()+"-"+subjects.getSubject_name()+"- Summer-25", s2);
+                        "<p><strong>Your User ID:</strong> " + ap.getUser_name() + "</p>" +
+
+                        "<p>Generate your <strong>Password</strong> using the <strong>Set New Password / Forgot Password</strong> option provided on the Login Page.</p>" +
+
+                        "<p>Download the <a href='" + userManualUrl + "'>QP Setting Application</a> zip file and unzip it. You will find the file <strong>GTU_QPSetter.bat</strong>.</p>" +
+
+                        "<p>Double-click on <strong>GTU_QPSetter.bat</strong> to open the QP Setter Application.</p>" +
+
+                        "<p>Once the login page is displayed, enter your <strong>User ID</strong> and <strong>Password</strong> to log in.</p>"+
+                        "<p>Technical Support No.s: +91-7923267607 / 608</p>"+
+                "<p>(Mon-Sat 10 AM - 6 PM on all Working Days)</p>"+
+
+                        "<p style='color: red; font-weight: bold;'>This is an auto-generated email. Please do not reply.</p>";
+
+
+
+//                //  String emailBody =String.format(s1,formattedDate,appointment.getName(),appointment.getCollege_code(),
+//                //        appointment.getSubject_code(),subjects.getSubject_name(),   course.getCourse_name(),"02-03-2025");
+//              //  String syllabusFile=filePath+ File.separator+"1.pdf";
+//                String s2= s1 +  "<p><a href='" + userManualUrl +"'>Click here to download QP Setting Application</a></p>"+
+//                        "<p>User ID and Password remains the same. If you have not received the password OR in case you have forgot the password, use the  <strong>Forgot Password</strong> option provided on the login page.</p>" +
+//                "<p>Download the zip file and unzip the file. You will have the file GTU_QPSetter.bat</p>"+
+//                        "<p>Double click on GTU_QPSetter.bat to open the QP Setter Application.</p>"+
+//                        "<p>Once the login page is displayed, enter the User ID and Password to Login.</p>";
+
+                sendMail.sendHtmlmail(ap.getEmail(), "URGENT and CONFIDENTIAL: Regarding Paper setter order for the Subject "+subjects.getSubjectCode()+"-"+subjects.getSubject_name()+"- Summer-25", emailBody);
 
                 UserData userData=appointmentService.getAppointmentDetailsById((long) ap.getId());
-                userData.setCurrent_status("Appointment Sent");
-                userData.setStatus_date(LocalDateTime.now()+"");
-                userData.setAppointment_sent_date(LocalDateTime.now()+"");
+                userData.setCurrent_status("Sent");
+                LocalDateTime now = LocalDateTime.now();
+                DateTimeFormatter displayFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                String displayDate = now.format(displayFormat);
+
+                userData.setStatus_date(displayDate);
+                userData.setAppointment_sent_date(displayDate);
                 appointmentService.saveUserAppointment(userData);
 
             }
@@ -438,4 +474,83 @@ if(ulist.size()>0) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");  // ✅ Return HTTP 500
         }
     }
+
+    @DeleteMapping("/deleteAppointment/{appointmentId}")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<String> deleteAppointment(@PathVariable("appointmentId") Long id, RedirectAttributes redirectAttributes){
+      UserData userData=  appointmentService.getAppointmentDetailsById(id);
+      ProfileDetailsEntity detailsService=profileDetailsService.getProfileDetailsByUserId((long) userData.getUserId());
+    User user=userService.getUserById(String.valueOf(detailsService.getUserId()));
+
+
+          QPFilesEntity qpFilesEntity = qpFilesService.getQPFilesByRollIdAndSubjectIdAndSetNoAndSetterId(1, userData.getSubjectId()+"", 1, user.getId());
+
+          if (qpFilesEntity == null) {
+              appointmentService.deleteAppointmentDetails(id);
+         //     profileDetailsService.deleteProfileDetails(detailsService.getId());
+           //   userService.deleteUserDetails(user.getId());
+          return ResponseEntity.ok("Deleted");
+          //redirectAttributes.addFlashAttribute("msg","Selected QP setter appointment removed successfully");
+      }
+      else{
+         // redirectAttributes.addFlashAttribute("msg","Selected QP setter already filled the profile details");
+          return ResponseEntity.ok("Selected QP setter already filled the Questions");
+      }
+
+     //   return ResponseEntity.ok("Deleted");
     }
+
+
+    @PostMapping("/uploadAppointments")
+    @Transactional
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        if (file.isEmpty()) {
+            model.addAttribute("message", "Please select a file to upload.");
+            model.addAttribute("page","uploadNew");
+            return "main";
+        }
+        SessionDataVo sessionDataVo=(SessionDataVo)session.getAttribute("sessionData");
+        try {
+            appointmentService.deleteFacultyAppointmentDetails(sessionDataVo.getUserId());
+            List<FacultyAppointment> uploadFileResults= appointmentService.saveBulkAppointments(file,sessionDataVo);
+            redirectAttributes.addFlashAttribute("uploadFileResults", uploadFileResults);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("message", "Failed to upload the file, check the column headings as per .csv file  "+ e.getMessage());
+        }
+//model.addAttribute("page","upload");
+        return "redirect:/upload";
+    }
+
+
+    @PostMapping("/updateAppointmentDate")
+    @Transactional
+    public String updateAppointmentDate(@ModelAttribute("appointments") BulkAppointmentVo bulkAppointmentVo, RedirectAttributes redirectAttributes) {
+        try {
+            String courseId = bulkAppointmentVo.getCourse_id();
+            String submissionDate = bulkAppointmentVo.getSubmission_date();
+            String semester = bulkAppointmentVo.getSemester();
+            String subjectId = bulkAppointmentVo.getSubject_id();
+
+            if ("All".equalsIgnoreCase(semester)) {
+                appointmentService.updateFacultyAppointmentDates(courseId, submissionDate);
+            } else if ("All".equalsIgnoreCase(subjectId)) {
+                appointmentService.updateSemesterWiseFacultyAppointmentDates(courseId, submissionDate, semester);
+            } else {
+                appointmentService.updateSubjectWiseFacultyAppointmentDates(courseId, submissionDate, subjectId);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        redirectAttributes.addFlashAttribute("message", "Appointment dates extended successfully");
+//model.addAttribute("page","upload");
+        return "redirect:/upload";
+    }
+
+
+
+}

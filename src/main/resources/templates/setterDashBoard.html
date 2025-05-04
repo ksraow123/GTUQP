@@ -9,7 +9,7 @@
 
                 <div class="card border-0">
                     <h2> Dashboard</h2>
-
+                    <p th:if="${msg}" class="text-danger" th:text="${msg}"></p>
 
                     <div class="row">
                         <div th:if="${#lists.isEmpty(profileDetails.account_no)}" class="col-12">
@@ -17,6 +17,7 @@
                             <a class="link-primary" th:href="@{/viewProfile}">Fill-in your profile before you start setting the QP.</a>
                         </div>
                         <div th:if="${not #lists.isEmpty(profileDetails.account_no)}" class="col-12">
+                            <div class="table-responsive">
                             <table class="table table-bordered" id="example">
                                 <thead>
                                 <tr>
@@ -24,7 +25,7 @@
                                     <th class="text-center">Year/Sem.</th>
                                     <th class="text-center">Subject Code</th>
                                     <th class="text-center">Subject Name</th>
-                                    <th class="text-center">Syllabus</th>
+                                    <th class="text-center">Syllabus/Pattern</th>
                                     <th class="text-center">Last Date to Submit</th>
                                     <th class="text-center">Total no. of Qns.</th>
                                     <th class="text-center">Qns. Compl.</th>
@@ -43,12 +44,17 @@
                                     <td th:text="${appointment.subject_code}" class="text-center"></td>
                                     <td th:text="${appointment.subject_name}" class="text-center"></td>
                                     <td class="text-center">
-                                        <!-- <a th:if="${appointment.syllabus}" th:href="@{${appointment.syllabus}}" target="_blank" title="View Syllabus">View</a>-->
-                                        <a  href="https://syllabus.gtu.ac.in/" class="link-primary" target="_blank" title="View Syllabus">View</a>
-                                        <!--<span th:unless="${appointment.syllabus}">No syllabus available</span>-->
+                                        <spna><a  href="https://syllabus.gtu.ac.in/" class="link-primary" target="_blank" title="View Syllabus">Syllabus</a></spna>
+                                        <spna><a th:if="${appointment.pattern_code != null}"  target="_blank" class="btn btn-sm btn-primary"
+                                           th:href="@{/viewPDF(fileinfo=${'/pattern/' + appointment.pattern_code + '.pdf'}, filename=${appointment.pattern_code + '.pdf'})}">
+                                            View Pattern
+                                        </a></spna>
                                     </td>
 
-                                    <td th:text="${appointment.submission_date}" class="text-center"></td>
+                                    <td  class="text-center">
+                                        <span th:text="${appointment.submission_date}"></span><br>
+                                        <span th:text="${appointment.lastDateStatus}"></span>
+                                    </td>
                                     <td th:text="${appointment.total_questions}" class="text-center"></td>
                                     <td th:text="${appointment.no_of_questions}" class="text-center"></td>
                                     <td th:text="${appointment.pending_questions}" class="text-center"></td>
@@ -71,7 +77,7 @@
 
                                     <!-- QP Authoring Button -->
                                     <td class="text-center">
-                                        <a th:if="${appointment.lastDateStatus=='Valid' and appointment.no_of_questions != appointment.pending_questions and appointment.qp_status != 'SUBMITTED'}"
+                                        <a th:if="${appointment.lastDateStatus=='Valid' and  appointment.qp_status != 'SUBMITTED'}"
                                            th:href="@{/bitwisequestionsList(id=${appointment.setno}, subjectId=${appointment.subject_id})}"
                                            class="btn btn-sm btn-info">
                                             Add/Edit Qns
@@ -80,7 +86,7 @@
 
                                     <!-- Forward to Admin Button -->
                                     <td class="text-center">
-                                        <a th:if="${appointment.no_of_questions == appointment.total_questions and appointment.qp_status != 'SUBMITTED'}"
+                                        <a th:if="${appointment.no_of_questions == appointment.total_questions and appointment.no_of_questions>0 and appointment.qp_status != 'SUBMITTED'}"
                                            href="#"
                                            class="btn btn-sm btn-success"
                                            title="Forward Questions"
@@ -96,7 +102,7 @@
                                 </tr>
                                 </tbody>
                             </table>
-
+                            </div>
                         </div>
                     </div>
 

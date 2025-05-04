@@ -19,10 +19,10 @@ public class SMSUtil {
         String iStatus = null;
 
         try {
-            String data = "user=" + URLEncoder.encode("NITTTRR", "UTF-8");
+            String data = "user=" + URLEncoder.encode("NITTTR", "UTF-8");
             data += "&password=" + URLEncoder.encode("d0@*$me$$@ge", "UTF-8");
             data += "&message=" + URLEncoder.encode(message, "UTF-8");
-            data += "&sender=" + URLEncoder.encode("COEMPT", "UTF-8");
+            data += "&sender=" + URLEncoder.encode("EXAMOE", "UTF-8");
             data += "&mobile=" + URLEncoder.encode(org.apache.commons.lang3.StringUtils.join(mobileNumbers, ","), "UTF-8");
             data += "&type=" + URLEncoder.encode("3", "UTF-8");
             data +="&template_id=" + URLEncoder.encode(templateId, "UTF-8");
@@ -30,6 +30,9 @@ public class SMSUtil {
             // URL url = new URL("http://login.bulksmsgateway.in/sendmessage.php?"+data);
             URLConnection conn = url.openConnection();
             conn.setDoOutput(true);
+            conn.setConnectTimeout(5000); // 5 seconds connect timeout
+            conn.setReadTimeout(5000);    // Optional: 5 seconds read timeout
+
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
             wr.write(data);
             wr.flush();
@@ -71,6 +74,9 @@ public class SMSUtil {
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
             wr.write(data);
             wr.flush();
+            conn.setConnectTimeout(5000); // 5 seconds connect timeout
+            conn.setReadTimeout(5000);    // Optional: 5 seconds read timeout
+
 // Get the response
             BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;
@@ -104,9 +110,14 @@ public class SMSUtil {
             URL url = new URL("https://api.bulksmsgateway.in/sendmessage.php?" + data);
             URLConnection conn = url.openConnection();
             conn.setDoOutput(true);
+
+            conn.setConnectTimeout(5000); // 5 seconds connect timeout
+            conn.setReadTimeout(5000);    // Optional: 5 seconds read timeout
+
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
             wr.write(data);
             wr.flush();
+
 // Get the response
             BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;

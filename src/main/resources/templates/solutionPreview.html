@@ -38,6 +38,16 @@
 }
 
 </style>
+<style>
+    body{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    }
+</style>
 <body>
 <div class="watermarked" id="watermark" th:attr="data-watermark=${watermark}"></div>
 <table width="720" border="0" align="center">
@@ -93,7 +103,7 @@
 
                         </td>
                         <td width="50" valign="top" align="center">
-                            <b th:text="${#numbers.formatInteger(question.marks, 2)}"></b>
+                            <b th:text="${question.marks}"></b>
                         </td>
                     </tr>
                 </table>

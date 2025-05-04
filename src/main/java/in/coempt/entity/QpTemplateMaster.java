@@ -17,18 +17,22 @@ public class QpTemplateMaster {
     @Column(name = "pattern_code")
     private String patternCode;
 
-    @Column(name = "q_no", length = 45)
-    private Integer qNo;
+    @Column(name = "q_no")
+    private String qNo;
 
-    @Column(name = "bit_no", length = 45)
+    @Column(name = "bit_no")
     private String bitNo;
 
-    @Column(name = "topic", length = 45)
+    @Column(name = "topic")
     private String topic;
 
-    @Column(name = "level", length = 45)
+    @Column(name = "level")
     private String level;
+    @Column(name = "q_order")
+    private Integer qorder;
 
-    @Column(name = "marks", length = 45)
+    @Column(name = "marks")
     private String marks;
+    private int q_flag;
+    private String instructions;
 }

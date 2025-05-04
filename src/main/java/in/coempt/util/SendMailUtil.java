@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.util.List;
 
 @Component
 public class SendMailUtil {
@@ -36,6 +37,27 @@ public class SendMailUtil {
         mail1.send(message);
 
     }
+
+    public void sendBulkMail(List<String> recipients, String subject, String msg) {
+
+        for (String to : recipients) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(fromMail);
+                message.setTo(to);
+                message.setSubject(subject);
+                message.setText(msg);
+
+                mail1.send(message);
+
+            } catch (Exception e) {
+                // Log or handle the failed attempt to send this specific email
+                System.out.println("Failed to send to " + to + ": " + e.getMessage());
+            }
+        }
+    }
+
+
 
     public void sendMailForForgotPassword(String from, String to, String subject, String msg, int proritymail) {
 

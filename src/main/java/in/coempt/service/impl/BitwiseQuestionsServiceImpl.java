@@ -14,7 +14,7 @@ public class BitwiseQuestionsServiceImpl implements BitwiseQuestionsService {
   private BitWiseQuestionsRepository bitWiseQuestionsRepository;
     @Override
     public List<BitwiseQuestions> getQpTemplateQuestions(Long setterId, String subjectId, int setNo) {
-        return bitWiseQuestionsRepository.findByQpSetterIdAndSubjectIdAndSetNo(setterId,Integer.parseInt(subjectId),setNo);
+        return bitWiseQuestionsRepository.findByQpSetterIdAndSubjectIdAndSetNoOrderByQorderAsc(setterId,Integer.parseInt(subjectId),setNo);
     }
 
     @Override

@@ -21,4 +21,9 @@ public class CourseServiceImpl implements CourseService {
     public Course getCourseDetailsById(String courseId) {
         return courseRepository.findById(Long.parseLong(courseId)).get();
     }
+
+    @Override
+    public Course getCourseDetailsByCode(String courseCode) {
+        return courseRepository.findByCourseCode(courseCode);
+    }
 }

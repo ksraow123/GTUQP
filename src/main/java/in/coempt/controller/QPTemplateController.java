@@ -1,12 +1,14 @@
 package in.coempt.controller;
 
 import com.lowagie.text.DocumentException;
+import java.util.LinkedHashMap;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
 import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.*;
 import in.coempt.entity.*;
 import in.coempt.repository.PatternInstructionsRepository;
+import in.coempt.repository.PatternQnoInstructionsRepository;
 import in.coempt.repository.RolesRepository;
 import in.coempt.repository.UserRepository;
 import in.coempt.service.*;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -76,9 +80,14 @@ public class QPTemplateController {
     @Autowired
     private SendMailUtil sendMail;
     @Autowired
+    private  CourseService courseService;
+    @Autowired
     private PatternInstructionsRepository patternInstructionsRepository;
     @Value("${filePath}")
     private String filePath;
+
+    @Autowired
+    private PatternQnoInstructionsRepository patternQnoInstructionsRepository;
 
     @GetMapping("/bitwisequestionsList")
     public String getBitwiseQuestions(
@@ -111,6 +120,11 @@ public class QPTemplateController {
             sectionTeamRemarks = qpFilesEntity.getRemarks();
         }
         model.addAttribute("sectionTeamRemarks", sectionTeamRemarks);
+        PatternInstructionsEntity instructionsEntity = patternInstructionsRepository.findByPatternCode(subjects.getPatternCode()).get();
+        model.addAttribute("patternInstructions", instructionsEntity);
+        if(instructionsEntity.getIs_cognitive().equalsIgnoreCase("1")){
+            return "CognitiveQPTemplate";
+        }
         return "QPTemplate";
 
     }
@@ -136,6 +150,8 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         Boolean isApproved = qpQuestionsFormula.stream()
                 .allMatch(q -> "Approved".equals(q.getQp_reviewer_status()));
         model.addAttribute("isApproved", isApproved);
+        PatternInstructionsEntity instructionsEntity = patternInstructionsRepository.findByPatternCode(subjects.getPatternCode()).get();
+        model.addAttribute("patternInstructions", instructionsEntity);
         return "reviewerQPTemplate";
 
     }
@@ -153,6 +169,8 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
                                @RequestParam("qid") Long qid,
                                @RequestParam(value = "instructions", required = false) String instructions,
                                @RequestParam(value = "image_file", required = false) MultipartFile imageFile,
+                               @RequestParam(value = "cognitive", required = false) String cognitive,
+                               @RequestParam(value = "outcome", required = false) String outcome,
                                RedirectAttributes redirectAttributes) {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -168,6 +186,8 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
 
             question.setQ_desc(questionDescription);
             question.setInstructions(instructions);
+            question.setCognitive(cognitive);
+            question.setOutcome(outcome);
 
             // **Convert Image to Base64 String**
             if (imageFile != null && !imageFile.isEmpty()) {
@@ -223,23 +243,35 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         User userEntity = userService.getUserByUserName(userDetails.getUsername());
         UserData appointment = appointmentService.getUserDataSubjectIdAndUserIdAndExamSeriesId(subjectId, Math.toIntExact(setterId), 1);
 
-        List<BitwiseQuestions> questionsList = null;
-        if (userEntity.getRoleId() == 2) {
-            questionsList = qpTemplateService.getQuestionsList(subjectId + "", id, userEntity.getId());
+        List<BitwiseQuestions> questionsList =   qpTemplateService.getQuestionsList(subjectId + "", id, setterId);
 
-        }
-        if (userEntity.getRoleId() == 1) {
-            questionsList = qpTemplateService.getReviewerQuestionsList(subjectId + "", id, userEntity.getId(), setterId);
-        }
+       // }
+//        if (userEntity.getRoleId() == 1) {
+//            questionsList = qpTemplateService.getReviewerQuestionsList(subjectId + "", id, userEntity.getId(), setterId);
+//        }
         Subjects subjects = subjectsService.getSubjectById(subjectId + "");
 
         model.addAttribute("subjects", subjects);
         model.addAttribute("appointment", appointment);
         model.addAttribute("questionsList", questionsList);
+        model.addAttribute("course", courseService.getCourseDetailsById(subjects.getCourseId()));
         model.addAttribute("watermark", subjects.getSubjectCode() + "," + userDetails.getUsername() + "," + LocalDateTime.now());
-        model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no)));
-        PatternInstructionsEntity instructionsEntity = patternInstructionsRepository.findByPatternCode(subjects.getPatternCode()).get();
-        model.addAttribute("patternInstructions", instructionsEntity);
+//        model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no),LinkedHashMap::new, // specify the map type to preserve order
+//                Collectors.toList()
+//        ));
+
+        Map<String, List<BitwiseQuestions>> groupedQuestions = questionsList.stream()
+                .collect(Collectors.groupingBy(
+                        BitwiseQuestions::getQ_no,
+                        LinkedHashMap::new, // specify the map type to preserve order
+                        Collectors.toList()
+                ));
+
+        model.addAttribute("groupedQuestions", groupedQuestions);
+
+
+            PatternInstructionsEntity instructionsEntity = patternInstructionsRepository.findByPatternCode(subjects.getPatternCode()).get();
+            model.addAttribute("patternInstructions", instructionsEntity);
 
         return "pdfsample";
     }
@@ -367,7 +399,10 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         questionsList.forEach(question -> {
             question.setQp_setter_status("SUBMITTED");
             question.setQpSetterId(user.getId());
-
+            question.setQp_reviewer_status("Submitted");
+            if(question.getQp_reviewer_status().equalsIgnoreCase("Rejected")){
+                question.setQp_reviewer_status("Re-submitted");
+            }
             question.setQpReviewerId(Integer.parseInt(sectionUserMappingEntity.getUserId() + ""));
 
         });
@@ -479,6 +514,8 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
             @RequestParam("qid") Long qid,
             @RequestParam(value = "instructions", required = false) String instructions,
             @RequestParam(value = "q_solution", required = false) String q_solution,
+            @RequestParam(value = "cognitive", required = false) String cognitive,
+            @RequestParam(value = "outcome", required = false) String outcome,
             @RequestParam(value = "image_file", required = false) MultipartFile imageFile, RedirectAttributes redirectAttributes) {
         Logger logger = LoggerFactory.getLogger(this.getClass());
         BitwiseQuestions question = qpTemplateService.getQuestionDetailsById(qid);
@@ -491,6 +528,8 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
             question.setQ_desc(questionDescription);
             question.setInstructions(instructions);
             question.setQ_solution(q_solution);
+            question.setOutcome(outcome);
+            question.setCognitive(cognitive);
 
 
             question.setLast_updated_by(userDetails.getUsername());
@@ -597,18 +636,23 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
 
         if (approved.equalsIgnoreCase("APPROVED")) {
 
-            QpInventoryEntity inventoryEntity = new QpInventoryEntity();
+            List<BitwiseQuestions> question = qpTemplateService.getReviewerQuestionsList(subjectId,1,user.getId(),setterId);
+            List<BitwiseQuestions> qlist=question.stream().peek(a->a.setReviewer_comments("")).collect(Collectors.toList());
 
-            inventoryEntity.setSubjectId(Integer.valueOf(subjectId));
+            qpTemplateService.saveAllQuestions(qlist);
+            QpInventoryEntity inventoryEntity = inventoryService.getQpByQpFilesRefId(Math.toIntExact(qpFilesEntity.getId()));
+
+            if (inventoryEntity == null) {
+                inventoryEntity = new QpInventoryEntity();
+            }
+            inventoryEntity.setSubjectId(Integer.parseInt(subjectId));
             inventoryEntity.setSetterUserId(Math.toIntExact(setterId));
             inventoryEntity.setSectionUserId(Math.toIntExact(user.getId()));
             inventoryEntity.setQpFilesRefId(Math.toIntExact(qpFilesEntity.getId()));
-            inventoryEntity.setExamSeriesId(1);
+            inventoryEntity.setExamSeriesId(1); // Consider making this configurable
             inventoryEntity.setQp_file_path(generateQPPdf(model, inventoryEntity));
             inventoryEntity.setFile_generated_date(formattedDate);
             inventoryService.saveQPInventoryFile(inventoryEntity);
-
-
         }
 
 
@@ -647,7 +691,7 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         }
         redirectAttributes.addFlashAttribute("successMessage", "QP " + approved + " successfully");
 
-        return "redirect:/moderatordashboard";
+            return "redirect:/moderatordashboard";
     }
 
     private String saveBase64Image(String base64Image, String outputPath) throws IOException {
@@ -659,30 +703,37 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         return outputFile.getAbsolutePath();  // Return the saved file path
     }
 
-    private String generateQPPdf(Model model, QpInventoryEntity inventoryEntity) throws IOException, InterruptedException {
+        private String generateQPPdf(Model model, QpInventoryEntity inventoryEntity) throws IOException, InterruptedException {
 
-        List<BitwiseQuestions> questionsList = qpTemplateService.getReviewerQuestionsList(inventoryEntity.getSubjectId() + "", 1, Long.valueOf(inventoryEntity.getSectionUserId()), Long.valueOf(inventoryEntity.getSetterUserId()));
-        Subjects subjects = subjectsService.getSubjectById(inventoryEntity.getSubjectId() + "");
-        model.addAttribute("subjects", subjects);
-        model.addAttribute("questionsList", questionsList);
-        model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no)));
+            List<BitwiseQuestions> questionsList = qpTemplateService.getReviewerQuestionsList(inventoryEntity.getSubjectId() + "", 1, Long.valueOf(inventoryEntity.getSectionUserId()), Long.valueOf(inventoryEntity.getSetterUserId()));
+            Subjects subjects = subjectsService.getSubjectById(inventoryEntity.getSubjectId() + "");
+            model.addAttribute("subjects", subjects);
+            UserData appointment = appointmentService.getUserDataSubjectIdAndUserIdAndExamSeriesId(Math.toIntExact(subjects.getId()), inventoryEntity.getSetterUserId(), 1);
+            model.addAttribute("appointment", appointment);
+            model.addAttribute("course", courseService.getCourseDetailsById(subjects.getCourseId()));
+            model.addAttribute("questionsList", questionsList);
+            PatternInstructionsEntity instructionsEntity = patternInstructionsRepository.findByPatternCode(subjects.getPatternCode()).get();
+            model.addAttribute("patternInstructions", instructionsEntity);
+            model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no,LinkedHashMap::new, // specify the map type to preserve order
+                    Collectors.toList()
+            )));
 
-        String fileName = subjects.getSubjectCode() + "_" + inventoryEntity.getQpFilesRefId() + ".pdf";
-        String commonPath = filePath + File.separator;
-        String ourPath = "QuestionBank" + File.separator + inventoryEntity.getSectionUserId() + File.separator;
-        String serverPath = commonPath + ourPath;
+            String fileName = subjects.getSubjectCode() + "_" + inventoryEntity.getQpFilesRefId() + ".pdf";
+            String commonPath = filePath + File.separator;
+            String ourPath = "QuestionBank" + File.separator + inventoryEntity.getSectionUserId() + File.separator;
+            String serverPath = commonPath + ourPath;
 
-        FileUploadUtil fileUpload = new FileUploadUtil();
-        fileUpload.createRequiredDirectoryIfNotExists(commonPath, ourPath);
+            FileUploadUtil fileUpload = new FileUploadUtil();
+            fileUpload.createRequiredDirectoryIfNotExists(commonPath, ourPath);
 
-        File finalPdf = new File(serverPath, fileName);
+            File finalPdf = new File(serverPath, fileName);
 
-        // Convert HTML to PDF using wkhtmltopdf
-        htmlToPdfService.generatePdfFromHtml(model, finalPdf.getAbsolutePath());
-        return ourPath + fileName;
+            // Convert HTML to PDF using wkhtmltopdf
+            htmlToPdfService.generatePdfFromHtml(model, finalPdf.getAbsolutePath());
+            return ourPath + fileName;
 
 
-    }
+        }
 
     @GetMapping("/solutionPreviewPdf/{subjectId}/{setterId}")
     public String solutionPreviewPdf(HttpServletRequest request, Model model,
@@ -698,7 +749,9 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         model.addAttribute("subjects", subjects);
         model.addAttribute("questionsList", questionsList);
         model.addAttribute("watermark", subjects.getSubjectCode() + "," + userDetails.getUsername() + "," + LocalDateTime.now());
-        model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no)));
+        model.addAttribute("groupedQuestions", questionsList.stream().collect(Collectors.groupingBy(BitwiseQuestions::getQ_no,LinkedHashMap::new, // specify the map type to preserve order
+                Collectors.toList()
+        )));
         return "solutionPreview";
     }
 
@@ -713,5 +766,18 @@ List<BitwiseQuestions> qpQuestionsFormula=qPtemplate.stream().filter(q->!q.getBi
         return "redirect:/reviewerQuestionsList?id=" + question.getSetNo() + "&subjectId=" + question.getSubjectId() + "&setterId=" + question.getQpSetterId();
 
     }
+    @PostMapping("/questionApproveMultiple")
+    public String approveSelectedQuestions(@RequestParam("selectedIds") List<Long> selectedIds) {
+        List<BitwiseQuestions> questionList = qpTemplateService.getQuestionListDetailsById(selectedIds);
+        questionList.forEach(question->
+        {
+            question.setQp_reviewer_status("Approved");
+            question.setReviewer_comments("");
+        });
 
+        qpTemplateService.saveAllQuestions(questionList);
+
+        return "redirect:/reviewerQuestionsList?id=1&subjectId=" + questionList.get(0).getSubjectId() + "&setterId=" + questionList.get(0).getQpSetterId();
+
+    }
 }

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <meta name="_csrf" th:content="${_csrf.token}"/>
 <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
+<script th:src="@{/js/jquery-3.7.1.js}"></script>
 <div class="container-fluid p-3">
     <!-- Content Start -->
 
@@ -10,13 +10,72 @@
         <div class="col-12">
             <div class="cards">
                 <div class="card border-0">
+
+                    <div class="container mt-4">
+
+                        <form th:action="@{/appointments/updateAppointmentDate}" method="post">
+                            <div class="row">
+
+                                <div class="col-md-12"><h2 class="mb-4 ">Bulk Update Appointment Dates</h2></div>
+                            </div>
+                            <div class="row">
+                                <!-- Course Name -->
+                                <div class="col-md-12"></div>
+
+                                <div class="col-md-1">
+                                    <div class="mb-3">
+                                        <label for="courseCode" class="form-label">Course</label>
+                                        <select class="form-select" id="courseCodeData" name="course_id" required onchange="fetchYearsData()">
+                                            <option value="" disabled selected>Select a course</option>
+                                            <option th:each="course : ${coursesList}"
+                                                    th:value="${course.id}"
+                                                    th:text="${course.course_name}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Year / Sem </label>
+                                        <select class="form-select" id="yearsemData" name="semester" required onchange="fetchAppointmentSubjectsData()">
+                                            <option value="All">All</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label for="" class="form-label">Subject </label>
+                                        <select class="form-select" id="subjectData" name="subject_id" required>
+                                            <option value="All">All</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Submission Date -->
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label for="submission_date" class="form-label">Last Date of Submission</label>
+                                        <input type="date" class="form-control" id="submission_date" name="submission_date" required />
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <div class="mb-3">
+                                        <button type="submit" class="btn btn-primary w-100">Extend Date</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                     <h2>Appointments - QP Setters</h2>
 
                     <div class="row">
+                        <p th:if="${message}" class="text-danger" th:text="${message}"></p>
                         <form th:action="@{/uploadFilters}"  method="post" >
                             <div class="col-md-12">
                                 <div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Course Name </label>
                                             <select class="form-select" id="courseCode" name="course_id" required onchange="fetchData()">
@@ -25,7 +84,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-1">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Year / Sem </label>
                                             <select class="form-select" id="yearsem" name="semester" required onchange="fetchSubjectsData()">
@@ -33,7 +92,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Subject </label>
                                             <select class="form-select" id="subject" name="subject_id" required>
@@ -41,7 +100,41 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Appointment Status </label>
+                                            <select class="form-select" id="appointment_type" name="appointment_type" required>
+                                                <option value="All">All</option>
+                                                <option value="Not Sent">Not Sent</option>
+                                                <option value="Sent">Sent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Submit Status </label>
+                                            <select class="form-select" id="submit_status" name="submit_status" required>
+                                                <option value="All">All</option>
+                                                <option value="SUBMITTED">SUBMITTED</option>
+                                                <option value="PENDING">PENDING</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="" class="form-label">Review Status </label>
+                                            <select class="form-select" id="review_status" name="review_status" required>
+                                                <option value="All">All</option>
+                                                <option value="PENDING">PENDING</option>
+                                                <option value="APPROVED">APPROVED</option>
+                                                <option value="REJECTED">REJECTED</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-1">
                                         <div class="mb-3 mt-4">
                                             <button class="btn btn-primary">Search</button>
                                         </div>
@@ -49,18 +142,24 @@
                                 </div>
                             </div>
                         </form>
+
+                        <div class="row">
                         <div class="col-12">
                             <form th:action="@{/appointments/processSelected}" method="post">
                             <p class="text-end">
                                 <input type="submit" class="btn btn-success"
                                        value="Send Appointment to selected records"/></p>
                            <div class="table-responsive">
+                               <!--<p class="mb-3 mt-2"><b><span>Check All/Un Check All</span></b> <input type="checkbox" id="checkAll" class="form-check-input border-dark"></p>-->
                                <table class="table table-bordered" id="example">
                                    <thead>
                                    <tr>
+                                       <th  class="text-center"><input type="checkbox" id="checkAll" class="form-check-input border-dark"></th>
+                                       <th colspan="15"><b><span>Select All</span></b></th>
+                                   </tr>
+                                   <tr>
                                        <th>Select</th>
                                        <th>S.No.</th>
-                                       <th>Role</th>
                                        <th>User Name</th>
                                        <th>Name</th>
                                        <th>Mobile</th>
@@ -69,14 +168,16 @@
                                        <th>Course</th>
                                        <th>Subject Code</th>
                                        <th>Subject Name</th>
-
-                                       <th>Syllabus</th>
-                                       <th>Appointment sent date</th>
+                                       <th>Appointment Status</th>
+                                       <th>Appointment Date</th>
                                        <th>Last Date of Submission</th>
-
-
                                        <th>Extend Date</th>
-<!--                                       <th>Reset Password</th>-->
+                                       <th>Submit Status</th>
+                                       <th>Review Status</th>
+
+
+                                   </tr>
+
                                    </thead>
                                    <tbody>
                                    <tr th:each="appoint, iterStat : ${appointmentList}">
@@ -86,7 +187,6 @@
                                            <input type="checkbox" class="form-check-input" name="selectedIds" th:value="${appoint.id}" />
                                        </td>
                                        <td class="text-center" th:text="${iterStat.count}"></td>
-                                       <td class="text-center" th:text="${appoint.role}"></td>
                                        <td class="text-center" th:text="${appoint.user_name}"></td>
                                        <td class="text-center" th:text="${(appoint.first_name ?: '') + ' - ' + (appoint.last_name ?: '')}"></td>
                                        <td class="text-center" th:text="${appoint.mobile_no}"></td>
@@ -94,10 +194,28 @@
 
                                        <td class="text-center" th:text="${(appoint.college_code ?: '') + ' - ' + (appoint.college_name ?: '')}"></td>
                                        <td class="text-center" th:text="${appoint.course_name}"></td>
-                                       <td class="text-center" th:text="${appoint.subject_code}"></td>
+                                       <td class="text-center">
+                                           <span th:text="${appoint.subject_code}"></span>
+
+                                           <a th:if="${appoint.pattern_code != null}"
+                                              target="_blank"
+                                              class="btn btn-sm btn-primary ms-2"
+                                              th:href="@{/viewPDF(fileinfo=${'/pattern/' + appoint.pattern_code + '.pdf'}, filename=${appoint.pattern_code + '.pdf'})}">
+                                               View Pattern
+                                           </a>
+                                       </td>
+
+
                                        <td class="text-center" th:text="${appoint.subject_name}"></td>
-                                       <td>
-                                           <a href="https://syllabus.gtu.ac.in/" target="_blank" class="link-primary" title="View Syllabus">View</a>
+                                       <td class="text-center">
+                                           <span th:text="${appoint.current_status}"></span>
+                                           <br/>
+                                           <button type="button"
+                                                   class="btn btn-sm btn-danger mt-2 btn-remove"
+                                                   th:attr="data-id=${appoint.id}"
+                                                   title="Remove">
+                                               Remove
+                                           </button>
                                        </td>
                                        <td class="text-center" th:text="${appoint.appointment_sent_date}"> </td>
                                        <td class="text-center">
@@ -108,13 +226,8 @@
                                            <button type="button" class="btn btn-primary btn-sm update-btn"
                                                    th:data-id="${appoint.id}">Extend Date</button>
                                        </td>
-<!--                                       <td>-->
-<!--                                           <a th:href="@{/password/resend/{email}/{userName}(email=${appoint.email}, userName=${appoint.user_name})}"-->
-<!--                                              class="btn btn-sm btn-danger" title="Reset Password">-->
-<!--                                               Reset Password-->
-<!--                                           </a>-->
-<!--                                       </td>-->
-
+                                       <td class="text-center" th:text="${appoint.setter_status}"></td>
+                                       <td class="text-center" th:text="${appoint.review_status}"></td>
                                    </tr>
 
                                    </tbody>
@@ -127,8 +240,9 @@
                     </div>
                         </div>
                         <div class="col-12 mt-3">
-                            <p><b>Upload QP Setters (CSV File)</b> <a  th:href="@{/faculty_appointments.csv}"  class="link-danger">Click here to download the sample file</a></p>
-                            <form method="post" th:action="@{/upload}" enctype="multipart/form-data">
+                            <p><b>Upload QP Setters (CSV File)</b> <a  th:href="@{/faculty_appointments.csv}"  class="link-danger">Click here to download the sample file.</a> </p>
+                           <p class="link-danger">Note: Follow the column headings exactly as given in the sample .csv file.  </p>
+                            <form method="post" th:action="@{/appointments/uploadAppointments}" enctype="multipart/form-data">
                             <div class="row">
                                 <div class="col-md-4">
                                     <input type="file" name="file" accept=".csv" required="" class="form-control">
@@ -146,71 +260,67 @@
 
 
         <!-- Success Records Table: Show only if successList is not empty -->
-        <div th:if="${not #lists.isEmpty(successList)}">
-            <h3 class="success">Successfully Uploaded Records</h3>
-            <table class="table table-bordered" id="example">
+        <div th:if="${not #lists.isEmpty(uploadFileResults)}">
+            <div class="cards">
+                <div class="card border-0">
+                    <div class="table-responsive">
+            <h3 class="success">Uploaded Records Status</h3>
+            <table class="table table-bordered" id="example1">
                 <thead>
                 <tr>
+
+                    <th>S No</th>
+                    <th>Remarks</th>
                     <th>Name</th>
                     <th>Subject Code</th>
                     <th>Mobile No</th>
                     <th>Email</th>
                     <th>Last Date to Submit</th>
                     <th>College Code</th>
-                    <th>Remarks</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="faculty : ${successList}">
-                    <td th:text="${faculty.firstName}"></td>
-                    <td th:text="${faculty.subjectCode}"></td>
-                    <td th:text="${faculty.mobileNo}"></td>
-                    <td th:text="${faculty.email}"></td>
-                    <td th:text="${faculty.lastDateToSubmit}"></td>
-                    <td th:text="${faculty.collegeCode}"></td>
-                    <td th:text="${faculty.remarks}"></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Failure Records Table: Show only if failureList is not empty -->
-        <div th:if="${not #lists.isEmpty(failureList)}">
-            <h3 class="failure">Failed Records</h3>
-            <table class="table table-bordered" id="example">
-                <thead>
-                <tr>
-                    <th>Name Name</th>
-                    <th>Subject Code</th>
-                    <th>Mobile No</th>
-                    <th>Email</th>
-                    <th>Last Date to Submit</th>
-
-                    <th>College Code</th>
-                    <th>Remarks</th>
+                    <th>Institute Address</th>
+                    <th>Course</th>
+                    <th>Course Name</th>
+                    <th>Designation</th>
+                    <th>Department</th>
+                    <th>Total Experience</th>
 
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="faculty : ${failureList}">
-                    <td th:text="${faculty.firstName}"></td>
-                    <td th:text="${faculty.subjectCode}"></td>
-                    <td th:text="${faculty.mobileNo}"></td>
+
+                <tr th:each="faculty ,iterStat : ${uploadFileResults}">
+                    <td th:text="${iterStat.count}" class="text-center"></td>
+                    <td th:utext="${faculty.record_status}"></td>
+                    <td th:text="${faculty.staffname}"></td>
+                    <td th:text="${faculty.subjectcode}"></td>
+                    <td th:text="${faculty.contact}"></td>
                     <td th:text="${faculty.email}"></td>
-                    <td th:text="${faculty.lastDateToSubmit}"></td>
-                    <td th:text="${faculty.collegeCode}"></td>
-                    <td th:text="${faculty.remarks}"></td>
+                    <td th:text="${faculty.lastdatetosubmit}"></td>
+                    <td th:text="${faculty.collegecode}"></td>
+                    <td th:text="${faculty.instituteaddress}"></td>
+                    <td th:text="${faculty.course}"></td>
+                    <td th:text="${faculty.coursename}"></td>
+                    <td th:text="${faculty.designation}"></td>
+                    <td th:text="${faculty.department}"></td>
+                    <td th:text="${faculty.totalexperience}"></td>
+
+
 
                 </tr>
+
+
                 </tbody>
             </table>
+                </div>
+            </div>
+                </div>
         </div>
     </div>
         </div>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
 
 
 <script>
@@ -248,6 +358,110 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkAllBox = document.getElementById('checkAll');
+        const checkboxes = document.querySelectorAll('input[name="selectedIds"]');
 
+        checkAllBox.addEventListener('change', function () {
+            checkboxes.forEach(cb => cb.checked = checkAllBox.checked);
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                // If any checkbox is unchecked, uncheck "Select All"
+                if (!cb.checked) {
+                    checkAllBox.checked = false;
+                } else {
+                    // If all are checked, check "Select All"
+                    const allChecked = [...checkboxes].every(c => c.checked);
+                    checkAllBox.checked = allChecked;
+                }
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        document.querySelectorAll('.btn-remove').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const appointmentId = this.getAttribute('data-id');
+                const currentButton = this;
+
+                if (confirm('Are you sure you want to remove this appointment?')) {
+                    fetch(`https://online.ctestservices.com/gqpsecon/appointments/deleteAppointment/${appointmentId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            [csrfHeader]: csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Appointment removed successfully.');
+                            const row = currentButton.closest('tr');
+                            if (row) row.remove();
+                        } else {
+                            return response.text().then(text => { throw new Error(text); });
+                        }
+                    })
+                    .catch(error => {
+                        alert('Failed to remove appointment: ' + error.message);
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    function fetchYearsData() {
+    let courseId = document.getElementById("courseCodeData").value;
+    let yearSemSelect = document.getElementById("yearsemData");
+
+    // Reset dropdowns
+    yearSemSelect.innerHTML = '<option value="All">All</option>';
+
+    if (!courseId || courseId === "All") return;
+
+    fetch(`https://online.ctestservices.com/gqpsecon/getSemestersAndSubjects?courseId=${courseId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(sem => {
+                yearSemSelect.appendChild(new Option(sem, sem));
+            });
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}
+
+// Function to fetch subjects based on semester selection
+function fetchAppointmentSubjectsData() {
+    let courseId = document.getElementById("courseCodeData").value;
+    let semester = document.getElementById("yearsemData").value;
+    let subjectSelect = document.getElementById("subjectData");
+
+    // Reset subject dropdown
+    subjectSelect.innerHTML = '<option value="All">All</option>';
+
+    if (!courseId || courseId === "All" || !semester || semester === "All") return;
+
+    fetch(`https://online.ctestservices.com/gqpsecon/getSubjectsByCourseAndSemester?courseId=${courseId}&semester=${semester}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(sub => {
+                subjectSelect.appendChild(new Option(`${sub.subjectCode} - ${sub.subject_name}`, sub.id));
+            });
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}
+
+
+
+
+
+</script>
 
 </html>

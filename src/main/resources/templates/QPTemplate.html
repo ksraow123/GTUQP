@@ -11,180 +11,138 @@
 
     <!-- Include CSS & Scripts -->
     <div th:replace="fragments/styles :: styles"></div>
-    <script th:src="@{/js/jquery-3.7.1.js}"></script>
+    <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/froala-editor@4.0.17/css/froala_editor.pkgd.min.css" rel="stylesheet">
-    <script type="text/javascript" th:src="@{https://cdn.jsdelivr.net/npm/froala-editor@4.0.17/js/froala_editor.pkgd.min.js}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/froala-editor@4.0.19/css/froala_editor.pkgd.min.css" rel="stylesheet">
+    <!--&lt;!&ndash;    <link href="/js/styles.css" rel="stylesheet">&ndash;&gt;-->
 
+    <!--    <script src="https://cdn.jsdelivr.net/npm/froala-editor@4.0.19/js/froala_editor.pkgd.min.js"></script>-->
+    <!--    <script th:src="@{/node_modules/@wiris/mathtype-froala3/wiris.js}"></script>-->
+
+    <script th:src="@{js/froala_editor.pkgd.min.js}"></script>
+
+
+    <script th:src="@{node_modules/wiris/mathtype-froala3/wiris.js}"></script>
+<!--    <script th:src="@{js/bootstrap.bundle.min.js}"></script>   -->
+    <style>
+        #customAlert {
+          display: none;
+          position: fixed;
+          top: 30%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          padding: 20px 30px;
+          background-color: white;
+          border: 2px solid #333;
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
+          z-index: 9999;
+        }
+        #customAlert button {
+          margin-top: 10px;
+        }
+    .center-alert-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 1055;
+        padding: 1rem;
+    }
+
+    #editModal {
+        width: 80%;
+        max-width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    }
+
+    #editModal .btn-close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        margin-left: auto;
+        background-color: #fff; /* Optional: make sure it's visible */
+    }
+        p{font-size:14px;}
+    </style>
     <script>
-        var editorDesc;
-        var editorSolution ;
-        var qp_instruction;
-       $(document).ready(function () {
-            editorDesc = new FroalaEditor('#q_desc', {
-                key: "uXD2lA6A5D5D4F4A3C7dNSWXf1h1MDb1CF1PLPFf1C1EESFKVlA3C11A8E7D2B4D4G2E3I3==",
+        var editorDesc, editorSolution, qp_instruction;
+
+        $(document).ready(function () {
+            const sharedOptions = {
+                key: "XAG4eC3H3C7B10A5E5E2A-9UJHAEFZMUJOYGYQEa1c1ZJg1RAeF5C4C3C3E2C2C5D6D4F2==",
                 height: 200,
                 pastePlain: false,
                 attribution: false,
                 spellcheck: true,
+                pluginsEnabled: [
+                    'align', 'charCounter', 'codeBeautifier', 'codeView', 'colors', 'draggable', 'embedly', 'emoticons',
+                    'entities', 'fontFamily', 'fontSize', 'fullscreen', 'image', 'imageManager', 'inlineClass',
+                    'inlineStyle', 'lineBreaker', 'link', 'lists', 'paragraphFormat', 'paragraphStyle', 'quickInsert',
+                    'quote', 'save', 'table', 'url', 'video', 'wordPaste', 'spellChecker', 'specialCharacters',
+                    'wiris'  // âœ… MathType plugins
+                ],
                 pasteAllowedStyleProps: [
                     'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
                     'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
                 ],
                 pasteDeniedAttrs: [],
-                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select','canvas', 'svg'],
-
+                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select', 'canvas', 'svg'],
                 fontFamily: {
                     "Times New Roman": "Times New Roman"
                 },
                 fontSize: ['12'],
-
                 toolbarButtons: [
                     'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
                     'inlineClass', 'clearFormatting', '|',
                     'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
+                    'wirisEditor', 'wirisChemistry','|',  // âœ… MathType buttons
                     'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
                     'lineHeight', 'outdent', 'indent', '|',
-
                     'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
                 ],
-
-
+                 imageEditButtons: ['wirisEditor','wirisChemistry'],
                 imageDefaultWidth: 300,
-                htmlAllowedTags: [
-                    'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
-                    'sup', 'sub', 'ul', 'ol', 'li', 'hr'
-                ],
-                imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
-                htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
-
+                 htmlAllowedTags: ['.*'],
+                 htmlAllowedAttrs: ['.*'],
+                 htmlAllowedEmptyTags: ['mprescripts', 'none'],
                 events: {
-                    'image.inserted': function ($img, response) {
+                    'image.inserted': function ($img) {
                         let img = $img[0];
-                        let reader = new FileReader();
-                        let file = img.src;
-                        fetch(file)
+                        fetch(img.src)
                             .then(res => res.blob())
                             .then(blob => {
+                                const reader = new FileReader();
                                 reader.readAsDataURL(blob);
-                                reader.onloadend = function () {
+                                reader.onloadend = () => {
                                     img.src = reader.result;
                                 };
                             })
                             .catch(err => console.error("Image conversion error:", err));
                     }
                 }
-            });
-             editorSolution = new FroalaEditor('#q_solution', {
-                key: "uXD2lA6A5D5D4F4A3C7dNSWXf1h1MDb1CF1PLPFf1C1EESFKVlA3C11A8E7D2B4D4G2E3I3==",
-               height: 200,
-                pastePlain: false,
-                attribution: false,
-                spellcheck: true,
-                pasteAllowedStyleProps: [
-                    'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
-                    'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
-                ],
-                pasteDeniedAttrs: [],
-                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select','canvas', 'svg'],
+            };
 
-                fontFamily: {
-                    "Times New Roman": "Times New Roman"
-                },
-                fontSize: ['12'],
-
-                toolbarButtons: [
-                    'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
-                    'inlineClass', 'clearFormatting', '|',
-                    'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
-                    'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
-                    'lineHeight', 'outdent', 'indent', '|',
-
-                    'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
-                ],
-
-
-                imageDefaultWidth: 300,
-                htmlAllowedTags: [
-                    'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
-                    'sup', 'sub', 'ul', 'ol', 'li', 'hr'
-                ],
-                imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
-                htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
-
-                events: {
-                    'image.inserted': function ($img, response) {
-                        let img = $img[0];
-                        let reader = new FileReader();
-                        let file = img.src;
-                        fetch(file)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                reader.readAsDataURL(blob);
-                                reader.onloadend = function () {
-                                    img.src = reader.result;
-                                };
-                            })
-                            .catch(err => console.error("Image conversion error:", err));
-                    }
-                }
-            });
+            editorDesc = new FroalaEditor('#q_desc', { ...sharedOptions });
+            editorSolution = new FroalaEditor('#q_solution', { ...sharedOptions });
             qp_instruction = new FroalaEditor('#qp_instruction', {
-                key: "uXD2lA6A5D5D4F4A3C7dNSWXf1h1MDb1CF1PLPFf1C1EESFKVlA3C11A8E7D2B4D4G2E3I3==",
-                height: 100,
-                pastePlain: false,
-                attribution: false,
-                spellcheck: true,
-                pasteAllowedStyleProps: [
-                    'color', 'font-size', 'background', 'font-weight', 'font-style', 'text-decoration',
-                    'font-family', 'letter-spacing', 'line-height', 'text-align', 'border', 'margin', 'padding'
-                ],
-                pasteDeniedAttrs: [],
-                pasteDeniedTags: ['meta', 'script', 'style', 'iframe', 'form', 'input', 'button', 'select','canvas', 'svg'],
-
-                fontFamily: {
-                    "Times New Roman": "Times New Roman"
-                },
-                fontSize: ['12'],
-
-                toolbarButtons: [
-                    'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize',
-                    'inlineClass', 'clearFormatting', '|',
-                    'insertImage', 'insertTable', 'fontAwesome', 'specialCharacters', 'embedly', 'insertHR', '|',
-                    'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
-                    'lineHeight', 'outdent', 'indent', '|',
-
-                    'undo', 'redo', 'fullscreen', 'spellChecker', 'help'
-                ],
-
-
-                imageDefaultWidth: 300,
-                htmlAllowedTags: [
-                    'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'p', 'b', 'i', 'u', 'strong', 'em', 'br', 'span',
-                    'sup', 'sub', 'ul', 'ol', 'li', 'hr'
-                ],
-                imageAllowedTypes: ['jpeg', 'jpg', 'png', 'gif'],
-                htmlAllowedAttrs: ['src', 'style', 'class', 'border', 'cellspacing', 'cellpadding', 'colspan', 'rowspan'],
-
-                events: {
-                    'image.inserted': function ($img, response) {
-                        let img = $img[0];
-                        let reader = new FileReader();
-                        let file = img.src;
-                        fetch(file)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                reader.readAsDataURL(blob);
-                                reader.onloadend = function () {
-                                    img.src = reader.result;
-                                };
-                            })
-                            .catch(err => console.error("Image conversion error:", err));
-                    }
-                }
+                ...sharedOptions,
+                height: 100  // shorter height for instructions
             });
-       });
+        });
     </script>
+
+
 </head>
 
 <body>
@@ -204,172 +162,211 @@
                                 <span th:text="${subject.subjectCode}"> </span> - <span th:text="${subject.subject_name}"></span><br />
                                 <small style="font-size:14px;"> <a  href="https://syllabus.gtu.ac.in/" target="_blank" title="View Syllabus" class="link-primary">View Syllabus</a>
                                     |  Max. Marks:<span th:text="${subject.max_marks}"></span>
+                                    | <a th:if="${subject.patternCode != null}"  target="_blank" class="btn btn-sm btn-primary"
+                                         th:href="@{/viewPDF(fileinfo=${'/pattern/' + subject.patternCode + '.pdf'}, filename=${subject.patternCode + '.pdf'})}">
+                                        View Pattern
+                                    </a>
+                                    |<a th:if="${subject.patternCode != null}"  th:href="@{/patternPreview/{subjectId}(subjectId=${subject.id})}"
+                                        class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                        <span th:text="${subject.patternCode}"></span>
+                                    </a>
+
+                                    </span>
+
                                 </small>
+                                <br>
+                                <p>Important Note:<br> View and follow the instructions as given in the QP pattern before adding questions. </p>
+                                <p><span th:utext="${patternInstructions.instructions_to_setter}"> </span> </p>
+
+
                             </h2>
+                            <div id="alertWrapper" class="center-alert-wrapper d-none">
+                            <div id="editModal" class="alert alert-light border alert-dismissible "   role="alert">
+                                <div class="row"><div class="col-md-12  ps-4 pe-4">
+                                <h2 class="modal-title border-bottom">Add/Edit Question</h2>
 
-                            <!-- Modal or Form Container -->
-                            <div id="editModal" class="modal fade" tabindex="-1" role="dialog">
-                                <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document"> <!-- Increased modal size -->
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h2 class="modal-title">Add/Edit Question</h2>
+                                <div id="customAlert">
+                                    <p id="alertMessage"></p>
+                                    <button onclick="closeCustomAlert()">OK</button>
+                                </div>
 
-                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
+                                <form th:action="@{/updateQuestions}" method="post" id="qpeditorform" enctype="multipart/form-data">
+                                    <input type="hidden" id="qid" name="qid">
+                                    <div class="col-12 text-end text-danger">All "*" marked fields are mandatory. </div>
+                                    <div class="mb-4 text-end">
+                                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="card p-2 mb-3 bg-light">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h3 class="modal-title">Q.No: <b><span id="qno"></span></b></h3>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h3 class="modal-title">Sub Q.No.: <b><span id="bit_no"></span></b></h3>
+                                                </div>
+                                                <!--                                                            <div class="col-md-4">-->
+                                                <!--                                                                <h3 class="modal-title">Topic: <b><span id="topic"></span></b></h3>-->
+                                                <!--                                                            </div>-->
+                                                <!--                                                            <div class="col-md-2">-->
+                                                <!--                                                                <h3 class="modal-title">Level: <b><span id="level"></span></b></h3>-->
+                                                <!--                                                            </div>-->
+                                                <div class="col-md-4">
+                                                    <h3 class="modal-title">Marks: <b><span id="marks"></span></b></h3>
+                                                </div>
+
+                                            </div>
                                         </div>
-                                        <div class="modal-body">
-                                            <form th:action="@{/updateQuestions}" method="post" id="qpeditorform" enctype="multipart/form-data">
-                                                <input type="hidden" id="qid" name="qid">
-                                                <div class="col-12 text-end text-danger">* Question and Solution are mandatory. </div>
-                                                <div class="col-12">
-                                                    <div class="card p-2 mb-3 bg-light">
-                                                        <div class="row">
-                                                            <div class="col-md-2">
-                                                                <h3 class="modal-title">Q.No: <b><span id="qno"></span></b></h3>
-                                                            </div>
-                                                            <div class="col-md-2">
-                                                                <h3 class="modal-title">Sub Q.No.: <b><span id="bitno"></span></b></h3>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <h3 class="modal-title">Topic: <b><span id="topic"></span></b></h3>
-                                                            </div>
-                                                            <div class="col-md-2">
-                                                                <h3 class="modal-title">Level: <b><span id="level"></span></b></h3>
-                                                            </div>
-                                                            <div class="col-md-2">
-                                                                <h3 class="modal-title">Marks: <b><span id="marks"></span></b></h3>
-                                                            </div>
 
-                                                        </div>
-                                                    </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Instructions if any</label>
+                                        <input class="form-control" type="text" id="instructions" name="instructions">
+                                    </div>
 
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Instructions</label>
-                                                    <input class="form-control" type="text" id="instructions" name="instructions">
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="form-label">Question</label>
-                                                    <textarea class="form-control qdesc" id="q_desc" name="q_desc" rows="53"></textarea>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Browse Image</label>
-                                                    <input class="form-control" type="file" id="image_file" name="image_file">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Solution</label>
-                                                    <textarea class="form-control qdesc" id="q_solution" name="q_solution" rows="3"></textarea>
-                                                </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><span class="text-danger">*</span> Question</label>
+                                        <textarea class="form-control qdesc" id="q_desc" name="q_desc" rows="53"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Browse Image</label>
+                                        <input class="form-control" type="file" id="image_file" name="image_file" accept=".jpg, .jpeg, .png">
+                                        <div  style="color:red">Upload only .jpg/.png file < 2MB size</div>
+                                        <div id="file_error" style="color:red; display:none;"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><span class="text-danger">*</span>  Solution</label>
+                                        <textarea class="form-control qdesc" id="q_solution" name="q_solution" rows="3"></textarea>
+                                    </div>
 
 
-                                                <div class="mb-3">
-                                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
-                                                </div>
-                                            </form>
+                                    <div class="col-12">
+
+                                        <div class="mb-4 text-end">
+                                            <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="hideAlert()" >Close</button>
+<!--                                            <button type="close" class="btn btn-sm btn-danger">Close</button>-->
+                                        </div>
+                                        <div class="mb-4">
+<!--                                            <button type="button" class="btn-close" onclick="hideAlert()" >Close</button>-->
                                         </div>
                                     </div>
-                                </div>
+                                </form>
+
+                                <button type="button" class="btn-close" onclick="hideAlert()" aria-label="Close"></button>
+                                </div></div>
                             </div>
-
-
+                            </div>
                         </div>
-                        <div class="row">
-                            <div class="col-12">
 
-                                <h2>Set No: <b th:text="${setNo}"></b> ( <a href="#" class="link-primary" th:if="${sectionTeamRemarks != null and sectionTeamRemarks != ''}"
-                                                                            onclick="showRemarks(this)"
-                                                                            th:data-remarks="${sectionTeamRemarks}">Rejected- View Remarks</a> )</h2>
+                    </div>
+                </div>
 
-                                <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
-                                    Preview
-                                </a>
+                <div class="col-12">
+                    <div class="cards">
+                        <div class="card border-0">
+                            <div class="row">
+                                <div class="col-12">
 
-                                <td class="text-center">
-                                    <a th:if="${filledStatus==1}"
-                                       href="#"
-                                       class="btn btn-sm btn-success"
-                                       title="Forward Questions"
-                                       th:data-id="1"
-                                       th:data-subject-id="${subject.id}"
-                                       th:data-setter-id="${setterId}"
-                                       th:data-subject-code="${subject.subjectCode}"
-                                       th:data-subject-name="${subject.subject_name}"
-                                       onclick="openForwardModal(this)">
-                                        <!--Forward to Admin--> Submit for Approval
+                                    <h2>Set No: <b th:text="${setNo}"></b> <a href="#" class="link-primary" th:if="${sectionTeamRemarks != null and sectionTeamRemarks != ''}"
+                                                                              onclick="showRemarks(this)"
+                                                                              th:data-remarks="${sectionTeamRemarks}">(Rejected- View Remarks}</a> </h2>
+
+                                    <a th:href="@{/previewPdf/{id}/{subjectId}/{setterId}(id=${setNo}, subjectId=${subject.id},setterId=${setterId})}" class="btn btn-sm btn-warning" title="preview" target="_blank">
+                                        Preview
                                     </a>
-                                </td>
 
-                                <div class="mt-3">
-                                    <form th:action="@{/saveSubjectInstruction}" method="post" id="saveSubjectInstruction" >
+                                    <td class="text-center">
+                                        <a th:if="${filledStatus==1}"
+                                           href="#"
+                                           class="btn btn-sm btn-success"
+                                           title="Forward Questions"
+                                           th:data-id="1"
+                                           th:data-subject-id="${subject.id}"
+                                           th:data-setter-id="${setterId}"
+                                           th:data-subject-code="${subject.subjectCode}"
+                                           th:data-subject-name="${subject.subject_name}"
+                                           onclick="openForwardModal(this)">
+                                            <!--Forward to Admin--> Submit for Approval
+                                        </a>
+                                    </td>
 
-                                <label class="form-label">QP Instructions, if any (optional)</label>
-                                        <textarea class="form-control qp_instruction" id="qp_instruction" name="qp_instruction" rows="2" th:text="${userData.qp_instruction}"></textarea>
-                                        <input type="hidden" id="subjectId" name="subjectId" th:value="${subject.id}">
-                                        <button type="submit"  class="btn btn-primary btn-block mb-4">Save</button>
+                                    <div class="mt-3">
+                                        <form th:action="@{/saveSubjectInstruction}" method="post" id="saveSubjectInstruction" >
 
-                                    </form>
+                                            <label class="form-label">QP Instructions, if any (optional)</label>
+                                            <p>Note: Standard Instructions are already given. If any specific instructions are required only add. Check the preview before adding instructions.</p>
+                                            <textarea class="form-control qp_instruction" id="qp_instruction" name="qp_instruction" rows="2" th:text="${userData.qp_instruction}"></textarea>
+                                            <input type="hidden" id="subjectId" name="subjectId" th:value="${subject.id}">
+                                            <button type="submit"  class="btn btn-primary btn-block mb-4">Save</button>
+
+                                        </form>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mt-3" >
+                                            <thead>
+                                            <tr>
+                                                <th>S.No.</th>
+                                                <th>Q.No</th>
+                                                <th>Sub Q.No.</th>
+                                                <!--                                        <th>Topic</th>-->
+                                                <th>Level</th>
+                                                <th>Marks</th>
+                                                <th>Instructions</th>
+                                                <th>Question</th>
+                                                <th>Solution</th>
+                                                <th width="110">Image</th>
+                                                <th width="110">Reviewer Status</th>
+                                                <th width="110">Reviewer Remarks</th>
+                                                <th>Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="qpoint, iterStat : ${qPtemplate}">
+                                                <td th:text="${iterStat.count}">S.No.</td>
+                                                <td th:text="${qpoint.q_no}"></td>
+                                                <td th:text="${qpoint.bit_no}">Sub Q.No.</td>
+                                                <!--                                        <td th:text="${qpoint.topic}">Topic</td>-->
+                                                <td th:utext="${qpoint.level}">Level</td>
+                                                <td th:text="${qpoint.marks}">Marks</td>
+                                                <td th:text="${qpoint.instructions}">Instructions</td>
+                                                <td th:utext="${qpoint.q_desc}">Question</td>
+                                                <td>
+                                                    <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
+                                                       onclick="showSolution(this)"
+                                                       th:data-solution="${qpoint.q_solution}">View Solution</a>
+                                                </td>
+                                                <td  align="center">
+                                                    <img th:if="${qpoint.image_path != null}"
+                                                         th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
+                                                         alt="Uploaded Image" width="100" height="100" />
+
+                                                    <a th:if="${qpoint.image_path != null}"
+                                                       th:href="@{/removeQpImage/{id}/(id=${qpoint.id})}"
+                                                       class="link-danger" title="Delete Image" >
+                                                        Delete Image
+                                                    </a>
+                                                </td>
+                                                <td th:text="${qpoint.qp_reviewer_status}" class="text-center">Reviewer Status</td>
+                                                <td th:text="${qpoint.reviewer_comments}" class="text-center">Reviewer Remarks</td>
+                                                <td>
+                                                    <a th:if="${qpoint.q_flag == 1 and qpoint.qp_reviewer_status != 'Approved'}"
+                                                       href="javascript:void(0);"
+                                                       class="btn btn-sm btn-info edit-btn"
+                                                       th:data-id="${qpoint.id}"
+                                                       title="Add">
+                                                        Add/Edit Question
+                                                    </a>
+
+
+
+                                                </td>
+
+                                            </tr>
+                                            </tbody>
+                                        </table></div>
+                                    </th:block>
                                 </div>
-                                <table class="table table-bordered mt-3" >
-                                    <thead>
-                                    <tr>
-                                        <th>S.No.</th>
-                                        <th>Q.No</th>
-                                        <th>Sub Q.No.</th>
-<!--                                        <th>Topic</th>-->
-<!--                                        <th>Level</th>-->
-                                        <th>Marks</th>
-                                        <th>Instructions</th>
-                                        <th>Question</th>
-                                        <th>Solution</th>
-                                        <th width="110">Image</th>
-                                        <th width="110">Reviewer Status</th>
-                                        <th width="110">Reviewer Remarks</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="qpoint, iterStat : ${qPtemplate}">
-                                        <td th:text="${iterStat.count}">S.No.</td>
-                                        <td th:text="${qpoint.q_no}"></td>
-                                        <td th:text="${qpoint.bit_no}">Sub Q.No.</td>
-<!--                                        <td th:text="${qpoint.topic}">Topic</td>-->
-<!--                                        <td th:text="${qpoint.level}">Level</td>-->
-                                        <td th:text="${qpoint.marks}">Marks</td>
-                                        <td th:text="${qpoint.instructions}">Instructions</td>
-                                        <td th:utext="${qpoint.q_desc}">Question</td>
-                                        <td>
-                                            <a href="#" th:if="${qpoint.q_solution != null and qpoint.q_solution != ''}"
-                                               onclick="showSolution(this)"
-                                               th:data-solution="${qpoint.q_solution}">View Solution</a>
-                                        </td>
-                                        <td  align="center">
-                                            <img th:if="${qpoint.image_path != null}"
-                                                 th:src="'data:image/' + ${qpoint.image_path} + ';base64,' + ${qpoint.image_path}"
-                                                 alt="Uploaded Image" width="100" height="100" />
-
-                                            <a th:if="${qpoint.image_path != null}"
-                                               th:href="@{/removeQpImage/{id}/(id=${qpoint.id})}"
-                                               class="link-danger" title="Delete Image" >
-                                                Delete Image
-                                            </a>
-                                        </td>
-                                        <td th:text="${qpoint.qp_reviewer_status}" class="text-center">Reviewer Status</td>
-                                        <td th:text="${qpoint.reviewer_comments}" class="text-center">Reviewer Remarks</td>
-                                        <td>
-
-                                            <a th:if="${qpoint.bit_no!='OR' && qpoint.qp_reviewer_status != 'Approved'}" href="javascript:void(0);" class="btn btn-sm btn-info edit-btn"
-                                               th:data-id="${qpoint.id}" title="Add">
-                                                Add/Edit Question
-                                            </a>
-
-                                        </td>
-
-                                    </tr>
-                                    </tbody>
-                                </table>
-                                </th:block>
                             </div>
                         </div>
                     </div>
@@ -390,30 +387,20 @@
             type: "GET",
             success: function (response) {
 
-                    $("#level").text(response.level);
+                  //  $("#level").text(response.level);
                     $("#marks").text(response.marks);
                     $("#qno").text(response.q_no);
-                    $("#bitno").text(response.bit_no);
-                    $("#topic").text(response.topic);
+                    $("#bit_no").text(response.bit_no);
+                   // $("#topic").text(response.topic);
                 $("#qid").val(response.id);
                 $("#instructions").val(response.instructions);
                if (response.q_desc) {
             editorDesc.html.set(response.q_desc);
         }
-<!--else{-->
-<!-- editorDesc.html.set("<p></p>");-->
-
-<!--}-->
-
    if (response.q_solution) {
           editorSolution.html.set(response.q_solution);
         }
-<!--else{-->
-<!-- editorSolution.html.set("<p></p>");-->
-
-<!--}-->
-
-                $("#editModal").modal("show");
+               // $("#editModal").modal("show");
             },
             error: function () {
                 alert("Failed to fetch question details.");
@@ -478,31 +465,56 @@
 </div>
 
 </html>
-
 <script>
     document.getElementById("qpeditorform").addEventListener("submit", function (event) {
-    let question = $("#q_desc").val().trim();
-    let solution = $("#q_solution").val().trim();
+        let isValid = true;
+        const qDesc = document.getElementById("q_desc").value.trim();
+        const qSolution = document.getElementById("q_solution").value.trim();
+        const imageFile = document.getElementById("image_file").files[0];
+        const fileError = document.getElementById("file_error");
+        fileError.style.display = "none";
+        fileError.textContent = "";
 
-    if (!question) {
-        alert("Please fill out the Question field.");
-        $("#q_desc").focus();
-        event.preventDefault();
-        return;
-    }
+        // Validate Question
+        if (!qDesc) {
+            showCustomAlert("Question is mandatory.");
+            isValid = false;
+        }
 
-    if (!solution) {
-        alert("Please fill the Solution for the Question before you save.");
-        $("#q_solution").focus();
-        event.preventDefault();
-    }
-});
+        // Validate Solution
+        if (!qSolution) {
+            showCustomAlert("Solution is mandatory.");
+            isValid = false;
+        }
 
-    $('#editModal').on('hidden.bs.modal', function () {
-    $('#qpeditorform')[0].reset();
-});
+        // Validate image file if uploaded
+        if (imageFile) {
+            const validExtensions = ['image/jpeg', 'image/png', 'image/jpg'];
+            const maxSize = 2 * 1024 * 1024; // 2MB
+
+            if (!validExtensions.includes(imageFile.type)) {
+            showCustomAlert("Only .jpg and .png image types are allowed.");
+                fileError.textContent = "Only .jpg and .png image types are allowed.";
+                fileError.style.display = "block";
+                isValid = false;
+            } else if (imageFile.size > maxSize) {
+             showCustomAlert("File size must be less than 2MB.");
+                fileError.textContent = "File size must be less than 2MB.";
+                fileError.style.display = "block";
+                isValid = false;
+            }
+        }
+
+        // Prevent submission if not valid
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+
 
 </script>
+
+
 <script>
 
     function openForwardModal(element) {
@@ -544,8 +556,7 @@ function submitForwardForm() {
 
                     <ul class="list-group list-group-numbered">
                         <li class="mb-2 list-group-item border-0">
-                            I undersign undertake to maintain the secrecy in matter of paper setting of subject
-                            (with code no) <b><span id="modalSubjectCode"></span>-<span id="modalSubjectName"></span></b>
+                            I undersign undertake to maintain the secrecy in matter of paper setting of <b><span id="modalSubjectCode"></span>-<span id="modalSubjectName"></span></b>
                             and all other assigned work including correspondence pertaining to Gujarat Technological University Examination.
                         </li>
                         <li class="mb-2 list-group-item border-0">
@@ -588,3 +599,36 @@ function submitForwardForm() {
         </div>
     </div>
 </div>
+<script>
+    function showCustomAlert(message) {
+    document.getElementById('alertMessage').textContent = message;
+    document.getElementById('customAlert').style.display = 'block';
+    }
+
+    function closeCustomAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+    }
+</script>
+
+<script>
+    $(document).on("click", ".edit-btn", function () {
+          // alert('hai');
+
+           const alertBox = document.getElementById("alertWrapper");
+           alertBox.classList.remove("d-none");
+           alertBox.classList.add("show");
+
+
+       });
+
+       function hideAlert() {
+
+           const alertBox = document.getElementById("alertWrapper");
+           alertBox.classList.remove("show");
+           alertBox.classList.add("d-none");
+            document.getElementById("qpeditorform").reset();
+        document.getElementById("file_error").style.display = "none";
+         location.reload();
+       }
+
+</script>

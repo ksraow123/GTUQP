@@ -29,7 +29,7 @@ public class BitwiseQuestions {
     private int examSeriesId;
 
     @Column(name = "q_no")
-    private Integer q_no;
+    private String q_no;
 
     @Column(name = "q_desc")
     private String q_desc;
@@ -39,10 +39,16 @@ public class BitwiseQuestions {
     private String bit_no;
     private String level;
     private String instructions;
-    private Integer marks;
+    private String marks;
     private String image_path;
     private String qp_setter_status;
     private String topic;
     private String qp_reviewer_status;
     private String last_updated_by;
+    private String cognitive;
+    private String outcome;
+    private int qp_template_auto_id;
+    private int q_flag;
+    @Column(name="q_order")
+    private Integer qorder;
 }

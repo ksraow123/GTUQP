@@ -31,7 +31,7 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="" class="form-label">First Name</label>
-                                <input class="form-control" type="text" th:field="*{first_name}" readonly>
+                                <input class="form-control" type="text" th:field="*{first_name}" >
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -43,7 +43,7 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="" class="form-label">Last Name</label>
-                                <input class="form-control" type="text" th:field="*{last_name}" readonly>
+                                <input class="form-control" type="text" th:field="*{lastName}" >
                             </div>
                         </div>
 
@@ -73,7 +73,8 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="" class="form-label">Other Designation, if any</label>
-                                <input class="form-control" type="text" th:text="${other_designation}" >
+                                <input class="form-control" type="text" th:field="*{other_designation}" >
+
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -129,15 +130,15 @@
                                 <input class="form-control"  required minlength="5" maxlength="30" type="text" th:field="*{account_no}">
                             </div>
                         </div> <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="" class="form-label">Account Type</label>
-                                <select class="form-control" id="acc_type" name="acc_type" required th:field="*{acc_type}">
-                                    <option value="">Select</option>
-                                    <option th:value="'Savings Account'">Savings Account</option>
-                                    <option th:value="'Current Account'">Current Account</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Account Type</label>
+                            <select class="form-control" id="acc_type" name="acc_type" required th:field="*{acc_type}">
+                                <option value="">Select</option>
+                                <option th:value="'Savings Account'">Savings Account</option>
+                                <option th:value="'Current Account'">Current Account</option>
+                            </select>
                         </div>
+                    </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="" class="form-label">IFSC Code </label>
@@ -176,35 +177,35 @@
     </div>
 </div>
 <script>
-function fetchBankDetails() {
-var ifscCode = document.getElementById("ifsc_code").value.trim(); // Trim spaces
+    function fetchBankDetails() {
+    var ifscCode = document.getElementById("ifsc_code").value.trim(); // Trim spaces
 
-if (ifscCode.length !== 11) {
-alert("IFSC Code must be exactly 11 characters.");
-return;
-}
+    if (ifscCode.length !== 11) {
+    alert("IFSC Code must be exactly 11 characters.");
+    return;
+    }
 
-fetch("https://online.ctestservices.com/gqpsecon/api/bank/getDetails/" + ifscCode)
-.then(response => {
-if (!response.ok) {
-throw new Error("Invalid IFSC Code or API error");
-}
-return response.json();
-})
-.then(data => {
-if (data && data.BANK && data.BRANCH && data.ADDRESS) {
-document.getElementById("bank_name").value = data.BANK;
-document.getElementById("branch_details").value = data.BRANCH;
-document.getElementById("branch_address").value = data.ADDRESS;
-} else {
-alert("Invalid IFSC Code or no data found.");
-}
-})
-.catch(error => {
-console.error("Error:", error);
-alert("Error fetching bank details. Please check the IFSC code.");
-});
-}
+    fetch("https://online.ctestservices.com/gqpsecon/api/bank/getDetails/" + ifscCode)
+    .then(response => {
+    if (!response.ok) {
+    throw new Error("Invalid IFSC Code or API error");
+    }
+    return response.json();
+    })
+    .then(data => {
+    if (data && data.BANK && data.BRANCH && data.ADDRESS) {
+    document.getElementById("bank_name").value = data.BANK;
+    document.getElementById("branch_details").value = data.BRANCH;
+    document.getElementById("branch_address").value = data.ADDRESS;
+    } else {
+    alert("Invalid IFSC Code or no data found.");
+    }
+    })
+    .catch(error => {
+    console.error("Error:", error);
+    alert("Error fetching bank details. Please check the IFSC code.");
+    });
+    }
 </script>
 
 

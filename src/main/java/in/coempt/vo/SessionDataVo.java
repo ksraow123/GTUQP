@@ -11,4 +11,5 @@ public class SessionDataVo {
     private List<Integer> sectionId;
     private Integer examSeriesId;
     private Long roleId;
+    private String userName;
 }

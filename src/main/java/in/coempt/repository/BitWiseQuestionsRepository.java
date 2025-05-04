@@ -15,7 +15,7 @@ public interface BitWiseQuestionsRepository extends JpaRepository<BitwiseQuestio
 
     List<BitwiseQuestions> findBySubjectIdAndQpReviewerId(int subjectId, int qpReviewerId);
 
-    List<BitwiseQuestions> findByQpSetterIdAndSubjectIdAndSetNo(Long setterId, int subjectId, int setNo);
+    List<BitwiseQuestions> findByQpSetterIdAndSubjectIdAndSetNoOrderByQorderAsc(Long setterId, int subjectId, int setNo);
 
-    List<BitwiseQuestions> findBySubjectIdAndQpReviewerIdAndSetNoAndQpSetterId(int subjectId, int reviewerId, int setNo,Long qpSetterId);
+    List<BitwiseQuestions> findBySubjectIdAndQpReviewerIdAndSetNoAndQpSetterIdOrderByQorderAsc(int subjectId, int reviewerId, int setNo,Long qpSetterId);
 }

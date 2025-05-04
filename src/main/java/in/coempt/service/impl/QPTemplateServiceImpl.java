@@ -45,7 +45,7 @@ public class QPTemplateServiceImpl implements QPTemplateService {
 
     @Override
     public List<BitwiseQuestions> getQuestionsList(String subjectId,int setNo,Long setterid) {
-        return bitWiseQuestionsRepository.findByQpSetterIdAndSubjectIdAndSetNo(setterid,Integer.parseInt(subjectId),setNo);
+        return bitWiseQuestionsRepository.findByQpSetterIdAndSubjectIdAndSetNoOrderByQorderAsc(setterid,Integer.parseInt(subjectId),setNo);
     }
 
     @Override
@@ -60,6 +60,11 @@ public class QPTemplateServiceImpl implements QPTemplateService {
 
     @Override
     public List<BitwiseQuestions> getReviewerQuestionsList(String subjectId, int setNo, Long reviewerId,Long setterId) {
-        return bitWiseQuestionsRepository.findBySubjectIdAndQpReviewerIdAndSetNoAndQpSetterId(Integer.parseInt(subjectId), Math.toIntExact(reviewerId),setNo,setterId);
+        return bitWiseQuestionsRepository.findBySubjectIdAndQpReviewerIdAndSetNoAndQpSetterIdOrderByQorderAsc(Integer.parseInt(subjectId), Math.toIntExact(reviewerId),setNo,setterId);
+    }
+
+    @Override
+    public List<BitwiseQuestions> getQuestionListDetailsById(List<Long> selectedIds) {
+        return bitWiseQuestionsRepository.findAllById(selectedIds);
     }
 }
