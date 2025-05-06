@@ -82,12 +82,15 @@ public class HtmlToPdfService {
                 "/usr/bin/wkhtmltopdf",
                 "--enable-local-file-access",
                 "--encoding", "UTF-8",
-                "--margin-bottom", "20mm",
+                "--print-media-type",
+                "--no-outline",
+                "--margin-bottom", "20mm",  // Adjust to suit
                 "--footer-center", "Page [page] of [toPage]",
-                "--footer-font-size", "10",
+                "--footer-font-size", "12",
                 "--footer-spacing", "5",
                 tempHtmlPath, outputPdfPath
         );
+
 
 
         builder.redirectErrorStream(true);

@@ -1,32 +1,73 @@
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>pdf</title>
+	<style type="text/css">
+		@font-face {
+			font-family: 'NotoSansDevanagari';
+			src: url('file:///usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf');
+		}
+
+		body {
+			font-family:  'Times New Roman', Times, serif !important;
+			font-size: 16pt !important;
+		}
+
+		p, h3, span, .q-desc, h2 small {
+			font-family:  'Times New Roman',  Times, serif !important;
+		}
+
+		p {
+			margin: 0 0 3px 0;
+			padding: 0;
+			font-size: 16pt !important;
+
+		}
+
+		h3 {
+			margin: 0;
+			padding: 0;
+			font-size: 17.5pt !important;
+		}
+		h2{font-size: 20pt !important; margin:0; margin-bottom:3pt; padding:0;}
+
+		img {
+			width: 70% !important;
+			height: auto !important;
+		}
+
+		.watermarked {
+			position: relative;
+			overflow: hidden;
+		}
+
+		h2 small {
+			display: block;
+			font-size: 16pt !important;
+			font-weight: bold;
+
+			letter-spacing: 0.5px;
+		}
+
+table, tr, td {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+		.q-desc {
+			font-size: 16pt !important;
+			max-width: 400px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: normal;
+			word-wrap: break-word;
+		}
+#isPasted p, #isPasted p span{font-size: 16pt !important;}
+
+	</style>
+
 </head>
-<style type="text/css">
-	body{font-family:"Times New Roman", "serif"  !important; font-size: 14px  !important;}
-    p{margin:0 0 3px 0; padding:0;}
-    h2,h3{margin: 0; padding: 0;}
-    img{ width:70% !important; height:auto !important;}
-    .watermarked {
-  position: relative;
-  overflow: hidden;
-}
 
-</style>
-<style>
-	.q-desc {
-    font-size: 16px; /* Adjust the font size */
-    max-width: 400px; /* Set a maximum width for the text */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal; /* Allows text wrapping */
-    word-wrap: break-word; /* Ensures long words break properly */
-}
-
-</style>
 <body>
 <table width="720" border="0" align="center">
 	<tr>
@@ -35,9 +76,9 @@
 	</tr>
 	<tr>
 		<td align="center">
-			<h2>GUJARAT TECHNOLOGICAL UNIVERSITY</h2>
-				<h3><small th:text="${courseNames + ' - SEMESTER - ' +semesterNames+ ' EXAMINATION - ' + examSeries.seriesName}"></small>
-			</h3>
+			<h2>GUJARAT TECHNOLOGICAL UNIVERSITY<br />
+				<small th:text="${courseNames + ' - SEMESTER - ' +semesterNames+ ' EXAMINATION - ' + examSeries.seriesName}"></small>
+			</h2>
 		</td>
 	</tr>
 	<tr>
@@ -53,8 +94,8 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<table width="100%" border="0">
-							<tr><td width="135" valign="top">
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+							<tr><td width="158" valign="top">
 								<h3>Subject Name:</h3>
 							</td>
 								<td align="left" valign="top">
@@ -62,7 +103,6 @@
 								</td></tr>
 						</table>
 					</td>
-
 				</tr>
 				<tr>
 					<td>
@@ -84,48 +124,65 @@
 						<p th:utext="${appointment.qp_instruction}" class="text-bold"></p>
 					</td>
 				</tr>
-
 			</table>
 		</td>
 	</tr>
 	<tr>
 		<td>
+			<table width="100%" border="0">
+				<td colspan="3"></td>
+
+				<td width="50" align="center"><b>Marks</b></td>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+
 			<th:block th:each="entry : ${groupedQuestions}">
-				<table width="100%" border="0">
-					<tr th:each="question, iterStat : ${entry.value}">
-						<td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q.' + entry.key}"></b></td>
-						<!--<td width="30" valign="top" th:if="${iterStat.first}"><b th:text="${'Q' + entry.key + '.'}"></b></td>-->
-						<td width="30" valign="top" th:unless="${iterStat.first}"></td>
+
+				<table width="100%" border="0" style="page-break-inside: avoid;" th:each="question, iterStat : ${entry.value}">
+					<tr>
+						<td width="30" valign="top" th:if="${iterStat.first}">
+							<b th:text="${'Q.' + entry.key}"></b>
+						</td>
+						<td width="30" valign="top" th:unless="${iterStat.first}">&nbsp;</td>
 						<td width="30" valign="top">
-							<!--                            <b th:if="${!question.bit_no.contains('OR')}" th:text="'(' + ${question.bit_no} + ')'"></b>-->
-							<b th:if="${question.bit_no != '' and !question.bit_no.contains('OR')}" th:text="'(' + ${question.bit_no} + ')'"></b>
+							<b th:if="${question.bit_no != '' and !question.bit_no.contains('OR')}"
+							   th:utext="'(' + ${question.bit_no} + ')'"
+							   class="devanagari"></b>
 						</td>
 						<td valign="top" th:if="${!question.bit_no.contains('OR')}">
-							<p ><b th:utext="${question.instructions}"></b></p>
+							<p><span th:utext="${question.instructions}"></span></p>
 							<span class="q-desc" th:utext="${question.q_desc}"></span>
 							<img th:if="${question.image_path != null}"
 								 th:src="'data:image/png;base64,' + ${question.image_path}"
-								 alt="Uploaded Image"  width="300" >
+								 alt="Uploaded Image" width="300" style="page-break-inside: avoid; max-width: 100%;">
 						</td>
-						<td valign="top"  align="center" th:if="${question.bit_no.contains('OR')}">
-							<p > <b th:text="${question.bit_no}"></b></p>
+						<td valign="top" align="center" th:if="${question.bit_no.contains('OR')}">
+							<p><b th:utext="${question.bit_no}"></b></p>
+							<p><span th:utext="${question.instructions}"></span></p>
+							<span class="q-desc" th:utext="${question.q_desc}"></span>
+							<img th:if="${question.image_path != null}"
+								 th:src="'data:image/png;base64,' + ${question.image_path}"
+								 alt="Uploaded Image" width="300" style="page-break-inside: avoid; max-width: 100%;">
 						</td>
+
 						<td width="50" valign="top" align="center">
-							<b th:text="${question.marks}"></b>
+							<b th:utext="${question.marks}"></b>
 						</td>
 					</tr>
+
 				</table>
+
 			</th:block>
 		</td>
 	</tr>
+
 	<tr>
 		<td align="center"><b>***</b></td>
 	</tr>
 </table>
-
-
-
-
-
 </body>
 </html>
+

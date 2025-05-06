@@ -123,7 +123,7 @@ public class AppointmentDao {
 
     public String getCourseNamesBySubjectCode(String subjectCode) {
         return jdbcTemplate.queryForObject(
-                "SELECT GROUP_CONCAT(distinct course_name) " +
+                "SELECT GROUP_CONCAT(distinct full_name) " +
                         "FROM tbl_subjects ts JOIN tbl_courses tc ON tc.id = ts.course_id " +
                         "WHERE ts.subject_code = ?",
                 new Object[]{subjectCode},
